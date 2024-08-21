@@ -1,0 +1,30 @@
+name: Configure project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-labels:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Generate Labels
+        run: |
+          # Definir las etiquetas que deseas crear con sus respectivos colores y descripciones
+          LABELS=(
+            '{"name":"completo","color":"0E8A16","description":"Etiqueta para indicar que una tarea está completa"}'
+            '{"name":"incompleto","color":"B60205","description":"Etiqueta para indicar que una tarea está incompleta"}'
+          )
+
+          # Bucle para crear cada etiqueta
+          for LABEL in "${LABELS[@]}"; do
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/$GITHUB_REPOSITORY/labels \
+              -d "$LABEL" \
+              -s
+          done

@@ -1,0 +1,37 @@
+name: Verify changes on pull request
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - '*'
+
+jobs:
+  verify-pr-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}      
+
+      - name: Set up node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check code formatting
+        run: npm run lint
+
+      - name: Check type coverage
+        run: npm run type-coverage
+
+      - name: Build
+        run: npm run build
+        

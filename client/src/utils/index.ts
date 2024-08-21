@@ -1,0 +1,3 @@
+/*
+Elimina este archivo.
+*/

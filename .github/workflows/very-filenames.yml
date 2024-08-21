@@ -1,0 +1,28 @@
+name: Verify filenames
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - '*'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Verify kebab-case filenames
+      run: |
+          FILES=$(git ls-files | grep -E '^(client)/src/' | grep -v '^(client)/src/images/' | awk -F/ '{print $NF}')
+          for FILE in $FILES; do
+            if [[ ! $FILE =~ ^[a-z0-9]+([-.][a-z0-9]+)*(\.[a-z]+)?$ ]]; then
+              echo "Error: $FILE no está nombrado en kebab-case."
+              exit 1
+            fi
+          done
+
