@@ -2,7 +2,7 @@
 
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
 
-import { CaretSortIcon } from '@radix-ui/react-icons'
+// import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useState, type ChangeEvent } from 'react'
 import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'

@@ -23,12 +23,16 @@ export function AddSalaryModal({ isOpen, onClose }: AddSalaryModalProps) {
         </div>
         <form>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-black">Año</label>
-            <Input className="mt-1 text-black" placeholder="Ingresa el año" type="number" />
+            <label className="block text-sm font-medium text-black" htmlFor="año">
+              Año
+            </label>
+            <Input className="mt-1 text-black" name="año" placeholder="Ingresa el año" type="number" />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-black">Valor</label>
-            <Input className="mt-1 text-black" placeholder="Ingresa el valor del salario" type="number" />
+            <label className="block text-sm font-medium text-black" htmlFor="valor">
+              Valor
+            </label>
+            <Input className="mt-1 text-black" name="valor" placeholder="Ingresa el valor del salario" type="number" />
           </div>
           <div className="flex justify-end">
             <Button type="submit" variant="default">
