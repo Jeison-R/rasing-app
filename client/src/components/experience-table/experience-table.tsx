@@ -2,7 +2,8 @@
 
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
 
-// import { CaretSortIcon } from '@radix-ui/react-icons'
+import { CaretSortIcon } from '@radix-ui/react-icons'
+import { Trash, Pencil } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useState, type ChangeEvent } from 'react'
 import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
@@ -172,32 +173,80 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     accessorKey: 'FechaInicio',
-    header: 'Fecha de inicio',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('FechaInicio')}</div>
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc')
+          }}
+        >
+          Fecha Inicio
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue('FechaInicio')}</div>
   },
   {
     accessorKey: 'FechaTerminacion',
-    header: 'Fecha de terminación',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('FechaTerminacion')}</div>
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc')
+          }}
+        >
+          Fecha Terminación
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue('FechaTerminacion')}</div>
+  },
+  {
+    accessorKey: 'edit',
+    header: 'Editar',
+    cell: ({ row }) => (
+      <button
+        className="text-blue-500 hover:underline"
+        type="button"
+        onClick={() => {
+          handleEdit(row.original)
+        }}
+      >
+        <Pencil className="h-5 w-5" />
+      </button>
+    )
+  },
+  // Columna para Eliminar
+  {
+    accessorKey: 'delete',
+    header: 'Eliminar',
+    cell: ({ row }) => (
+      <button
+        className="text-red-500 hover:underline"
+        type="button"
+        onClick={() => {
+          handleDelete(row.original)
+        }}
+      >
+        <Trash className="h-5 w-5" />
+      </button>
+    )
   }
-  // {
-  //   accessorKey: 'email',
-  //   header: ({ column }) => {
-  //     return (
-  //       <Button
-  //         variant="ghost"
-  //         onClick={() => {
-  //           column.toggleSorting(column.getIsSorted() === 'asc')
-  //         }}
-  //       >
-  //         Email
-  //         <CaretSortIcon className="ml-2 h-4 w-4" />
-  //       </Button>
-  //     )
-  //   },
-  //   cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>
-  // },
 ]
+
+const handleEdit = (rowData: Payment) => {
+  // Lógica para editar el registro
+  console.log('Editar:', rowData)
+}
+
+const handleDelete = (rowData: Payment) => {
+  // Lógica para eliminar el registro
+  console.log('Eliminar:', rowData)
+}
 
 export function CustomTable() {
   const [sorting, setSorting] = useState<SortingState>([])
