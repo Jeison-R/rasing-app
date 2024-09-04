@@ -240,12 +240,12 @@ export const columns: ColumnDef<Payment>[] = [
 
 const handleEdit = (rowData: Payment) => {
   // Lógica para editar el registro
-  console.log('Editar:', rowData)
+  return rowData
 }
 
 const handleDelete = (rowData: Payment) => {
   // Lógica para eliminar el registro
-  console.log('Eliminar:', rowData)
+  return rowData
 }
 
 export function CustomTable() {
