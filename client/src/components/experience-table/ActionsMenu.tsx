@@ -5,27 +5,23 @@ import { Eye, Pencil, Trash, MoreVertical } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
-export function ActionsMenu({ row }) {
+export function ActionsMenu() {
   const [isOpen, setIsOpen] = useState(false)
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
   }
 
-  const handleEdit = (rowData: unknown) => {
+  const handleEdit = () => {
     // Lógica para editar el registro
-    // eslint-disable-next-line no-console
-    console.log('Editando:', rowData)
   }
 
-  const handleDelete = (rowData) => {
+  const handleDelete = () => {
     // Lógica para eliminar el registro
-    console.log('Eliminando:', rowData)
   }
 
-  const handleView = (rowData) => {
+  const handleView = () => {
     // Lógica para ver el registro
-    console.log('Viendo:', rowData)
   }
 
   return (
@@ -40,7 +36,7 @@ export function ActionsMenu({ row }) {
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               type="button"
               onClick={() => {
-                handleView(row.original)
+                handleView()
                 setIsOpen(false)
               }}
             >
@@ -51,7 +47,7 @@ export function ActionsMenu({ row }) {
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               type="button"
               onClick={() => {
-                handleEdit(row.original)
+                handleEdit()
                 setIsOpen(false)
               }}
             >
@@ -62,7 +58,7 @@ export function ActionsMenu({ row }) {
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
               type="button"
               onClick={() => {
-                handleDelete(row.original)
+                handleDelete()
                 setIsOpen(false)
               }}
             >

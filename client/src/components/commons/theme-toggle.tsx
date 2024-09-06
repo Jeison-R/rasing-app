@@ -6,13 +6,13 @@ import { Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CustomTooltip } from '@/components/commons/tooltip'
 
-const ThemeToggle: React.FC = () => {
+function ThemeToggle() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark'
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null
 
-    if (savedTheme) {
+    if (savedTheme === 'light' || savedTheme === 'dark') {
       setTheme(savedTheme)
       applyTheme(savedTheme)
     } else {
@@ -23,7 +23,7 @@ const ThemeToggle: React.FC = () => {
   const applyTheme = (selectedTheme: 'light' | 'dark') => {
     if (selectedTheme === 'light') {
       document.documentElement.classList.remove('dark')
-    } else if (selectedTheme === 'dark') {
+    } else {
       document.documentElement.classList.add('dark')
     }
   }

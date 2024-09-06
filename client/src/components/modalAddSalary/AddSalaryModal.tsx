@@ -8,7 +8,7 @@ interface AddExperenciaModalProps {
   onClose: () => void
 }
 
-export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaModalProps>) {
+export function AddSalaryModal({ isOpen, onClose }: Readonly<AddExperenciaModalProps>) {
   if (!isOpen) return null
 
   return (
