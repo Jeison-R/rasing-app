@@ -2,7 +2,7 @@
 
 import type { Payment } from './experience-table'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Eye, Pencil, Trash, MoreVertical } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ interface ActionsMenuProps {
 
 export function ActionsMenu({ row }: ActionsMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -35,13 +36,28 @@ export function ActionsMenu({ row }: ActionsMenuProps) {
     // Aquí puedes agregar la lógica para ver el registro
   }
 
+  // Efecto para detectar clics fuera del menú y cerrar el menú
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuRef])
+
   return (
-    <div className="relative">
+    <div ref={menuRef} className="relative">
       <Button variant="ghost" onClick={toggleMenu}>
         <MoreVertical className="h-5 w-5" />
       </Button>
       {isOpen ? (
-        <div className="absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+        <div className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
           <div className="py-1">
             <button
               className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
