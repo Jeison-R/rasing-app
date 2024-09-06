@@ -1,6 +1,6 @@
 import { CustomTable } from '@/components/salarios-table/salarios'
 
-export default function ExperiencesPage() {
+export default function SalaryPage() {
   return (
     <div className="w-full">
       <CustomTable />

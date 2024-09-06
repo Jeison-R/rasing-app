@@ -8,6 +8,7 @@ import { MainNav } from '@/components/commons/main-nav'
 import { NavMobile } from '@/components/commons/nav-mobile'
 import { Button } from '@/components/ui/button'
 import { CustomTooltip } from '@/components/commons/tooltip'
+import ThemeToggle from '@/components/commons/theme-toggle'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,6 +26,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <MainNav />
             <NavMobile />
             <div className="flex w-fit items-center gap-4">
+              {/* Menú de cambio de tema */}
+              <ThemeToggle /> {/* Usamos el componente separado */}
               <CustomTooltip content="Cerrar sesión">
                 <Button className="group rounded-full border-input/10 bg-border/10 hover:bg-transparent" size="icon" type="button" variant="outline">
                   <LogOut className="h-5 w-5 text-muted-foreground group-hover:text-secondary" strokeWidth={1.5} />

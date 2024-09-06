@@ -3,10 +3,9 @@
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
-import { Trash, Pencil } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
+
+import { ActionsMenu } from './ActionsMenu'
 
 const data: Payment[] = [
   {
@@ -142,14 +143,14 @@ export interface Payment {
 
 export const columns: ColumnDef<Payment>[] = [
   {
-    accessorKey: 'Entidad',
-    header: 'Entidad Contratante',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('Entidad')}</div>
+    accessorKey: 'Contrato',
+    header: 'Contrato',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('Contrato')}</div>
   },
   {
-    accessorKey: 'Contrato',
-    header: 'N° Contrato',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('Contrato')}</div>
+    accessorKey: 'Entidad',
+    header: 'Contratante',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('Entidad')}</div>
   },
   {
     accessorKey: 'Contratista',
@@ -198,7 +199,7 @@ export const columns: ColumnDef<Payment>[] = [
             column.toggleSorting(column.getIsSorted() === 'asc')
           }}
         >
-          Fecha Terminación
+          Fecha fin
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       )
@@ -206,47 +207,11 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue('FechaTerminacion')}</div>
   },
   {
-    accessorKey: 'edit',
-    header: 'Editar',
-    cell: ({ row }) => (
-      <button
-        className="text-blue-500 hover:underline"
-        type="button"
-        onClick={() => {
-          handleEdit(row.original)
-        }}
-      >
-        <Pencil className="h-5 w-5" />
-      </button>
-    )
-  },
-  // Columna para Eliminar
-  {
-    accessorKey: 'delete',
-    header: 'Eliminar',
-    cell: ({ row }) => (
-      <button
-        className="text-red-500 hover:underline"
-        type="button"
-        onClick={() => {
-          handleDelete(row.original)
-        }}
-      >
-        <Trash className="h-5 w-5" />
-      </button>
-    )
+    accessorKey: 'actions',
+    header: 'Acciones',
+    cell: ({ row }) => <ActionsMenu row={row} />
   }
 ]
-
-const handleEdit = (rowData: Payment) => {
-  // Lógica para editar el registro
-  return rowData
-}
-
-const handleDelete = (rowData: Payment) => {
-  // Lógica para eliminar el registro
-  return rowData
-}
 
 export function CustomTable() {
   const [sorting, setSorting] = useState<SortingState>([])
