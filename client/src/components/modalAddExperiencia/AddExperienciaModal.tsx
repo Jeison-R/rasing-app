@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,17 +10,22 @@ interface AddExperenciaModalProps {
   onClose: () => void
 }
 
+interface Adicion {
+  id: string
+  value: number
+}
+
 export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaModalProps>) {
-  const [adiciones, setAdiciones] = useState<number[]>([])
+  const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorInicial, setValorInicial] = useState<number>(0)
   const [partPorcentaje, setPartPorcentaje] = useState<number>(0)
   const [valorFinalAfectado, setValorFinalAfectado] = useState<number>(0)
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
-  const [anioTerminacion, setAnioTerminacion] = useState<number | null>(null)
+  const [anioTerminacion, setAnioTerminacion] = useState<number>(new Date().getFullYear())
 
   // Calcular el valor afectado en base al valor inicial y las adiciones
   useEffect(() => {
-    const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr, 0)
+    const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr.value, 0)
     const valorFinal = valorInicial + totalAdiciones
 
     setValorFinalAfectado(valorFinal)
@@ -27,17 +33,17 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
 
   // Agregar adición
   const addAdicion = () => {
-    setAdiciones([...adiciones, 0])
+    setAdiciones([...adiciones, { id: uuidv4(), value: 0 }])
   }
 
   // Eliminar adición
-  const removeAdicion = (index: number) => {
-    setAdiciones(adiciones.filter((_, i) => i !== index))
+  const removeAdicion = (id: string) => {
+    setAdiciones(adiciones.filter((adicion) => adicion.id !== id))
   }
 
   // Actualizar valor de adición
-  const updateAdicion = (index: number, valor: number) => {
-    const newAdiciones = adiciones.map((adicion, i) => (i === index ? valor : adicion))
+  const updateAdicion = (id: string, valor: number) => {
+    const newAdiciones = adiciones.map((adicion) => (adicion.id === id ? { ...adicion, value: valor } : adicion))
 
     setAdiciones(newAdiciones)
   }
@@ -62,7 +68,12 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <form className="grid grid-cols-4 gap-4">
+        <form
+          className="grid grid-cols-4 gap-4"
+          onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+            e.preventDefault()
+          }}
+        >
           <div>
             <label className="block text-sm font-medium" htmlFor="rup">
               Nº RUP
@@ -148,7 +159,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               name="fechaTerminacion"
               type="date"
               value={fechaTerminacion}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFechaTerminacion(e.target.value)
               }}
             />
@@ -173,7 +184,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               placeholder="Part. %"
               type="number"
               value={partPorcentaje}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setPartPorcentaje(Number(e.target.value))
               }}
             />
@@ -190,7 +201,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               placeholder="Valor Inicial"
               type="number"
               value={valorInicial}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setValorInicial(Number(e.target.value))
               }}
             />
@@ -200,13 +211,13 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
           <div className="col-span-4">
             <h4 className="mb-2">Adiciones</h4>
             {adiciones.map((adicion, index) => (
-              <div key={index} className="mb-2 flex items-center">
+              <div key={adicion.id} className="mb-2 flex items-center">
                 <Input
                   placeholder={`Adición ${index + 1}`}
                   type="number"
-                  value={adicion}
-                  onChange={(e) => {
-                    updateAdicion(index, Number(e.target.value))
+                  value={adicion.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    updateAdicion(adicion.id, Number(e.target.value))
                   }}
                 />
                 <Button
@@ -214,7 +225,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
                   size="icon"
                   variant="ghost"
                   onClick={() => {
-                    removeAdicion(index)
+                    removeAdicion(adicion.id)
                   }}
                 >
                   <X className="h-5 w-5" />

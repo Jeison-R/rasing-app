@@ -32,8 +32,10 @@ export function ActionsMenu({ row }: ActionsMenuProps) {
     // Aquí puedes agregar la lógica para eliminar el registro
   }
 
-  const handleView = (_data: Payment) => {
+  const handleView = (data: Payment) => {
     setIsModalOpen(true) // Abre el modal de visualización
+
+    return data
   }
 
   const closeModal = () => {

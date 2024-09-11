@@ -38,6 +38,7 @@ export function NavMobile() {
                 <span className="text-2xl font-bold">Rasing S.A.S</span>
               </Link>
               <Link
+                className="text-black dark:text-white"
                 href={ROUTES.EXPERIENCES}
                 onClick={() => {
                   setIsOpen(false)
@@ -46,6 +47,7 @@ export function NavMobile() {
                 Experiencias
               </Link>
               <Link
+                className="text-black dark:text-white"
                 href={ROUTES.MINIMUIM_WAGE}
                 onClick={() => {
                   setIsOpen(false)
