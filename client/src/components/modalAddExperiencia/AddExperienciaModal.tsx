@@ -228,7 +228,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="rup"
               placeholder="Nº RUP"
               value={rup}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('rup', e.target.value)
               }}
             />
@@ -244,7 +244,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="entidadContratante"
               placeholder="Entidad Contratante"
               value={entidadContratante}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('entidadContratante', e.target.value)
               }}
             />
@@ -260,7 +260,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="contratoNo"
               placeholder="Contrato No."
               value={contratoNo}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('contratoNo', e.target.value)
               }}
             />
@@ -276,7 +276,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="socio"
               placeholder="Socio Aportante / Propio"
               value={socio}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('socio', e.target.value)
               }}
             />
@@ -307,7 +307,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               id="modalidad"
               name="modalidad"
               value={modalidad}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 handleFieldChange('modalidad', e.target.value)
               }}
             >
@@ -326,7 +326,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               id="tipoContrato"
               name="tipoContrato"
               value={tipoContrato}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 handleFieldChange('tipoContrato', e.target.value)
               }}
             >
@@ -345,7 +345,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               id="actividadPrincipal"
               name="actividadPrincipal"
               value={actividadPrincipal}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 handleFieldChange('actividadPrincipal', e.target.value)
               }}
             >
@@ -365,7 +365,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="fechaInicio"
               type="date"
               value={fechaInicio}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('fechaInicio', e.target.value)
               }}
             />
@@ -381,7 +381,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               name="fechaTerminacion"
               type="date"
               value={fechaTerminacion}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('fechaTerminacion', e.target.value)
               }}
             />
@@ -404,7 +404,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               placeholder="Part. %"
               type="number"
               value={partPorcentaje}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('partPorcentaje', Number(e.target.value))
               }}
             />
@@ -421,7 +421,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               placeholder="Valor Inicial"
               type="number"
               value={valorInicial}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFieldChange('valorInicial', Number(e.target.value))
               }}
             />

@@ -2,5 +2,6 @@ export const ROUTES = {
   HOME: '/',
   EXPERIENCES: '/experiencias',
   MINIMUIM_WAGE: '/salarios-minimos',
-  LOGIN: '/login'
+  LOGIN: '/login',
+  ACTIVIDAD: '/actividad'
 }
