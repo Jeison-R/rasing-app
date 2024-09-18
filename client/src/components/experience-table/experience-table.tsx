@@ -16,6 +16,8 @@ import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
 
 import { ActionsMenu } from './ActionsMenu'
 
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+
 const data: Payment[] = [
   {
     id: 'm5gr84i9',
@@ -207,9 +209,29 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue('FechaTerminacion')}</div>
   },
   {
-    accessorKey: 'actions',
-    header: 'Acciones',
-    cell: ({ row }) => <ActionsMenu row={row} />
+    id: 'actions',
+    enableHiding: false,
+    cell: ({ row }) => {
+      const payment = row.original
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="h-8 w-8 p-0" variant="ghost">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>Copy payment ID</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View customer</DropdownMenuItem>
+            <DropdownMenuItem>View payment details</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
   }
 ]
 
@@ -220,9 +242,10 @@ export function CustomTable() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [tableData, setTableData] = useState<Payment[]>(data) // Usa tableData como el estado
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -244,6 +267,10 @@ export function CustomTable() {
     }
   })
 
+  const handleDeleteRow = (id: string) => {
+    setTableData((prevData) => prevData.filter((row) => row.id !== id))
+  }
+
   const handleOpenModal = () => {
     setIsModalOpen(true)
   }
@@ -252,14 +279,18 @@ export function CustomTable() {
     setIsModalOpen(false)
   }
 
+  const handleAddData = (newData: Payment) => {
+    setTableData((prevData) => [...prevData, newData])
+  }
+
   return (
     <>
       <div className="flex items-center justify-between py-4">
         <Input
           className="max-w-sm"
           placeholder="Filtrar..."
-          value={table.getColumn('email')?.getFilterValue() as string}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('email')?.setFilterValue(event.target.value)}
+          value={table.getColumn('Entidad')?.getFilterValue() as string}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('Entidad')?.setFilterValue(event.target.value)}
         />
         <CustomTooltip content="Añadir experiencia">
           <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>
@@ -285,6 +316,14 @@ export function CustomTable() {
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
+                  <TableCell>
+                    <ActionsMenu
+                      row={row}
+                      onDelete={() => {
+                        handleDeleteRow(row.original.id)
+                      }}
+                    />{' '}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -330,7 +369,7 @@ export function CustomTable() {
           </CustomTooltip>
         </div>
       </div>
-      <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleAddData} />
     </>
   )
 }
