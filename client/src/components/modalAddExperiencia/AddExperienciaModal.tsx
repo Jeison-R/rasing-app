@@ -1,6 +1,10 @@
+import type { MultiValue } from 'react-select'
+
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import Swal from 'sweetalert2'
+import Select from 'react-select'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +14,28 @@ interface AddExperenciaModalProps {
   onClose: () => void
   onSave: (data: Payment) => void
 }
+
+interface OptionDocument {
+  value: string
+  label: string
+}
+
+interface OptionActivity {
+  value: string
+  label: string
+}
+
+const documentOptions: OptionDocument[] = [
+  { value: 'Tipo 1', label: 'Tipo 1' },
+  { value: 'Tipo 2', label: 'Tipo 2' },
+  { value: 'Tipo 3', label: 'Tipo 3' }
+]
+
+const actitivityOptions: OptionActivity[] = [
+  { value: 'Tipo 1', label: 'Tipo 1' },
+  { value: 'Tipo 2', label: 'Tipo 2' },
+  { value: 'Tipo 3', label: 'Tipo 3' }
+]
 
 interface Adicion {
   id: string
@@ -41,8 +67,8 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
   const [socio, setSocio] = useState<string>('')
   const [objeto, setObjeto] = useState<string>('')
   const [modalidad, setModalidad] = useState<string>('')
-  const [tipoContrato, setTipoContrato] = useState<string>('')
-  const [actividadPrincipal, setActividadPrincipal] = useState<string>('')
+  const [tipoContrato, setTipoContrato] = useState<string[]>([])
+  const [actividadPrincipal, setActividadPrincipal] = useState<string[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
@@ -60,6 +86,14 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       setAnioTerminacion(anio)
     }
   }, [fechaTerminacion])
+
+  const handleSelectDocument = (selectedOptions: MultiValue<OptionDocument>) => {
+    setTipoContrato(selectedOptions.map((option) => option.value))
+  }
+
+  const handleSelectActivity = (selectedOptions: MultiValue<OptionActivity>) => {
+    setActividadPrincipal(selectedOptions.map((option) => option.value))
+  }
 
   const addAdicion = () => {
     setAdiciones([...adiciones, { id: uuidv4(), value: 0 }])
@@ -90,9 +124,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     if (!modalidad) newErrors.modalidad = true
 
-    if (!tipoContrato) newErrors.tipoContrato = true
+    if (tipoContrato.length === 0) newErrors.tipoContrato = true
 
-    if (!actividadPrincipal) newErrors.actividadPrincipal = true
+    if (actividadPrincipal.length === 0) newErrors.actividadPrincipal = true
 
     if (!fechaInicio) newErrors.fechaInicio = true
 
@@ -127,13 +161,22 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       Contrato: contratoNo,
       Contratista: socio,
       Modalidad: modalidad,
-      TipoContrato: tipoContrato,
-      ActividadPrincipal: actividadPrincipal,
+      TipoContrato: tipoContrato.join(', '),
+      ActividadPrincipal: actividadPrincipal.join(', '),
       FechaInicio: fechaInicio,
       FechaTerminacion: fechaTerminacion
     }
 
     onSave(newData)
+
+    // Mostrar alerta de éxito
+    void Swal.fire({
+      title: 'Guardado',
+      text: 'La experiencia se ha guardado exitosamente',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    })
+
     onClose()
   }
 
@@ -145,8 +188,8 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     setSocio('')
     setObjeto('')
     setModalidad('')
-    setTipoContrato('')
-    setActividadPrincipal('')
+    setTipoContrato([])
+    setActividadPrincipal([])
     setFechaInicio('')
     setFechaTerminacion('')
     setAdiciones([])
@@ -180,10 +223,10 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
         setModalidad(value as string)
         break
       case 'tipoContrato':
-        setTipoContrato(value as string)
+        setTipoContrato([value as string])
         break
       case 'actividadPrincipal':
-        setActividadPrincipal(value as string)
+        setActividadPrincipal([value as string])
         break
       case 'fechaInicio':
         setFechaInicio(value as string)
@@ -319,40 +362,30 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="tipoContrato">
-              Tipo de Contrato
+              Documentos de soporte
             </label>
-            <select
-              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.tipoContrato ? 'border-red-500' : ''}`}
-              id="tipoContrato"
-              name="tipoContrato"
-              value={tipoContrato}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                handleFieldChange('tipoContrato', e.target.value)
-              }}
-            >
-              <option value="">Seleccione el tipo de contrato</option>
-              <option value="Tipo 1">Tipo 1</option>
-              <option value="Tipo 2">Tipo 2</option>
-            </select>
+            <Select
+              isMulti
+              className="basic-multi-select"
+              classNamePrefix="select"
+              options={documentOptions}
+              value={documentOptions.filter((option) => tipoContrato.includes(option.value))}
+              onChange={handleSelectDocument}
+            />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="actividadPrincipal">
               Actividad Principal
             </label>
-            <select
-              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.actividadPrincipal ? 'border-red-500' : ''}`}
-              id="actividadPrincipal"
-              name="actividadPrincipal"
-              value={actividadPrincipal}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                handleFieldChange('actividadPrincipal', e.target.value)
-              }}
-            >
-              <option value="">Seleccione la actividad</option>
-              <option value="Actividad 1">Actividad 1</option>
-              <option value="Actividad 2">Actividad 2</option>
-            </select>
+            <Select
+              isMulti
+              className="basic-multi-select"
+              classNamePrefix="select"
+              options={actitivityOptions}
+              value={actitivityOptions.filter((option) => actividadPrincipal.includes(option.value))}
+              onChange={handleSelectActivity}
+            />
             {errors.actividadPrincipal ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
           <div>

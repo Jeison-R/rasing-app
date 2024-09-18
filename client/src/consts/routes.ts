@@ -3,5 +3,5 @@ export const ROUTES = {
   EXPERIENCES: '/experiencias',
   MINIMUIM_WAGE: '/salarios-minimos',
   LOGIN: '/login',
-  ACTIVIDAD: '/actividad'
+  ACTIVIDAD: '/actividad-contratos'
 }
