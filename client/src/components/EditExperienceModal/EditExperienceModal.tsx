@@ -1,6 +1,6 @@
 import type { Payment, Adicion } from '../experience-table/experience-table'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ChangeEvent } from 'react'
 import { X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import Swal from 'sweetalert2'
@@ -19,7 +19,7 @@ interface EditExperienceModalProps {
   onSave: (updatedPayment: Payment) => void
 }
 
-export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditExperienceModalProps) {
+export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditExperienceModalProps): JSX.Element | null {
   const [entidadContratante, setEntidadContratante] = useState<string>('')
   const [contratoNo, setContratoNo] = useState<string>('')
   const [socio, setSocio] = useState<string>('')
@@ -55,7 +55,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     }
   }, [payment])
 
-  const handleSave = () => {
+  const handleSave = (): void => {
     if (!payment) return
 
     const updatedPayment: Payment = {
@@ -87,15 +87,15 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     })
   }
 
-  const addAdicion = () => {
+  const addAdicion = (): void => {
     setAdiciones([...adiciones, { id: uuidv4(), value: 0 }])
   }
 
-  const removeAdicion = (id: string) => {
+  const removeAdicion = (id: string): void => {
     setAdiciones(adiciones.filter((adicion) => adicion.id !== id))
   }
 
-  const updateAdicion = (id: string, value: number) => {
+  const updateAdicion = (id: string, value: number): void => {
     setAdiciones(adiciones.map((adicion) => (adicion.id === id ? { ...adicion, value } : adicion)))
   }
 
@@ -124,7 +124,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="entidad"
               value={entidadContratante}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setEntidadContratante(e.target.value)
               }}
             />
@@ -136,7 +136,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="contratoNo"
               value={contratoNo}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setContratoNo(e.target.value)
               }}
             />
@@ -148,7 +148,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="socio"
               value={socio}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setSocio(e.target.value)
               }}
             />
@@ -160,7 +160,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="modalidad"
               value={modalidad}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setModalidad(e.target.value)
               }}
             />
@@ -175,7 +175,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               name="objeto"
               placeholder="Descripción del Objeto"
               value={objeto}
-              onChange={(e) => {
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
                 setObjeto(e.target.value)
               }}
             />
@@ -214,7 +214,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               id="fechaInicio"
               type="date"
               value={fechaInicio}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFechaInicio(e.target.value)
               }}
             />
@@ -226,8 +226,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="fechaFin"
               type="date"
-              value={fechaTerminacion}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFechaTerminacion(e.target.value)
               }}
             />
@@ -240,7 +239,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               id="valorInicial"
               type="number"
               value={valorInicial}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setValorInicial(Number(e.target.value))
               }}
             />
@@ -253,7 +252,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               id="Part"
               type="number"
               value={partPorcentaje}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setPartPorcentaje(Number(e.target.value))
               }}
             />
@@ -265,7 +264,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               type="number"
               value={valorFinalAfectado}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setValorFinalAfectado(Number(e.target.value))
               }}
             />
@@ -279,7 +278,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
                 <Input
                   type="number"
                   value={adicion.value}
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     updateAdicion(adicion.id, Number(e.target.value))
                   }}
                 />

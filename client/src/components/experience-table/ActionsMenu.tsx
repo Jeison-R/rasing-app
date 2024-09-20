@@ -67,9 +67,9 @@ export function ActionsMenu({ row, onDelete }: ActionsMenuProps) {
     }
   }, [menuRef])
 
-  const handleSaveEdit = (updatedPayment: Payment) => {
+  const handleSaveEdit = () => {
     // Aquí puedes manejar la lógica de guardado de los datos editados
-    console.log('Datos editados:', updatedPayment)
+
     setIsEditModalOpen(false) // Cierra el modal una vez guardado
   }
 
