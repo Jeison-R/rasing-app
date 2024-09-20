@@ -23,109 +23,104 @@ const data: Payment[] = [
     Contrato: '1234',
     Contratista: 'Salud Vida SAS',
     Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
     TipoContrato: 'Prestación de Servicios',
     ActividadPrincipal: 'Suministro de medicamentos',
     FechaInicio: '2023-01-15',
-    FechaTerminacion: '2023-12-31'
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
   },
   {
-    id: '3u1reuv4',
-    Entidad: 'Gobernación de Cundinamarca',
-    Contrato: '2345',
-    Contratista: 'Construcciones Cundinamarca',
-    Modalidad: 'Concurso de Méritos',
-    TipoContrato: 'Obra Pública',
-    ActividadPrincipal: 'Construcción de hospital',
-    FechaInicio: '2022-06-10',
-    FechaTerminacion: '2024-06-10'
-  },
-  {
-    id: 'derv1ws0',
-    Entidad: 'Alcaldía de Bogotá',
-    Contrato: '3456',
-    Contratista: 'Tecnologías Modernas',
-    Modalidad: 'Contratación Directa',
-    TipoContrato: 'Suministro',
-    ActividadPrincipal: 'Suministro de equipos de cómputo',
-    FechaInicio: '2023-03-01',
-    FechaTerminacion: '2023-12-01'
-  },
-  {
-    id: 'plow56tf',
-    Entidad: 'Ministerio de Transporte',
-    Contrato: '4567',
-    Contratista: 'Transporte Nacional SAS',
-    Modalidad: 'Licitación Pública',
-    TipoContrato: 'Obra Pública',
-    ActividadPrincipal: 'Construcción de carretera',
-    FechaInicio: '2022-09-01',
-    FechaTerminacion: '2025-09-01'
-  },
-  {
-    id: 'qwerty98',
-    Entidad: 'Gobernación del Valle',
+    id: 'n3bv78k0',
+    Entidad: 'Ministerio de Educación',
     Contrato: '5678',
-    Contratista: 'Agua Limpia SAS',
-    Modalidad: 'Concurso de Méritos',
-    TipoContrato: 'Consultoría',
-    ActividadPrincipal: 'Estudios para acueducto',
-    FechaInicio: '2023-02-15',
-    FechaTerminacion: '2024-02-15'
-  },
-  {
-    id: 'jkf78m9l',
-    Entidad: 'Alcaldía de Medellín',
-    Contrato: '6789',
-    Contratista: 'Desarrollo Urbano Ltda',
-    Modalidad: 'Licitación Pública',
-    TipoContrato: 'Obra Pública',
-    ActividadPrincipal: 'Construcción de parque',
-    FechaInicio: '2022-11-01',
-    FechaTerminacion: '2024-11-01'
-  },
-  {
-    id: 'vpo8l2kn',
-    Entidad: 'Secretaría de Educación',
-    Contrato: '7890',
-    Contratista: 'Educación Futuro SAS',
+    Contratista: 'Educamos Juntos',
     Modalidad: 'Contratación Directa',
-    TipoContrato: 'Prestación de Servicios',
-    ActividadPrincipal: 'Capacitación de docentes',
-    FechaInicio: '2023-05-10',
-    FechaTerminacion: '2024-05-10'
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf',
+    TipoContrato: 'Consultoría',
+    ActividadPrincipal: 'Capacitación docente',
+    FechaInicio: '2022-03-01',
+    FechaTerminacion: '2022-11-30',
+    ValorInicial: 3000000,
+    PartPorcentaje: 100,
+    ValorFinalAfectado: 3000000,
+    AnioTerminacion: 2022,
+    Adiciones: []
   },
   {
-    id: 'loi9f2d3',
-    Entidad: 'Ministerio de Agricultura',
-    Contrato: '8901',
-    Contratista: 'AgroProductivo SAS',
+    id: 'z7gh93k2',
+    Entidad: 'Alcaldía de Bogotá',
+    Contrato: '91011',
+    Contratista: 'Bogotá Limpia S.A.',
     Modalidad: 'Licitación Pública',
-    TipoContrato: 'Suministro',
-    ActividadPrincipal: 'Suministro de insumos agrícolas',
-    FechaInicio: '2023-04-01',
-    FechaTerminacion: '2023-12-31'
-  },
-  {
-    id: 'xz8p7vqr',
-    Entidad: 'Alcaldía de Cali',
-    Contrato: '9012',
-    Contratista: 'Urbanismo Cali SAS',
-    Modalidad: 'Concurso de Méritos',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf',
     TipoContrato: 'Obra Pública',
-    ActividadPrincipal: 'Mejoramiento de vías urbanas',
-    FechaInicio: '2023-06-01',
-    FechaTerminacion: '2024-06-01'
+    ActividadPrincipal: 'Construcción de vías',
+    FechaInicio: '2021-06-01',
+    FechaTerminacion: '2022-12-15',
+    ValorInicial: 10000000,
+    PartPorcentaje: 75,
+    ValorFinalAfectado: 13000000,
+    AnioTerminacion: 2022,
+    Adiciones: [
+      {
+        id: 'adicion2',
+        value: 3000000
+      }
+    ]
   },
   {
-    id: 'mnbv3rty',
+    id: 'y9kl65n1',
     Entidad: 'Gobernación de Antioquia',
-    Contrato: '0123',
-    Contratista: 'Infraestructura Antioquia',
-    Modalidad: 'Contratación Directa',
-    TipoContrato: 'Consultoría',
-    ActividadPrincipal: 'Estudios para puentes',
-    FechaInicio: '2023-08-01',
-    FechaTerminacion: '2024-08-01'
+    Contrato: '1213',
+    Contratista: 'Antioquia Proyectos',
+    Modalidad: 'Concesión',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf',
+    TipoContrato: 'Concesión de Servicios',
+    ActividadPrincipal: 'Operación de peajes',
+    FechaInicio: '2020-09-01',
+    FechaTerminacion: '2025-09-01',
+    ValorInicial: 20000000,
+    PartPorcentaje: 60,
+    ValorFinalAfectado: 25000000,
+    AnioTerminacion: 2025,
+    Adiciones: [
+      {
+        id: 'adicion3',
+        value: 5000000
+      }
+    ]
+  },
+  {
+    id: 'p3dv72q5',
+    Entidad: 'Instituto Colombiano de Bienestar Familiar',
+    Contrato: '1415',
+    Contratista: 'Familias Felices SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf',
+    TipoContrato: 'Suministro',
+    ActividadPrincipal: 'Suministro de alimentos',
+    FechaInicio: '2023-02-01',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 4000000,
+    PartPorcentaje: 40,
+    ValorFinalAfectado: 6000000,
+    AnioTerminacion: 2023,
+    Adiciones: [
+      {
+        id: 'adicion4',
+        value: 2000000
+      }
+    ]
   }
 ]
 
@@ -135,10 +130,21 @@ export interface Payment {
   Contrato: string
   Contratista: string
   Modalidad: string
+  Objeto: string
   TipoContrato: string
   ActividadPrincipal: string
   FechaInicio: string
   FechaTerminacion: string
+  ValorInicial: number // Valor inicial del contrato
+  PartPorcentaje: number // Participación porcentual
+  ValorFinalAfectado: number // Valor final afectado después de adiciones
+  AnioTerminacion: number // Año de terminación
+  Adiciones?: Adicion[] // Array opcional de adiciones
+}
+
+export interface Adicion {
+  id: string
+  value: number // Valor de la adición
 }
 
 export const columns: ColumnDef<Payment>[] = [

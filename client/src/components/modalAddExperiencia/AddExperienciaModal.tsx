@@ -25,13 +25,13 @@ interface OptionActivity {
   label: string
 }
 
-const documentOptions: OptionDocument[] = [
+export const documentOptions: OptionDocument[] = [
   { value: 'Tipo 1', label: 'Tipo 1' },
   { value: 'Tipo 2', label: 'Tipo 2' },
   { value: 'Tipo 3', label: 'Tipo 3' }
 ]
 
-const actitivityOptions: OptionActivity[] = [
+export const actitivityOptions: OptionActivity[] = [
   { value: 'Tipo 1', label: 'Tipo 1' },
   { value: 'Tipo 2', label: 'Tipo 2' },
   { value: 'Tipo 3', label: 'Tipo 3' }
@@ -48,10 +48,16 @@ export interface Payment {
   Contrato: string
   Contratista: string
   Modalidad: string
+  Objeto: string
   TipoContrato: string
   ActividadPrincipal: string
   FechaInicio: string
   FechaTerminacion: string
+  ValorInicial: number // Valor inicial del contrato
+  PartPorcentaje: number // Participación porcentual
+  ValorFinalAfectado: number // Valor final afectado después de adiciones
+  AnioTerminacion: number // Año de terminación
+  Adiciones?: Adicion[] // Array opcional de adiciones
 }
 
 export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExperenciaModalProps>) {
@@ -159,14 +165,24 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       id: uuidv4(),
       Entidad: entidadContratante,
       Contrato: contratoNo,
+      Objeto: objeto,
       Contratista: socio,
       Modalidad: modalidad,
       TipoContrato: tipoContrato.join(', '),
       ActividadPrincipal: actividadPrincipal.join(', '),
       FechaInicio: fechaInicio,
-      FechaTerminacion: fechaTerminacion
+      FechaTerminacion: fechaTerminacion,
+      ValorInicial: valorInicial,
+      PartPorcentaje: partPorcentaje,
+      ValorFinalAfectado: valorFinalAfectado,
+      AnioTerminacion: anioTerminacion,
+      Adiciones: adiciones.map((adicion) => ({
+        id: adicion.id,
+        value: adicion.value
+      }))
     }
 
+    handleClose()
     onSave(newData)
 
     // Mostrar alerta de éxito
@@ -240,6 +256,15 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       case 'partPorcentaje':
         setPartPorcentaje(value as number)
         break
+      case 'valorFinalAfectado':
+        setValorFinalAfectado(value as number)
+        break
+      case 'anioTerminacion':
+        setAnioTerminacion(value as number)
+        break
+      case 'adicion': // Este es un ejemplo de cómo manejar las adiciones si necesitas una adición individual
+        setAdiciones((prevAdiciones) => prevAdiciones.map((adicion) => (adicion.id === field ? { ...adicion, value: value as number } : adicion)))
+        break
       default:
         break
     }
@@ -259,8 +284,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <form className="grid grid-cols-4 gap-4" onSubmit={handleSave}>
-          {/* Input fields para capturar los valores */}
+        <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleSave}>
           <div>
             <label className="block text-sm font-medium" htmlFor="rup">
               Nº RUP
@@ -277,6 +301,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.rup ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="entidadContratante">
               Entidad Contratante
@@ -293,6 +318,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.entidadContratante ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="contratoNo">
               Contrato No.
@@ -309,6 +335,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.contratoNo ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="socio">
               Socio Aportante / Propio
@@ -325,7 +352,8 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.socio ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
-          <div className="col-span-4">
+
+          <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <label className="block text-sm font-medium" htmlFor="objeto">
               Objeto
             </label>
@@ -341,6 +369,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.objeto ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="modalidad">
               Modalidad
@@ -360,6 +389,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             </select>
             {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="tipoContrato">
               Documentos de soporte
@@ -374,6 +404,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="actividadPrincipal">
               Actividad Principal
@@ -388,6 +419,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.actividadPrincipal ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="fechaInicio">
               Fecha de Inicio
@@ -404,6 +436,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.fechaInicio ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="fechaTerminacion">
               Fecha de Terminación
@@ -420,12 +453,14 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.fechaTerminacion ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="anioTerminacion">
               Año de Terminación
             </label>
             <Input disabled id="anioTerminacion" name="anioTerminacion" type="number" value={anioTerminacion || ''} />
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="partPorcentaje">
               Part. %
@@ -443,6 +478,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.partPorcentaje ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="valorInicial">
               Valor Inicial
@@ -460,10 +496,11 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             />
             {errors.valorInicial ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
+
           <div>
             <h4 className="mb-1">Adiciones</h4>
             {adiciones.map((adicion, index) => (
-              <div key={adicion.id} className="mb-2 flex items-center">
+              <div key={adicion.id} className="mb-2 flex flex-col items-center lg:flex-row">
                 <Input
                   className={errors[`adicion_${index}`] ? 'border-red-500' : ''}
                   placeholder={`Adición ${index + 1}`}
@@ -474,7 +511,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
                   }}
                 />
                 <Button
-                  className="ml-2"
+                  className="ml-0 mt-2 lg:ml-2 lg:mt-0"
                   size="icon"
                   variant="ghost"
                   onClick={() => {
@@ -490,13 +527,15 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               + Agregar Adición
             </Button>
           </div>
+
           <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="valorFinalAfectado">
               Valor Final Afectado (%) de Part.
             </label>
             <Input disabled id="valorFinalAfectado" name="valorFinalAfectado" placeholder="Valor Final Afectado" type="number" value={valorFinalAfectado} />
           </div>
-          <div className="col-span-4 flex justify-end">
+
+          <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">
             <Button type="submit" variant="default">
               Guardar
             </Button>

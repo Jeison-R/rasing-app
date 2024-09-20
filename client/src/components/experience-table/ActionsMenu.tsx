@@ -6,6 +6,7 @@ import { Eye, Pencil, Trash, MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
+import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 
 import { deleteExperience } from './deleteExperience'
 
@@ -29,6 +30,8 @@ export function ActionsMenu({ row, onDelete }: ActionsMenuProps) {
 
   const [isOpen, setIsOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false) // Estado para el modal de edición
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null) // Para almacenar el pago seleccionado
   const menuRef = useRef<HTMLDivElement>(null)
 
   const toggleMenu = () => {
@@ -36,19 +39,18 @@ export function ActionsMenu({ row, onDelete }: ActionsMenuProps) {
   }
 
   const handleEdit = (data: Payment) => {
-    // Aquí puedes abrir un modal de edición o redirigir a una página de edición
-
-    return data
+    setSelectedPayment(data)
+    setIsEditModalOpen(true) // Abre el modal de edición
   }
 
   const handleView = (data: Payment) => {
-    setIsModalOpen(true)
-
-    return data
+    setSelectedPayment(data)
+    setIsModalOpen(true) // Abre el modal de visualización
   }
 
   const closeModal = () => {
     setIsModalOpen(false)
+    setIsEditModalOpen(false) // Cierra el modal de edición también si está abierto
   }
 
   useEffect(() => {
@@ -64,6 +66,12 @@ export function ActionsMenu({ row, onDelete }: ActionsMenuProps) {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [menuRef])
+
+  const handleSaveEdit = (updatedPayment: Payment) => {
+    // Aquí puedes manejar la lógica de guardado de los datos editados
+    console.log('Datos editados:', updatedPayment)
+    setIsEditModalOpen(false) // Cierra el modal una vez guardado
+  }
 
   return (
     <>
@@ -112,7 +120,15 @@ export function ActionsMenu({ row, onDelete }: ActionsMenuProps) {
       </div>
 
       {/* Modal para ver los detalles del pago */}
-      <ViewExperienceModal isOpen={isModalOpen} payment={row.original} onClose={closeModal} />
+      <ViewExperienceModal isOpen={isModalOpen} payment={selectedPayment} onClose={closeModal} />
+
+      {/* Modal para editar el pago */}
+      <EditExperienceModal
+        isOpen={isEditModalOpen}
+        payment={selectedPayment}
+        onClose={closeModal}
+        onSave={handleSaveEdit} // Función para manejar el guardado de datos editados
+      />
     </>
   )
 }

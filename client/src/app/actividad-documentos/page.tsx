@@ -1,5 +1,5 @@
-import { CustomTableActividad } from '@/components/actividad-contratos/actividad'
-import { CustomTableContrato } from '@/components/actividad-contratos/documento'
+import { CustomTableActividad } from '@/components/actividad-documentos/actividad-table'
+import { CustomTableContrato } from '@/components/actividad-documentos/documento-table'
 
 export default function ActividadContratoPage() {
   return (
