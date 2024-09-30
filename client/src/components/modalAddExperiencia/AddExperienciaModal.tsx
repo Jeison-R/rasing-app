@@ -8,8 +8,8 @@ import Select from 'react-select'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { documentOptions } from '@/components/actividad-documentos/documento-table'
 
+import { documentOptions } from '../actividad-documentos/documento-table'
 import { activityOptions } from '../actividad-documentos/actividad-table'
 import { tipoContratoOptions } from '../actividad-documentos/tipoContrato-table'
 import { salariosMinimos } from '../salarios-table/salarios'
@@ -522,7 +522,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               className="basic-multi-select"
               classNamePrefix="select"
               options={documentOptions}
-              // value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
+              value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
               onChange={handleSelectDocument}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
