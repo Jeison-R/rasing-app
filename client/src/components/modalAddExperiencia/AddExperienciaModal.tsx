@@ -8,6 +8,11 @@ import Select from 'react-select'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { documentOptions } from '@/components/actividad-documentos/documento-table'
+
+import { activityOptions } from '../actividad-documentos/actividad-table'
+import { tipoContratoOptions } from '../actividad-documentos/tipoContrato-table'
+import { salariosMinimos } from '../salarios-table/salarios'
 
 interface AddExperenciaModalProps {
   isOpen: boolean
@@ -25,17 +30,10 @@ interface OptionActivity {
   label: string
 }
 
-export const documentOptions: OptionDocument[] = [
-  { value: 'Tipo 1', label: 'Tipo 1' },
-  { value: 'Tipo 2', label: 'Tipo 2' },
-  { value: 'Tipo 3', label: 'Tipo 3' }
-]
-
-export const actitivityOptions: OptionActivity[] = [
-  { value: 'Tipo 1', label: 'Tipo 1' },
-  { value: 'Tipo 2', label: 'Tipo 2' },
-  { value: 'Tipo 3', label: 'Tipo 3' }
-]
+interface OptionTipoContrato {
+  value: string
+  label: string
+}
 
 interface Adicion {
   id: string
@@ -44,15 +42,20 @@ interface Adicion {
 
 export interface Payment {
   id: string
+  RUP: string
   Entidad: string
   Contrato: string
   Contratista: string
   Modalidad: string
   Objeto: string
+  DocumentoSoporte: string
   TipoContrato: string
   ActividadPrincipal: string
   FechaInicio: string
   FechaTerminacion: string
+  ValorSmmlv: number
+  ValorSmmlvPart2: number
+  ValorActual: number
   ValorInicial: number // Valor inicial del contrato
   PartPorcentaje: number // Participación porcentual
   ValorFinalAfectado: number // Valor final afectado después de adiciones
@@ -64,6 +67,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorInicial, setValorInicial] = useState<number>(0)
   const [partPorcentaje, setPartPorcentaje] = useState<number>(0)
+  const [valorSmmlvPart2, setValorSmmlvPart2] = useState<number>(0) // Para almacenar el valor en SMMLV % PART2
   const [valorFinalAfectado, setValorFinalAfectado] = useState<number>(0)
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
   const [anioTerminacion, setAnioTerminacion] = useState<number>(new Date().getFullYear())
@@ -73,10 +77,13 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
   const [socio, setSocio] = useState<string>('')
   const [objeto, setObjeto] = useState<string>('')
   const [modalidad, setModalidad] = useState<string>('')
+  const [documentoSoporte, setDocumentoSoporte] = useState<string[]>([])
   const [tipoContrato, setTipoContrato] = useState<string[]>([])
   const [actividadPrincipal, setActividadPrincipal] = useState<string[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
+  const [valorSmmlv, setValorSmmlv] = useState<number>(0)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [valorActual, setValorActual] = useState<number>(0) // Para almacenar el valor actual basado en el año actual
 
   useEffect(() => {
     const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr.value, 0)
@@ -94,11 +101,15 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
   }, [fechaTerminacion])
 
   const handleSelectDocument = (selectedOptions: MultiValue<OptionDocument>) => {
-    setTipoContrato(selectedOptions.map((option) => option.value))
+    setDocumentoSoporte(selectedOptions.map((option) => option.value))
   }
 
   const handleSelectActivity = (selectedOptions: MultiValue<OptionActivity>) => {
     setActividadPrincipal(selectedOptions.map((option) => option.value))
+  }
+
+  const handleSelectTipoDocument = (selectedOptions: MultiValue<OptionTipoContrato>) => {
+    setTipoContrato(selectedOptions.map((option) => option.value))
   }
 
   const addAdicion = () => {
@@ -130,7 +141,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     if (!modalidad) newErrors.modalidad = true
 
-    if (tipoContrato.length === 0) newErrors.tipoContrato = true
+    if (documentoSoporte.length === 0) newErrors.tipoContrato = true
 
     if (actividadPrincipal.length === 0) newErrors.actividadPrincipal = true
 
@@ -141,6 +152,26 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     if (!valorInicial) newErrors.valorInicial = true
 
     if (!partPorcentaje) newErrors.partPorcentaje = true
+
+    if (fechaInicio && fechaTerminacion) {
+      const startDate = new Date(fechaInicio)
+      const endDate = new Date(fechaTerminacion)
+
+      if (startDate > endDate) {
+        // Mostrar alerta de error con SweetAlert2
+        void Swal.fire({
+          title: 'Error de Fechas',
+          text: 'La fecha de inicio no puede ser mayor que la fecha de terminación',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        })
+
+        // Retornar false para indicar que el formulario no es válido
+        setErrors(newErrors)
+
+        return false
+      }
+    }
 
     // Validar adiciones si existen
     adiciones.forEach((adicion, index) => {
@@ -163,11 +194,13 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     const newData: Payment = {
       id: uuidv4(),
+      RUP: rup,
       Entidad: entidadContratante,
       Contrato: contratoNo,
       Objeto: objeto,
       Contratista: socio,
       Modalidad: modalidad,
+      DocumentoSoporte: documentoSoporte.join(', '),
       TipoContrato: tipoContrato.join(', '),
       ActividadPrincipal: actividadPrincipal.join(', '),
       FechaInicio: fechaInicio,
@@ -176,6 +209,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       PartPorcentaje: partPorcentaje,
       ValorFinalAfectado: valorFinalAfectado,
       AnioTerminacion: anioTerminacion,
+      ValorSmmlv: valorSmmlv,
+      ValorActual: valorActual,
+      ValorSmmlvPart2: valorSmmlvPart2,
       Adiciones: adiciones.map((adicion) => ({
         id: adicion.id,
         value: adicion.value
@@ -204,10 +240,12 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     setSocio('')
     setObjeto('')
     setModalidad('')
+    setDocumentoSoporte([])
     setTipoContrato([])
     setActividadPrincipal([])
     setFechaInicio('')
     setFechaTerminacion('')
+    setValorSmmlv(0)
     setAdiciones([])
     setValorInicial(0)
     setPartPorcentaje(0)
@@ -238,6 +276,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       case 'modalidad':
         setModalidad(value as string)
         break
+      case 'documentoSoporte':
+        setDocumentoSoporte([value as string])
+        break
       case 'tipoContrato':
         setTipoContrato([value as string])
         break
@@ -252,6 +293,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
         break
       case 'valorInicial':
         setValorInicial(value as number)
+        break
+      case 'valorSmmlv':
+        setValorSmmlv(value as number)
         break
       case 'partPorcentaje':
         setPartPorcentaje(value as number)
@@ -271,6 +315,84 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     // Eliminar el error cuando el usuario comienza a escribir
     setErrors((prevErrors) => ({ ...prevErrors, [field]: false }))
+  }
+
+  const obtenerSalarioMinimo = (anio: number): number | undefined => {
+    const salario = salariosMinimos.find((item) => item.año === anio)
+
+    return salario ? salario.valor : undefined
+  }
+
+  const obtenerUltimoSalarioMinimo = (): number => {
+    return salariosMinimos[salariosMinimos.length - 1].valor // Último salario mínimo en la tabla
+  }
+
+  useEffect(() => {
+    const ultimoSalarioMinimo = obtenerUltimoSalarioMinimo()
+    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
+
+    setValorActual(valorCalculado)
+  }, [valorSmmlvPart2])
+
+  // Actualizar el valor en SMMLV cuando cambia el año de terminación o el valor final afectado
+  useEffect(() => {
+    if (anioTerminacion && valorFinalAfectado) {
+      const salarioMinimo = obtenerSalarioMinimo(anioTerminacion)
+
+      if (salarioMinimo) {
+        const valorEnSmmlv = valorFinalAfectado / salarioMinimo
+
+        setValorSmmlv(valorEnSmmlv)
+      } else {
+        setValorSmmlv(0) // Manejar si no se encuentra el salario mínimo para ese año
+      }
+    }
+  }, [anioTerminacion, valorFinalAfectado])
+
+  useEffect(() => {
+    if (valorSmmlv && partPorcentaje) {
+      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
+
+      setValorSmmlvPart2(valorSmmlvPart2g)
+    } else {
+      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
+    }
+  }, [valorSmmlv, partPorcentaje])
+
+  const formatNumber = (num: number): string => {
+    return num.toLocaleString('es-ES') // Formato para español (puntos de miles)
+  }
+
+  // Función para quitar los separadores de miles y trabajar con el valor real
+  const parseNumber = (formattedNumber: string): number => {
+    return Number(formattedNumber.replace(/\./g, '').replace(/,/g, '.')) // Reemplaza puntos y comas correctamente
+  }
+
+  // Actualiza el valor del input mientras se escribe
+  const handleValorInicialChange = (value: string) => {
+    // Utilizar una expresión regular para permitir solo números
+    const cleanedValue = value.replace(/[^0-9]/g, '') // Elimina cualquier carácter que no sea un número
+
+    // Convierte el valor limpio a número y actualiza el estado
+    const parsedValue = cleanedValue ? parseNumber(cleanedValue) : 0 // Si está vacío, es 0
+
+    setValorInicial(parsedValue)
+
+    if (!parsedValue) {
+      setValorSmmlv(0)
+    }
+  }
+
+  const handleValorFinalAfectadoChange = (value: string) => {
+    const parsedValue = parseNumber(value) // Convierte a número real sin separadores
+
+    setValorFinalAfectado(parsedValue)
+  }
+
+  const handleValorActualChange = (value: string) => {
+    const parsedValue = parseNumber(value) // Convierte a número real sin separadores
+
+    setValorActual(parsedValue)
   }
 
   if (!isOpen) return null
@@ -384,8 +506,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               }}
             >
               <option value="">Seleccione una modalidad</option>
-              <option value="Modalidad 1">Modalidad 1</option>
-              <option value="Modalidad 2">Modalidad 2</option>
+              <option value="Individual">Individual</option>
+              <option value="Consorcio">Consorcio</option>
+              <option value="Unión Temporal">Unión Temporal</option>
             </select>
             {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
@@ -399,8 +522,23 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               className="basic-multi-select"
               classNamePrefix="select"
               options={documentOptions}
-              value={documentOptions.filter((option) => tipoContrato.includes(option.value))}
+              value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
               onChange={handleSelectDocument}
+            />
+            {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium" htmlFor="tipoContrato">
+              Tipo Contrato
+            </label>
+            <Select
+              isMulti
+              className="basic-multi-select"
+              classNamePrefix="select"
+              options={tipoContratoOptions}
+              value={tipoContratoOptions.filter((option) => tipoContrato.includes(option.value))}
+              onChange={handleSelectTipoDocument}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
@@ -413,8 +551,8 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              options={actitivityOptions}
-              value={actitivityOptions.filter((option) => actividadPrincipal.includes(option.value))}
+              options={activityOptions}
+              value={activityOptions.filter((option) => actividadPrincipal.includes(option.value))}
               onChange={handleSelectActivity}
             />
             {errors.actividadPrincipal ? <span className="text-red-500">Campo requerido</span> : null}
@@ -484,19 +622,62 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               Valor Inicial
             </label>
             <Input
-              className={errors.valorInicial ? 'border-red-500' : ''}
               id="valorInicial"
               name="valorInicial"
               placeholder="Valor Inicial"
-              type="number"
-              value={valorInicial}
+              type="text"
+              value={formatNumber(valorInicial)} // Formatea el valor con separadores de miles
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('valorInicial', Number(e.target.value))
-              }}
+                handleValorInicialChange(e.target.value)
+              }} // Quita el formato para cálculo interno
             />
             {errors.valorInicial ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="valorFinalAfectado">
+              Valor Final Afectado (%) de Part.
+            </label>
+            <Input
+              disabled
+              id="valorFinalAfectado"
+              name="valorFinalAfectado"
+              placeholder="Valor Final Afectado"
+              type="text"
+              value={formatNumber(valorFinalAfectado)} // Mostrar con separadores de miles
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleValorFinalAfectadoChange(e.target.value)
+              }} // Manejar el cambio del input
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlv">
+              Valor en SMMLV
+            </label>
+            <Input
+              disabled
+              id="valorSmmlv"
+              name="valorSmmlv"
+              placeholder="Valor en SMMLV"
+              type="number"
+              value={valorSmmlv.toFixed(2)} // To show it formatted to 2 decimal places
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlvPart2">
+              Valor en SMMLV % PART2
+            </label>
+            <Input
+              disabled
+              id="valorSmmlvPart2"
+              name="valorSmmlvPart2"
+              placeholder="Valor en SMMLV % PART2"
+              type="text"
+              value={formatNumber(valorSmmlvPart2)} // Formatea el valor con separadores de miles
+            />
+          </div>
           <div>
             <h4 className="mb-1">Adiciones</h4>
             {adiciones.map((adicion, index) => (
@@ -529,10 +710,20 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorFinalAfectado">
-              Valor Final Afectado (%) de Part.
+            <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
+              Valor Actual
             </label>
-            <Input disabled id="valorFinalAfectado" name="valorFinalAfectado" placeholder="Valor Final Afectado" type="number" value={valorFinalAfectado} />
+            <Input
+              disabled
+              id="valorActual"
+              name="valorActual"
+              placeholder="Valor Actual"
+              type="number"
+              value={valorActual.toFixed(2)} // Mostrar el valor actual calculado
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleValorActualChange(e.target.value)
+              }} //
+            />
           </div>
 
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">

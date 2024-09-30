@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 // Importamos las opciones de tipo de contrato y actividad principal desde experience-table
-import { documentOptions, actitivityOptions } from '../modalAddExperiencia/AddExperienciaModal'
+import { activityOptions } from '../actividad-documentos/actividad-table'
+import { documentOptions } from '../actividad-documentos/documento-table'
+import { tipoContratoOptions } from '../actividad-documentos/tipoContrato-table'
+import { salariosMinimos } from '../salarios-table/salarios'
 
 interface EditExperienceModalProps {
   isOpen: boolean
@@ -20,11 +23,13 @@ interface EditExperienceModalProps {
 }
 
 export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditExperienceModalProps): JSX.Element | null {
+  const [rup, setRup] = useState<string>('')
   const [entidadContratante, setEntidadContratante] = useState<string>('')
   const [contratoNo, setContratoNo] = useState<string>('')
   const [socio, setSocio] = useState<string>('')
   const [modalidad, setModalidad] = useState<string>('')
   const [objeto, setObjeto] = useState<string>('')
+  const [documentoSoporte, setDocumentoSoporte] = useState<string[]>([])
   const [tipoContrato, setTipoContrato] = useState<string[]>([])
   const [actividadPrincipal, setActividadPrincipal] = useState<string[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
@@ -33,11 +38,15 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
   const [partPorcentaje, setPartPorcentaje] = useState<number>(0)
   const [valorFinalAfectado, setValorFinalAfectado] = useState<number>(0)
   const [anioTerminacion, setAnioTerminacion] = useState<number>(new Date().getFullYear())
+  const [valorSmmlv, setValorSmmlv] = useState<number>(0)
+  const [valorSmmlvPart2, setValorSmmlvPart2] = useState<number>(0)
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
+  const [valorActual, setValorActual] = useState<number>(0)
 
   useEffect(() => {
     if (payment) {
       // Poblar los campos con los datos actuales de 'payment'
+      setRup(payment.RUP) // Poblar el campo RUP
       setEntidadContratante(payment.Entidad)
       setContratoNo(payment.Contrato)
       setSocio(payment.Contratista)
@@ -45,13 +54,17 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
       setObjeto(payment.Objeto)
       setTipoContrato(payment.TipoContrato.split(', '))
       setActividadPrincipal(payment.ActividadPrincipal.split(', '))
+      setDocumentoSoporte(payment.DocumentoSoporte.split(', '))
       setFechaInicio(payment.FechaInicio)
       setFechaTerminacion(payment.FechaTerminacion)
       setValorInicial(payment.ValorInicial)
       setPartPorcentaje(payment.PartPorcentaje)
       setValorFinalAfectado(payment.ValorFinalAfectado)
+      setValorSmmlv(payment.ValorSmmlv) // Poblar el Valor en SMMLV
+      setValorSmmlvPart2(payment.ValorSmmlvPart2) // Poblar Valor en SMMLV % Part2
       setAnioTerminacion(payment.AnioTerminacion)
       setAdiciones(payment.Adiciones || [])
+      setValorActual(payment.ValorActual)
     }
   }, [payment])
 
@@ -60,19 +73,24 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
 
     const updatedPayment: Payment = {
       ...payment,
+      RUP: rup, // Guardar RUP
       Entidad: entidadContratante,
       Contrato: contratoNo,
       Contratista: socio,
       Modalidad: modalidad,
       TipoContrato: tipoContrato.join(', '),
       ActividadPrincipal: actividadPrincipal.join(', '),
+      DocumentoSoporte: documentoSoporte.join(', '),
       FechaInicio: fechaInicio,
       FechaTerminacion: fechaTerminacion,
       ValorInicial: valorInicial,
       PartPorcentaje: partPorcentaje,
       ValorFinalAfectado: valorFinalAfectado,
       AnioTerminacion: anioTerminacion,
-      Adiciones: adiciones
+      ValorSmmlv: valorSmmlv, // Guardar el valor SMMLV
+      ValorSmmlvPart2: valorSmmlvPart2, // Guardar el valor SMMLV Part2
+      Adiciones: adiciones,
+      ValorActual: valorActual
     }
 
     onSave(updatedPayment)
@@ -99,6 +117,64 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     setAdiciones(adiciones.map((adicion) => (adicion.id === id ? { ...adicion, value } : adicion)))
   }
 
+  const obtenerSalarioMinimo = (anio: number): number | undefined => {
+    const salario = salariosMinimos.find((item) => item.año === anio)
+
+    return salario ? salario.valor : undefined
+  }
+
+  useEffect(() => {
+    if (fechaTerminacion) {
+      const anio = new Date(fechaTerminacion).getFullYear()
+
+      setAnioTerminacion(anio)
+    }
+  }, [fechaTerminacion])
+
+  const obtenerUltimoSalarioMinimo = (): number => {
+    return salariosMinimos[salariosMinimos.length - 1].valor // Último salario mínimo en la tabla
+  }
+
+  useEffect(() => {
+    const ultimoSalarioMinimo = obtenerUltimoSalarioMinimo()
+    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
+
+    setValorActual(valorCalculado)
+  }, [valorSmmlvPart2])
+
+  // Actualizar el valor en SMMLV cuando cambia el año de terminación o el valor final afectado
+  useEffect(() => {
+    if (anioTerminacion && valorFinalAfectado) {
+      const salarioMinimo = obtenerSalarioMinimo(anioTerminacion)
+
+      if (salarioMinimo) {
+        const valorEnSmmlv = valorFinalAfectado / salarioMinimo
+
+        setValorSmmlv(valorEnSmmlv)
+      } else {
+        setValorSmmlv(0) // Manejar si no se encuentra el salario mínimo para ese año
+      }
+    }
+  }, [anioTerminacion, valorFinalAfectado])
+
+  useEffect(() => {
+    if (valorSmmlv && partPorcentaje) {
+      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
+
+      setValorSmmlvPart2(valorSmmlvPart2g)
+    } else {
+      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
+    }
+  }, [valorSmmlv, partPorcentaje])
+
+  useEffect(() => {
+    // Calculate total value of all additions
+    const totalAdiciones = adiciones.reduce((total, current) => total + current.value, 0)
+
+    // Update valorFinalAfectado with the sum of valorInicial and totalAdiciones
+    setValorFinalAfectado(valorInicial + totalAdiciones)
+  }, [adiciones, valorInicial])
+
   if (!isOpen || !payment) return null
 
   return (
@@ -117,6 +193,18 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             handleSave()
           }}
         >
+          <div>
+            <label className="block text-sm font-medium" htmlFor="rup">
+              Nº RUP
+            </label>
+            <Input
+              id="rup"
+              value={rup}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setRup(e.target.value)
+              }}
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="entidad">
               Entidad
@@ -153,18 +241,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               }}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="modalidad">
-              Modalidad
-            </label>
-            <Input
-              id="modalidad"
-              value={modalidad}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setModalidad(e.target.value)
-              }}
-            />
-          </div>
+
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <label className="block text-sm font-medium" htmlFor="objeto">
               Objeto
@@ -181,12 +258,37 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             />
           </div>
           <div>
+            <label className="block text-sm font-medium" htmlFor="modalidad">
+              Modalidad
+            </label>
+            <Input
+              id="modalidad"
+              value={modalidad}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setModalidad(e.target.value)
+              }}
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium" htmlFor="contrato">
-              Tipo de Contrato
+              Documento Soporte
             </label>
             <Select
               isMulti
               options={documentOptions} // Opciones importadas desde experience-table
+              value={documentoSoporte.map((tc) => ({ value: tc, label: tc }))}
+              onChange={(selected) => {
+                setDocumentoSoporte(selected.map((option) => option.value))
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="contrato">
+              Tipo Contrato
+            </label>
+            <Select
+              isMulti
+              options={tipoContratoOptions} // Opciones importadas desde experience-table
               value={tipoContrato.map((tc) => ({ value: tc, label: tc }))}
               onChange={(selected) => {
                 setTipoContrato(selected.map((option) => option.value))
@@ -199,7 +301,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             </label>
             <Select
               isMulti
-              options={actitivityOptions} // Opciones importadas desde experience-table
+              options={activityOptions} // Opciones importadas desde experience-table
               value={actividadPrincipal.map((ap) => ({ value: ap, label: ap }))}
               onChange={(selected) => {
                 setActividadPrincipal(selected.map((option) => option.value))
@@ -226,8 +328,23 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input
               id="fechaFin"
               type="date"
+              value={fechaTerminacion}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFechaTerminacion(e.target.value)
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="valorInicial">
+              Año de Terminación
+            </label>
+            <Input
+              disabled
+              id="valorInicial"
+              type="number"
+              value={anioTerminacion}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setAnioTerminacion(Number(e.target.value))
               }}
             />
           </div>
@@ -262,12 +379,25 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               Valor Final Afectado
             </label>
             <Input
+              disabled
               type="number"
               value={valorFinalAfectado}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setValorFinalAfectado(Number(e.target.value))
               }}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="valorSmmlv">
+              Valor en SMMLV
+            </label>
+            <Input disabled id="valorSmmlv" type="number" value={valorSmmlv.toFixed(2)} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="valorSmmlvPart2">
+              Valor en SMMLV % Part2
+            </label>
+            <Input disabled id="valorSmmlvPart2" type="number" value={valorSmmlvPart2.toFixed(2)} />
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="adiciones">
@@ -297,6 +427,12 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Button type="button" onClick={addAdicion}>
               + Agregar Adición
             </Button>
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="valorSmmlv">
+              Valor Actual
+            </label>
+            <Input disabled id="valorSmmlv" type="number" value={valorActual.toFixed(2)} />
           </div>
         </form>
         <div className="mt-6 flex justify-end">

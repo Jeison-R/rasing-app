@@ -14,25 +14,31 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { CustomTooltip } from '../commons/tooltip'
 import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
 
-const data: { id: string; tipoDocumento: string }[] = [
-  { id: '1', tipoDocumento: 'CONTRATO' },
-  { id: '2', tipoDocumento: 'CARTA UNION TEMPORAL' },
-  { id: '3', tipoDocumento: 'CARTA CONSORCIAL' },
-  { id: '4', tipoDocumento: 'ADICCIÓN' },
-  { id: '5', tipoDocumento: 'ACTA DE RECIBO FINAL' },
-  { id: '6', tipoDocumento: 'ACTA DE LIQUIDACIÓN' },
-  { id: '7', tipoDocumento: 'CERTIFICACIÓN' },
-  { id: '8', tipoDocumento: 'ACTA DE INICIO' },
-  { id: '9', tipoDocumento: 'COMPROMISO DE CONFIDENCIALIDAD' },
-  { id: '10', tipoDocumento: 'POLIZA' },
-  { id: '11', tipoDocumento: 'RUT' },
-  { id: '12', tipoDocumento: 'CARTA PLURAL' },
-  { id: '13', tipoDocumento: 'ACTA FINAL' }
+export const data: { id: string; documentoSoporte: string }[] = [
+  { id: '1', documentoSoporte: 'CONTRATO' },
+  { id: '2', documentoSoporte: 'CARTA UNION TEMPORAL' },
+  { id: '3', documentoSoporte: 'CARTA CONSORCIAL' },
+  { id: '4', documentoSoporte: 'ADICCIÓN' },
+  { id: '5', documentoSoporte: 'ACTA DE RECIBO FINAL' },
+  { id: '6', documentoSoporte: 'ACTA DE LIQUIDACIÓN' },
+  { id: '7', documentoSoporte: 'CERTIFICACIÓN' },
+  { id: '8', documentoSoporte: 'ACTA DE INICIO' },
+  { id: '9', documentoSoporte: 'COMPROMISO DE CONFIDENCIALIDAD' },
+  { id: '10', documentoSoporte: 'POLIZA' },
+  { id: '11', documentoSoporte: 'RUT' },
+  { id: '12', documentoSoporte: 'CARTA PLURAL' },
+  { id: '13', documentoSoporte: 'ACTA FINAL' }
 ]
+
+// Si necesitas transformarlo en el formato que usa react-select:
+export const documentOptions = data.map((doc) => ({
+  value: doc.documentoSoporte,
+  label: doc.documentoSoporte
+}))
 
 export interface Payment {
   id: string
-  tipoDocumento: string
+  documentoSoporte: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -56,7 +62,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="text-center lowercase">{row.getValue('id')}</div>
   },
   {
-    accessorKey: 'tipoDocumento',
+    accessorKey: 'documentoSoporte',
     header: ({ column }) => {
       return (
         <div className="flex justify-center">
@@ -72,11 +78,11 @@ export const columns: ColumnDef<Payment>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('tipoDocumento')}</div>
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('documentoSoporte')}</div>
   }
 ]
 
-export function CustomTableContrato() {
+export function CustomTableDocumento() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})

@@ -14,45 +14,52 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { CustomTooltip } from '../commons/tooltip'
 import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
 
-export const data: { id: string; actividad: string }[] = [
-  { id: '1', actividad: 'ADECUACION' },
-  { id: '2', actividad: 'AGUAS' },
-  { id: '3', actividad: 'AMPLIACION' },
-  { id: '4', actividad: 'COLOCACION' },
-  { id: '5', actividad: 'CONSERVACION' },
-  { id: '6', actividad: 'CONSTRUCCIÓN' },
-  { id: '7', actividad: 'DISEÑOS' },
-  { id: '8', actividad: 'DOTACION' },
-  { id: '9', actividad: 'ESTRUCTURAL' },
-  { id: '10', actividad: 'ESTUDIOS' },
-  { id: '11', actividad: 'FIGURACION' },
-  { id: '12', actividad: 'HIDRAULICO' },
-  { id: '13', actividad: 'LLUVIAS' },
-  { id: '14', actividad: 'MANTENIMIENTO' },
-  { id: '15', actividad: 'MEJORAMIENTO' },
-  { id: '16', actividad: 'OPTIMIZACION' },
-  { id: '17', actividad: 'PUENTE' },
-  { id: '18', actividad: 'RECONSTRUCCION' },
-  { id: '19', actividad: 'RED' },
-  { id: '20', actividad: 'REHABILITACION' },
-  { id: '21', actividad: 'REMODELACION' },
-  { id: '22', actividad: 'REPARACION' },
-  { id: '23', actividad: 'REPOSICION' },
-  { id: '24', actividad: 'SANITARIO' },
-  { id: '25', actividad: 'SUELO' },
-  { id: '26', actividad: 'SUMINISTRO' },
-  { id: '27', actividad: 'TERMINACION' }
+export const data: { id: string; tipoContrato: string }[] = [
+  { id: '1', tipoContrato: 'ACUEDUCTO' },
+  { id: '2', tipoContrato: 'ADECUACION' },
+  { id: '3', tipoContrato: 'ALCANTARILLADO' },
+  { id: '4', tipoContrato: 'AMBIENTAL' },
+  { id: '5', tipoContrato: 'BATERIAS' },
+  { id: '6', tipoContrato: 'CAÑO' },
+  { id: '7', tipoContrato: 'CERRAMIENTO' },
+  { id: '8', tipoContrato: 'CIC' },
+  { id: '9', tipoContrato: 'CONSULTORIA' },
+  { id: '10', tipoContrato: 'CUBIERTAS' },
+  { id: '11', tipoContrato: 'DE' },
+  { id: '12', tipoContrato: 'DEPORTIVO' },
+  { id: '13', tipoContrato: 'EDIFICACION' },
+  { id: '14', tipoContrato: 'EDIFICACIONES' },
+  { id: '15', tipoContrato: 'ELECTRICO' },
+  { id: '16', tipoContrato: 'EN' },
+  { id: '17', tipoContrato: 'ESCENARIO' },
+  { id: '18', tipoContrato: 'GAVIONES' },
+  { id: '19', tipoContrato: 'INTERVENTORIA' },
+  { id: '20', tipoContrato: 'MANTENIMIENTO' },
+  { id: '21', tipoContrato: 'METALICA' },
+  { id: '22', tipoContrato: 'MOVIMIENTO' },
+  { id: '23', tipoContrato: 'PARQUES' },
+  { id: '24', tipoContrato: 'PONTONES' },
+  { id: '25', tipoContrato: 'POZOS' },
+  { id: '26', tipoContrato: 'PUENTE' },
+  { id: '27', tipoContrato: 'PUENTES' },
+  { id: '28', tipoContrato: 'RELLENOS' },
+  { id: '29', tipoContrato: 'SANITARIAS' },
+  { id: '30', tipoContrato: 'SUMINISTRO' },
+  { id: '31', tipoContrato: 'TANQUE' },
+  { id: '32', tipoContrato: 'TANQUES' },
+  { id: '33', tipoContrato: 'TIERRAS' },
+  { id: '34', tipoContrato: 'UNIDADES' },
+  { id: '35', tipoContrato: 'VIAS' }
 ]
 
-// Si necesitas transformarlo en el formato que usa react-select:
-export const activityOptions = data.map((doc) => ({
-  value: doc.actividad,
-  label: doc.actividad
+export const tipoContratoOptions = data.map((doc) => ({
+  value: doc.tipoContrato,
+  label: doc.tipoContrato
 }))
 
 export interface Payment {
   id: string
-  actividad: string
+  tipoContrato: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -74,7 +81,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue('id')}</div>
   },
   {
-    accessorKey: 'actividad',
+    accessorKey: 'tipoContrato',
     header: ({ column }) => {
       return (
         <div className="flex justify-end">
@@ -84,17 +91,17 @@ export const columns: ColumnDef<Payment>[] = [
               column.toggleSorting(column.getIsSorted() === 'asc')
             }}
           >
-            Actividad
+            Tipo Contrato
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('actividad')}</div>
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('tipoContrato')}</div>
   }
 ]
 
-export function CustomTableActividad() {
+export function CustomTableTipoContrato() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -136,7 +143,7 @@ export function CustomTableActividad() {
   return (
     <>
       <div className="flex flex-col items-center justify-center py-4">
-        <h1 className="mb-2">Actividad Principal</h1>
+        <h1 className="mb-2">Tipo de Contrato</h1>
         <div className="flex items-center space-x-2">
           <Input
             className="max-w-sm"

@@ -19,6 +19,7 @@ import { ActionsMenu } from './ActionsMenu'
 const data: Payment[] = [
   {
     id: 'm5gr84i9',
+    RUP: '123456789',
     Entidad: 'Ministerio de Salud',
     Contrato: '1234',
     Contratista: 'Salud Vida SAS',
@@ -32,6 +33,10 @@ const data: Payment[] = [
     PartPorcentaje: 50,
     ValorFinalAfectado: 7500000,
     AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
     Adiciones: [
       {
         id: 'adicion1',
@@ -41,6 +46,7 @@ const data: Payment[] = [
   },
   {
     id: 'n3bv78k0',
+    RUP: '123456789',
     Entidad: 'Ministerio de Educación',
     Contrato: '5678',
     Contratista: 'Educamos Juntos',
@@ -54,10 +60,15 @@ const data: Payment[] = [
     PartPorcentaje: 100,
     ValorFinalAfectado: 3000000,
     AnioTerminacion: 2022,
+    DocumentoSoporte: '',
+    ValorActual: 0,
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
     Adiciones: []
   },
   {
     id: 'z7gh93k2',
+    RUP: '123456789',
     Entidad: 'Alcaldía de Bogotá',
     Contrato: '91011',
     Contratista: 'Bogotá Limpia S.A.',
@@ -71,6 +82,10 @@ const data: Payment[] = [
     PartPorcentaje: 75,
     ValorFinalAfectado: 13000000,
     AnioTerminacion: 2022,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
     Adiciones: [
       {
         id: 'adicion2',
@@ -80,6 +95,7 @@ const data: Payment[] = [
   },
   {
     id: 'y9kl65n1',
+    RUP: '123456789',
     Entidad: 'Gobernación de Antioquia',
     Contrato: '1213',
     Contratista: 'Antioquia Proyectos',
@@ -93,6 +109,10 @@ const data: Payment[] = [
     PartPorcentaje: 60,
     ValorFinalAfectado: 25000000,
     AnioTerminacion: 2025,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
     Adiciones: [
       {
         id: 'adicion3',
@@ -102,6 +122,7 @@ const data: Payment[] = [
   },
   {
     id: 'p3dv72q5',
+    RUP: '123456789',
     Entidad: 'Instituto Colombiano de Bienestar Familiar',
     Contrato: '1415',
     Contratista: 'Familias Felices SAS',
@@ -115,6 +136,10 @@ const data: Payment[] = [
     PartPorcentaje: 40,
     ValorFinalAfectado: 6000000,
     AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
     Adiciones: [
       {
         id: 'adicion4',
@@ -126,6 +151,7 @@ const data: Payment[] = [
 
 export interface Payment {
   id: string
+  RUP: string
   Entidad: string
   Contrato: string
   Contratista: string
@@ -135,6 +161,10 @@ export interface Payment {
   ActividadPrincipal: string
   FechaInicio: string
   FechaTerminacion: string
+  DocumentoSoporte: string
+  ValorSmmlv: number
+  ValorSmmlvPart2: number
+  ValorActual: number
   ValorInicial: number // Valor inicial del contrato
   PartPorcentaje: number // Participación porcentual
   ValorFinalAfectado: number // Valor final afectado después de adiciones

@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { CustomTooltip } from '../commons/tooltip'
 import { AddSalaryModal } from '../modalAddSalary/AddSalaryModal'
 
-const data: Payment[] = [
+export const salariosMinimos: Payment[] = [
   {
     id: 'm5gr84i9',
     valor: 11298,
@@ -286,7 +286,7 @@ export function CustomTable() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const table = useReactTable({
-    data,
+    data: salariosMinimos,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -308,7 +308,7 @@ export function CustomTable() {
     }
   })
 
-  const ultimoSalario = data[data.length - 1]
+  const ultimoSalario = salariosMinimos[salariosMinimos.length - 1]
 
   const handleOpenModal = () => {
     setIsModalOpen(true)

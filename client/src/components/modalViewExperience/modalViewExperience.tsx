@@ -25,6 +25,10 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
+            <h4 className="text-sm font-medium">RUP:</h4>
+            <p>{payment.RUP}</p>
+          </div>
+          <div>
             <h4 className="text-sm font-medium">Entidad:</h4>
             <p>{payment.Entidad}</p>
           </div>
@@ -36,17 +40,22 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Contratista:</h4>
             <p>{payment.Contratista}</p>
           </div>
-          <div>
-            <h4 className="text-sm font-medium">Modalidad:</h4>
-            <p>{payment.Modalidad}</p>
-          </div>
+
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <h4 className="text-sm font-medium">Objeto:</h4>
             <p>{payment.Objeto}</p>
           </div>
           <div>
+            <h4 className="text-sm font-medium">Modalidad:</h4>
+            <p>{payment.Modalidad}</p>
+          </div>
+          <div>
             <h4 className="text-sm font-medium">Tipo de Contrato:</h4>
             <p>{payment.TipoContrato}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium">Documentos Soporte:</h4>
+            <p>{payment.DocumentoSoporte}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Actividad Principal:</h4>
@@ -61,20 +70,29 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <p>{payment.FechaTerminacion}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Valor Inicial:</h4>
-            <p>{payment.ValorInicial}</p>
+            <h4 className="text-sm font-medium">Año de terminación:</h4>
+            <p>{payment.AnioTerminacion}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Part. %:</h4>
             <p>{payment.PartPorcentaje}</p>
           </div>
           <div>
+            <h4 className="text-sm font-medium">Valor Inicial:</h4>
+            <p>{payment.ValorInicial}</p>
+          </div>
+
+          <div>
             <h4 className="text-sm font-medium">Valor Final Afectado:</h4>
             <p>{payment.ValorFinalAfectado}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Año de Terminación:</h4>
-            <p>{payment.AnioTerminacion}</p>
+            <h4 className="text-sm font-medium">Valor en SMMLV:</h4>
+            <p>{payment.ValorSmmlv}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium">Valor en SMMLV % PART2:</h4>
+            <p>{payment.ValorSmmlvPart2}</p>
           </div>
           {/* Si existen adiciones, las mostramos */}
           {payment.Adiciones && payment.Adiciones.length > 0 ? (
