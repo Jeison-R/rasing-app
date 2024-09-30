@@ -522,7 +522,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               className="basic-multi-select"
               classNamePrefix="select"
               options={documentOptions}
-              value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
+              // value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
               onChange={handleSelectDocument}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
