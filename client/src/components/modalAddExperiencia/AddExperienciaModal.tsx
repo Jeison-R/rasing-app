@@ -63,6 +63,13 @@ export interface Payment {
   Adiciones?: Adicion[] // Array opcional de adiciones
 }
 
+export const opcionesModalidad = [
+  { value: '', label: 'Seleccione una modalidad' },
+  { value: 'Individual', label: 'Individual' },
+  { value: 'Consorcio', label: 'Consorcio' },
+  { value: 'Unión Temporal', label: 'Unión Temporal' }
+]
+
 export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExperenciaModalProps>) {
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorInicial, setValorInicial] = useState<number>(0)
@@ -332,7 +339,17 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
 
     setValorActual(valorCalculado)
-  }, [valorSmmlvPart2])
+  }, [valorSmmlvPart2, salariosMinimos])
+
+  useEffect(() => {
+    if (valorSmmlv && partPorcentaje) {
+      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
+
+      setValorSmmlvPart2(valorSmmlvPart2g)
+    } else {
+      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
+    }
+  }, [valorSmmlv, partPorcentaje])
 
   // Actualizar el valor en SMMLV cuando cambia el año de terminación o el valor final afectado
   useEffect(() => {
@@ -348,16 +365,6 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       }
     }
   }, [anioTerminacion, valorFinalAfectado])
-
-  useEffect(() => {
-    if (valorSmmlv && partPorcentaje) {
-      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
-
-      setValorSmmlvPart2(valorSmmlvPart2g)
-    } else {
-      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
-    }
-  }, [valorSmmlv, partPorcentaje])
 
   const formatNumber = (num: number): string => {
     return num.toLocaleString('es-ES') // Formato para español (puntos de miles)
@@ -387,12 +394,6 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     const parsedValue = parseNumber(value) // Convierte a número real sin separadores
 
     setValorFinalAfectado(parsedValue)
-  }
-
-  const handleValorActualChange = (value: string) => {
-    const parsedValue = parseNumber(value) // Convierte a número real sin separadores
-
-    setValorActual(parsedValue)
   }
 
   if (!isOpen) return null
@@ -505,10 +506,11 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
                 handleFieldChange('modalidad', e.target.value)
               }}
             >
-              <option value="">Seleccione una modalidad</option>
-              <option value="Individual">Individual</option>
-              <option value="Consorcio">Consorcio</option>
-              <option value="Unión Temporal">Unión Temporal</option>
+              {opcionesModalidad.map((opcion) => (
+                <option key={opcion.value} value={opcion.value}>
+                  {opcion.label}
+                </option>
+              ))}
             </select>
             {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
@@ -629,7 +631,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               value={formatNumber(valorInicial)} // Formatea el valor con separadores de miles
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleValorInicialChange(e.target.value)
-              }} // Quita el formato para cálculo interno
+              }}
             />
             {errors.valorInicial ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
@@ -655,14 +657,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlv">
               Valor en SMMLV
             </label>
-            <Input
-              disabled
-              id="valorSmmlv"
-              name="valorSmmlv"
-              placeholder="Valor en SMMLV"
-              type="number"
-              value={valorSmmlv.toFixed(2)} // To show it formatted to 2 decimal places
-            />
+            <Input disabled id="valorSmmlv" name="valorSmmlv" placeholder="Valor en SMMLV" type="text" value={formatNumber(valorSmmlv)} />
           </div>
 
           <div>
@@ -685,8 +680,8 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
                 <Input
                   className={errors[`adicion_${index}`] ? 'border-red-500' : ''}
                   placeholder={`Adición ${index + 1}`}
-                  type="number"
-                  value={adicion.value}
+                  type="text"
+                  value={formatNumber(adicion.value)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     updateAdicion(adicion.id, Number(e.target.value))
                   }}
@@ -713,17 +708,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
               Valor Actual
             </label>
-            <Input
-              disabled
-              id="valorActual"
-              name="valorActual"
-              placeholder="Valor Actual"
-              type="number"
-              value={valorActual.toFixed(2)} // Mostrar el valor actual calculado
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleValorActualChange(e.target.value)
-              }} //
-            />
+            <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
           </div>
 
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">

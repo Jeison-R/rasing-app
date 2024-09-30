@@ -10,6 +10,10 @@ interface ViewExperienceModalProps {
   payment: Payment | null
 }
 
+const formatNumber = (num: number): string => {
+  return num.toLocaleString('es-ES') // Formato con puntos de miles
+}
+
 export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperienceModalProps) {
   if (!isOpen || !payment) return null
 
@@ -79,20 +83,20 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor Inicial:</h4>
-            <p>{payment.ValorInicial}</p>
+            <p>{formatNumber(payment.ValorInicial)}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-medium">Valor Final Afectado:</h4>
-            <p>{payment.ValorFinalAfectado}</p>
+            <p>{formatNumber(payment.ValorFinalAfectado)}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor en SMMLV:</h4>
-            <p>{payment.ValorSmmlv}</p>
+            <p>{formatNumber(payment.ValorSmmlv)}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor en SMMLV % PART2:</h4>
-            <p>{payment.ValorSmmlvPart2}</p>
+            <p>{formatNumber(payment.ValorSmmlvPart2)}</p>
           </div>
           {/* Si existen adiciones, las mostramos */}
           {payment.Adiciones && payment.Adiciones.length > 0 ? (
@@ -100,11 +104,15 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
               {payment.Adiciones.map((adicion, index) => (
                 <div key={adicion.id}>
                   <h4 className="text-sm font-medium">Adición {index + 1}:</h4>
-                  <p>Valor: {adicion.value}</p>
+                  <p>Valor: {formatNumber(adicion.value)}</p>
                 </div>
               ))}
             </>
           ) : null}
+          <div>
+            <h4 className="text-sm font-medium">Valor Actual</h4>
+            <p>{formatNumber(payment.ValorActual)}</p>
+          </div>
         </div>
 
         <div className="mt-6 flex justify-end">

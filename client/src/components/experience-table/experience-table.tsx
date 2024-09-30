@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
+import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 
 import { ActionsMenu } from './ActionsMenu'
 
@@ -251,6 +252,8 @@ export function CustomTable() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [tableData, setTableData] = useState<Payment[]>(data) // Usa tableData como el estado
 
   const table = useReactTable({
@@ -292,6 +295,20 @@ export function CustomTable() {
     setTableData((prevData) => [...prevData, newData])
   }
 
+  const handleOpenEditModal = (payment: Payment) => {
+    setSelectedPayment(payment)
+    setIsEditModalOpen(true)
+  }
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false)
+  }
+
+  const handleSaveEdit = (updatedPayment: Payment) => {
+    setTableData((prevData) => prevData.map((payment) => (payment.id === updatedPayment.id ? updatedPayment : payment)))
+    setIsEditModalOpen(false)
+  }
+
   return (
     <>
       <div className="flex items-center justify-between py-4">
@@ -331,6 +348,9 @@ export function CustomTable() {
                       onDelete={() => {
                         handleDeleteRow(row.original.id)
                       }}
+                      onEdit={() => {
+                        handleOpenEditModal(row.original)
+                      }} // Pass the payment to edit
                     />{' '}
                   </TableCell>
                 </TableRow>
@@ -379,6 +399,7 @@ export function CustomTable() {
         </div>
       </div>
       <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleAddData} />
+      {isEditModalOpen && selectedPayment ? <EditExperienceModal isOpen={isEditModalOpen} payment={selectedPayment} onClose={handleCloseEditModal} onSave={handleSaveEdit} /> : null}
     </>
   )
 }
