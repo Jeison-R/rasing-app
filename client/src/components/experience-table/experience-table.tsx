@@ -28,7 +28,7 @@ const data: Payment[] = [
     Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
     TipoContrato: 'Prestación de Servicios',
     ActividadPrincipal: 'Suministro de medicamentos',
-    FechaInicio: '2023-01-15',
+    FechaInicio: '15-05-2016',
     FechaTerminacion: '2023-12-31',
     ValorInicial: 5000000,
     PartPorcentaje: 50,
