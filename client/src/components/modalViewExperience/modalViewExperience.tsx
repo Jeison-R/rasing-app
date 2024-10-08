@@ -115,8 +115,34 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Valor Actual</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorActual)}</p>
           </div>
-        </div>
 
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="documentoCargado">
+              Documentos Soporte Cargados
+            </label>
+
+            {/* Mostrar los documentos cargados */}
+            <div className="space-y-2">
+              {payment.DocumentoCargado.length > 0 ? (
+                payment.DocumentoCargado.map((doc, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <span className="max-w-[6rem] truncate text-sm text-gray-600">{doc.name}</span>
+                    <a
+                      className="text-blue-600 hover:underline"
+                      href={doc.url} // Enlaza al archivo PDF
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Ver documento
+                    </a>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No hay documentos cargados.</p>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="mt-6 flex justify-end">
           <Button variant="default" onClick={onClose}>
             Cerrar

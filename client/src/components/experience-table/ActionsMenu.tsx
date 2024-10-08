@@ -1,9 +1,10 @@
 import type { Payment } from './experience-table'
 
-import { useState, useEffect, useRef } from 'react'
-import { Eye, Pencil, Trash, MoreVertical } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 
 import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
 
@@ -18,24 +19,9 @@ interface ActionsMenuProps {
 }
 
 export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const payment = row.original
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
-
-  const handleDelete = async () => {
-    const payment: Payment = row.original
-
-    await deleteExperience(payment).then((result) => {
-      if (result.isConfirmed) {
-        onDelete()
-      }
-    })
-  }
 
   const handleView = (data: Payment) => {
     setSelectedPayment(data)
@@ -46,65 +32,43 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
     setIsModalOpen(false)
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+  const handleDelete = async () => {
+    await deleteExperience(payment).then((result) => {
+      if (result.isConfirmed) {
+        onDelete()
       }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [menuRef])
+    })
+  }
 
   return (
     <>
-      <div className="relative">
-        <Button variant="ghost" onClick={toggleMenu}>
-          <MoreVertical className="h-5 w-5" />
-        </Button>
-        {isOpen ? (
-          <div ref={menuRef} className="fixed right-10 z-50 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-            <div className="py-1">
-              <button
-                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                type="button"
-                onClick={() => {
-                  handleView(row.original)
-                  setIsOpen(false)
-                }}
-              >
-                <Eye className="mr-2 inline-block h-4 w-4" />
-                Visualizar
-              </button>
-              <button
-                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                type="button"
-                onClick={() => {
-                  onEdit(row.original) // Pasar el pago al componente padre
-                  setIsOpen(false)
-                }}
-              >
-                <Pencil className="mr-2 inline-block h-4 w-4" />
-                Editar
-              </button>
-              <button
-                className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                type="button"
-                onClick={() => {
-                  void handleDelete()
-                }}
-              >
-                <Trash className="mr-2 inline-block h-4 w-4" />
-                Eliminar
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="h-8 w-8 p-0" variant="ghost">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              handleView(payment)
+            }}
+          >
+            Visualizar
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              onEdit(payment)
+            }}
+          >
+            Editar
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => void handleDelete()}>Eliminar</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Modal para ver los detalles del pago */}
       <ViewExperienceModal isOpen={isModalOpen} payment={selectedPayment} onClose={closeModal} />

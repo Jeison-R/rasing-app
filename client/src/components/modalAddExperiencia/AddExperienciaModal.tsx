@@ -1,7 +1,7 @@
 import type { MultiValue } from 'react-select'
 
 import { X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Swal from 'sweetalert2'
 import Select from 'react-select'
@@ -61,6 +61,7 @@ export interface Payment {
   ValorFinalAfectado: number // Valor final afectado después de adiciones
   AnioTerminacion: number // Año de terminación
   Adiciones?: Adicion[] // Array opcional de adiciones
+  DocumentoCargado: { name: string; url: string }[]
 }
 
 export const opcionesModalidad = [
@@ -91,13 +92,17 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
   const [valorSmmlv, setValorSmmlv] = useState<number>(0)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [valorActual, setValorActual] = useState<number>(0) // Para almacenar el valor actual basado en el año actual
+  const [files, setFiles] = useState<File[]>([])
+
+  const valorFinalCalculado = useMemo(() => {
+    const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr.value, 0)
+
+    return valorInicial + totalAdiciones
+  }, [valorInicial, adiciones])
 
   useEffect(() => {
-    const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr.value, 0)
-    const valorFinal = valorInicial + totalAdiciones
-
-    setValorFinalAfectado(valorFinal)
-  }, [valorInicial, adiciones])
+    setValorFinalAfectado(valorFinalCalculado)
+  }, [valorFinalCalculado])
 
   useEffect(() => {
     if (fechaTerminacion) {
@@ -107,16 +112,69 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     }
   }, [fechaTerminacion])
 
+  useEffect(() => {
+    const ultimoSalarioMinimo = obtenerUltimoSalarioMinimo()
+    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
+
+    setValorActual(valorCalculado)
+  }, [valorSmmlvPart2, salariosMinimos])
+
+  useEffect(() => {
+    if (valorSmmlv && partPorcentaje) {
+      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
+
+      setValorSmmlvPart2(valorSmmlvPart2g)
+    } else {
+      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
+    }
+  }, [valorSmmlv, partPorcentaje])
+
+  // Actualizar el valor en SMMLV cuando cambia el año de terminación o el valor final afectado
+  useEffect(() => {
+    if (anioTerminacion && valorFinalAfectado) {
+      const salarioMinimo = obtenerSalarioMinimo(anioTerminacion)
+
+      if (salarioMinimo) {
+        const valorEnSmmlv = valorFinalAfectado / salarioMinimo
+
+        setValorSmmlv(valorEnSmmlv)
+      } else {
+        setValorSmmlv(0) // Manejar si no se encuentra el salario mínimo para ese año
+      }
+    }
+  }, [anioTerminacion, valorFinalAfectado])
+
   const handleSelectDocument = (selectedOptions: MultiValue<OptionDocument>) => {
-    setDocumentoSoporte(selectedOptions.map((option) => option.value))
+    const values = selectedOptions.map((option) => option.value)
+
+    setDocumentoSoporte(values)
+
+    // Validar si hay al menos un valor seleccionado
+    if (values.length > 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, documentoSoporte: false }))
+    }
   }
 
   const handleSelectActivity = (selectedOptions: MultiValue<OptionActivity>) => {
-    setActividadPrincipal(selectedOptions.map((option) => option.value))
+    const values = selectedOptions.map((option) => option.value)
+
+    setActividadPrincipal(values)
+
+    // Validar si hay al menos un valor seleccionado
+    if (values.length > 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, actividadPrincipal: false }))
+    }
   }
 
-  const handleSelectTipoDocument = (selectedOptions: MultiValue<OptionTipoContrato>) => {
-    setTipoContrato(selectedOptions.map((option) => option.value))
+  const handleSelectTipoContrato = (selectedOptions: MultiValue<OptionTipoContrato>) => {
+    const values = selectedOptions.map((option) => option.value)
+
+    setTipoContrato(values)
+
+    // Validar si hay al menos un valor seleccionado
+    if (values.length > 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, tipoContrato: false }))
+    }
   }
 
   const addAdicion = () => {
@@ -148,9 +206,11 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     if (!modalidad) newErrors.modalidad = true
 
-    if (documentoSoporte.length === 0) newErrors.tipoContrato = true
+    if (documentoSoporte.length === 0) newErrors.documentoSoporte = true
 
     if (actividadPrincipal.length === 0) newErrors.actividadPrincipal = true
+
+    if (tipoContrato.length === 0) newErrors.tipoContrato = true
 
     if (!fechaInicio) newErrors.fechaInicio = true
 
@@ -159,6 +219,10 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     if (!valorInicial) newErrors.valorInicial = true
 
     if (!partPorcentaje) newErrors.partPorcentaje = true
+
+    if (files.length === 0) {
+      newErrors.files = true
+    }
 
     if (fechaInicio && fechaTerminacion) {
       const startDate = new Date(fechaInicio)
@@ -219,6 +283,10 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
       ValorSmmlv: valorSmmlv,
       ValorActual: valorActual,
       ValorSmmlvPart2: valorSmmlvPart2,
+      DocumentoCargado: files.map((file) => ({
+        name: file.name,
+        url: URL.createObjectURL(file)
+      })), // Incluye el archivo en los datos enviados
       Adiciones: adiciones.map((adicion) => ({
         id: adicion.id,
         value: adicion.value
@@ -258,6 +326,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     setPartPorcentaje(0)
     setValorFinalAfectado(0)
     setAnioTerminacion(new Date().getFullYear())
+    setFiles([])
     setErrors({})
 
     onClose() // Llama a la función pasada como prop para cerrar el modal
@@ -334,38 +403,6 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     return salariosMinimos[salariosMinimos.length - 1].valor // Último salario mínimo en la tabla
   }
 
-  useEffect(() => {
-    const ultimoSalarioMinimo = obtenerUltimoSalarioMinimo()
-    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
-
-    setValorActual(valorCalculado)
-  }, [valorSmmlvPart2, salariosMinimos])
-
-  useEffect(() => {
-    if (valorSmmlv && partPorcentaje) {
-      const valorSmmlvPart2g = valorSmmlv * (partPorcentaje / 100) // Multiplicar el valor en SMMLV por el porcentaje
-
-      setValorSmmlvPart2(valorSmmlvPart2g)
-    } else {
-      setValorSmmlvPart2(0) // Si no hay valor o porcentaje, el resultado es 0
-    }
-  }, [valorSmmlv, partPorcentaje])
-
-  // Actualizar el valor en SMMLV cuando cambia el año de terminación o el valor final afectado
-  useEffect(() => {
-    if (anioTerminacion && valorFinalAfectado) {
-      const salarioMinimo = obtenerSalarioMinimo(anioTerminacion)
-
-      if (salarioMinimo) {
-        const valorEnSmmlv = valorFinalAfectado / salarioMinimo
-
-        setValorSmmlv(valorEnSmmlv)
-      } else {
-        setValorSmmlv(0) // Manejar si no se encuentra el salario mínimo para ese año
-      }
-    }
-  }, [anioTerminacion, valorFinalAfectado])
-
   const formatNumber = (num: number): string => {
     return num.toLocaleString('es-ES') // Formato para español (puntos de miles)
   }
@@ -377,8 +414,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
   // Actualiza el valor del input mientras se escribe
   const handleValorInicialChange = (value: string) => {
-    // Utilizar una expresión regular para permitir solo números
-    const cleanedValue = value.replace(/[^0-9]/g, '') // Elimina cualquier carácter que no sea un número
+    const cleanedValue = value.replace(/[^0-9]/g, '')
 
     // Convierte el valor limpio a número y actualiza el estado
     const parsedValue = cleanedValue ? parseNumber(cleanedValue) : 0 // Si está vacío, es 0
@@ -388,12 +424,29 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     if (!parsedValue) {
       setValorSmmlv(0)
     }
+
+    if (parsedValue > 0) {
+      setErrors((prevErrors) => ({ ...prevErrors, valorInicial: false }))
+    }
   }
 
   const handleValorFinalAfectadoChange = (value: string) => {
     const parsedValue = parseNumber(value) // Convierte a número real sin separadores
 
     setValorFinalAfectado(parsedValue)
+  }
+
+  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files) // Convertimos FileList en array
+
+      setFiles(selectedFiles)
+      setErrors((prevErrors) => ({ ...prevErrors, files: false }))
+    }
+  }
+
+  const removeFile = (indexToRemove: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
   }
 
   if (!isOpen) return null
@@ -527,7 +580,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
               onChange={handleSelectDocument}
             />
-            {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
+            {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
           <div>
@@ -540,7 +593,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               classNamePrefix="select"
               options={tipoContratoOptions}
               value={tipoContratoOptions.filter((option) => tipoContrato.includes(option.value))}
-              onChange={handleSelectTipoDocument}
+              onChange={handleSelectTipoContrato}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
@@ -709,6 +762,49 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               Valor Actual
             </label>
             <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
+              Cargar Documentos Soporte (PDF)
+            </label>
+
+            {/* Contenedor personalizado para el campo de carga */}
+            <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
+              <input
+                multiple
+                accept="application/pdf" // Solo permite archivos PDF
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                id="documentosCargados"
+                name="documentosCargados"
+                type="file"
+                onChange={handleMultipleFileUpload}
+              />
+              <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
+            </div>
+
+            {/* Mostrar nombres de archivos seleccionados */}
+            {files.length > 0 && (
+              <ul className="mt-2 space-y-2">
+                {files.map((file, index) => (
+                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                    <span className="w-4/5 truncate">{file.name}</span>
+                    <button
+                      className="ml-2 text-red-500 hover:text-red-700"
+                      type="button"
+                      onClick={() => {
+                        removeFile(index)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Mensaje de error si es necesario */}
+            {errors.files ? <span className="text-red-500">Debes cargar al menos un documento</span> : null}
           </div>
 
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">

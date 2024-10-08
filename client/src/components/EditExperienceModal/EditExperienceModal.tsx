@@ -42,6 +42,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
   const [valorSmmlvPart2, setValorSmmlvPart2] = useState<number>(0)
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorActual, setValorActual] = useState<number>(0)
+  const [files, setFiles] = useState<File[]>([]) // Para almacenar nuevos archivos cargados
+  const [documentoSoporteUrls, setDocumentoSoporteUrls] = useState<{ name: string; url: string }[]>([])
 
   useEffect(() => {
     if (payment) {
@@ -55,6 +57,12 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
       setTipoContrato(payment.TipoContrato.split(', '))
       setActividadPrincipal(payment.ActividadPrincipal.split(', '))
       setDocumentoSoporte(payment.DocumentoSoporte.split(', '))
+      setDocumentoSoporteUrls(
+        payment.DocumentoCargado.map((doc) => ({
+          name: doc.name,
+          url: doc.url
+        }))
+      )
       setFechaInicio(payment.FechaInicio)
       setFechaTerminacion(payment.FechaTerminacion)
       setValorInicial(payment.ValorInicial)
@@ -68,8 +76,82 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     }
   }, [payment])
 
+  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files) // Convertimos FileList en array
+
+      setFiles([...files, ...selectedFiles]) // Añadir archivos seleccionados a la lista
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)) // Eliminar archivo de la lista de nuevos archivos
+  }
+
+  const removeUploadedFile = (index: number) => {
+    setDocumentoSoporteUrls((prevUrls) => prevUrls.filter((_, i) => i !== index)) // Eliminar URL de documento subido
+  }
+
+  const validateForm = (): boolean => {
+    let isValid = true
+
+    // Verificar campos vacíos
+    if (!rup.trim()) {
+      void Swal.fire('Error', 'El campo Nº RUP no puede estar vacío', 'error')
+      isValid = false
+    } else if (!entidadContratante.trim()) {
+      void Swal.fire('Error', 'El campo Entidad no puede estar vacío', 'error')
+      isValid = false
+    } else if (!contratoNo.trim()) {
+      void Swal.fire('Error', 'El campo Contrato No no puede estar vacío', 'error')
+      isValid = false
+    } else if (!socio.trim()) {
+      void Swal.fire('Error', 'El campo Contratista no puede estar vacío', 'error')
+      isValid = false
+    } else if (!modalidad.trim()) {
+      void Swal.fire('Error', 'El campo Modalidad no puede estar vacío', 'error')
+      isValid = false
+    } else if (!objeto.trim()) {
+      void Swal.fire('Error', 'El campo Objeto no puede estar vacío', 'error')
+      isValid = false
+    } else if (!documentoSoporte.length) {
+      void Swal.fire('Error', 'Debe seleccionar al menos un Documento Soporte', 'error')
+      isValid = false
+    } else if (!tipoContrato.length) {
+      void Swal.fire('Error', 'Debe seleccionar al menos un Tipo Contrato', 'error')
+      isValid = false
+    } else if (!actividadPrincipal.length) {
+      void Swal.fire('Error', 'Debe seleccionar al menos una Actividad Principal', 'error')
+      isValid = false
+    } else if (!fechaInicio.trim()) {
+      void Swal.fire('Error', 'El campo Fecha de Inicio no puede estar vacío', 'error')
+      isValid = false
+    } else if (!fechaTerminacion.trim()) {
+      void Swal.fire('Error', 'El campo Fecha de Terminación no puede estar vacío', 'error')
+      isValid = false
+    } else if (!valorInicial) {
+      void Swal.fire('Error', 'El campo Valor Inicial no puede estar vacío', 'error')
+      isValid = false
+    } else if (!partPorcentaje) {
+      void Swal.fire('Error', 'El campo Part. % no puede estar vacío', 'error')
+      isValid = false
+    }
+
+    if (documentoSoporteUrls.length === 0 && files.length === 0) {
+      void Swal.fire('Error', 'Debe tener al menos un documento cargado', 'error')
+      isValid = false
+    }
+
+    return isValid
+  }
+
   const handleSave = (): void => {
     if (!payment) return
+
+    // Validar formulario
+    if (!validateForm()) {
+      return // Si la validación falla, no se procederá con el guardado
+    }
 
     const updatedPayment: Payment = {
       ...payment,
@@ -82,6 +164,16 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
       TipoContrato: tipoContrato.join(', '),
       ActividadPrincipal: actividadPrincipal.join(', '),
       DocumentoSoporte: documentoSoporte.join(', '),
+      DocumentoCargado: [
+        ...documentoSoporteUrls.map((doc) => ({
+          name: doc.name,
+          url: doc.url
+        })),
+        ...files.map((file) => ({
+          name: file.name,
+          url: URL.createObjectURL(file)
+        }))
+      ],
       FechaInicio: fechaInicio,
       FechaTerminacion: fechaTerminacion,
       ValorInicial: valorInicial,
@@ -128,6 +220,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     setValorSmmlvPart2(0)
     setAdiciones([])
     setValorActual(0)
+    setDocumentoSoporteUrls([])
   }
 
   useEffect(() => {
@@ -478,6 +571,68 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               Valor Actual
             </label>
             <Input disabled id="valorActual" type="text" value={formatNumber(valorActual)} />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
+              Documentos Soporte Cargados
+            </label>
+
+            {/* Mostrar documentos subidos previamente */}
+            {documentoSoporteUrls.length > 0 && (
+              <ul className="mt-2 space-y-2">
+                {documentoSoporteUrls.map((doc, index) => (
+                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                    <a className="truncate" href={doc.url} rel="noopener noreferrer" target="_blank">
+                      {doc.name} {/* Usar directamente el nombre del documento */}
+                    </a>
+                    <button
+                      className="ml-2 text-red-500 hover:text-red-700"
+                      type="button"
+                      onClick={() => {
+                        removeUploadedFile(index)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {files.length > 0 && (
+              <ul className="mt-2 space-y-2">
+                {files.map((file, index) => (
+                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                    <span className="truncate">{file.name}</span>
+                    <button
+                      className="ml-2 text-red-500 hover:text-red-700"
+                      type="button"
+                      onClick={() => {
+                        removeFile(index)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Campo para cargar nuevos documentos */}
+            <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
+              <input
+                multiple
+                accept="application/pdf"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                id="documentosCargados"
+                name="documentosCargados"
+                type="file"
+                onChange={handleMultipleFileUpload}
+              />
+              <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
+            </div>
+
+            {/* Mostrar nombres de los nuevos archivos seleccionados */}
           </div>
         </form>
         <div className="mt-6 flex justify-end">

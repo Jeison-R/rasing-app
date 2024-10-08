@@ -15,6 +15,8 @@ import { CustomTooltip } from '../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
 import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 
+
+
 import { ActionsMenu } from './ActionsMenu'
 
 const data: Payment[] = [
@@ -38,6 +40,175 @@ const data: Payment[] = [
     ValorSmmlv: 0,
     ValorSmmlvPart2: 0,
     ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
+    Adiciones: [
+      {
+        id: 'adicion1',
+        value: 2500000
+      }
+    ]
+  },
+  {
+    id: 'm5gr84i9',
+    RUP: '123456789',
+    Entidad: 'Ministerio de Salud',
+    Contrato: '1234',
+    Contratista: 'Salud Vida SAS',
+    Modalidad: 'Licitación Pública',
+    Objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf sdadffhghfghfghfghfghfghfghfggjhjghjghjghjghjhgjghjghj',
+    TipoContrato: 'Prestación de Servicios',
+    ActividadPrincipal: 'Suministro de medicamentos',
+    FechaInicio: '15-05-2016',
+    FechaTerminacion: '2023-12-31',
+    ValorInicial: 5000000,
+    PartPorcentaje: 50,
+    ValorFinalAfectado: 7500000,
+    AnioTerminacion: 2023,
+    DocumentoSoporte: '',
+    ValorSmmlv: 0,
+    ValorSmmlvPart2: 0,
+    ValorActual: 0,
+    DocumentoCargado: [],
     Adiciones: [
       {
         id: 'adicion1',
@@ -65,6 +236,10 @@ const data: Payment[] = [
     ValorActual: 0,
     ValorSmmlv: 0,
     ValorSmmlvPart2: 0,
+    DocumentoCargado: [
+      { name: 'tema 1.pdf', url: 'https://ejemplo.com/documentos/tema1.pdf' },
+      { name: 'tema 2.pdf', url: 'https://ejemplo.com/documentos/tema2.pdf' }
+    ],
     Adiciones: []
   },
   {
@@ -87,6 +262,10 @@ const data: Payment[] = [
     ValorSmmlv: 0,
     ValorSmmlvPart2: 0,
     ValorActual: 0,
+    DocumentoCargado: [
+      { name: 'tema 1.pdf', url: 'https://ejemplo.com/documentos/tema1.pdf' },
+      { name: 'tema 2.pdf', url: 'https://ejemplo.com/documentos/tema2.pdf' }
+    ],
     Adiciones: [
       {
         id: 'adicion2',
@@ -114,6 +293,10 @@ const data: Payment[] = [
     ValorSmmlv: 0,
     ValorSmmlvPart2: 0,
     ValorActual: 0,
+    DocumentoCargado: [
+      { name: 'tema 1.pdf', url: 'https://ejemplo.com/documentos/tema1.pdf' },
+      { name: 'tema 2.pdf', url: 'https://ejemplo.com/documentos/tema2.pdf' }
+    ],
     Adiciones: [
       {
         id: 'adicion3',
@@ -141,6 +324,10 @@ const data: Payment[] = [
     ValorSmmlv: 0,
     ValorSmmlvPart2: 0,
     ValorActual: 0,
+    DocumentoCargado: [
+      { name: 'tema 1.pdf', url: 'https://ejemplo.com/documentos/tema1.pdf' },
+      { name: 'tema 2.pdf', url: 'https://ejemplo.com/documentos/tema2.pdf' }
+    ],
     Adiciones: [
       {
         id: 'adicion4',
@@ -171,6 +358,7 @@ export interface Payment {
   ValorFinalAfectado: number // Valor final afectado después de adiciones
   AnioTerminacion: number // Año de terminación
   Adiciones?: Adicion[] // Array opcional de adiciones
+  DocumentoCargado: { name: string; url: string }[]
 }
 
 export interface Adicion {
