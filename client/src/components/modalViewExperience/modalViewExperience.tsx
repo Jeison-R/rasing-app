@@ -124,8 +124,8 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             {/* Mostrar los documentos cargados */}
             <div className="space-y-2">
               {payment.DocumentoCargado.length > 0 ? (
-                payment.DocumentoCargado.map((doc, index) => (
-                  <div key={index} className="flex items-center space-x-2">
+                payment.DocumentoCargado.map((doc) => (
+                  <div key={doc.name} className="flex items-center space-x-2">
                     <span className="max-w-[6rem] truncate text-sm text-gray-600">{doc.name}</span>
                     <a
                       className="text-blue-600 hover:underline"

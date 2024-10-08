@@ -784,24 +784,20 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             </div>
 
             {/* Mostrar nombres de archivos seleccionados */}
-            {files.length > 0 && (
-              <ul className="mt-2 space-y-2">
-                {files.map((file, index) => (
-                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
-                    <span className="w-4/5 truncate">{file.name}</span>
-                    <button
-                      className="ml-2 text-red-500 hover:text-red-700"
-                      type="button"
-                      onClick={() => {
-                        removeFile(index)
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {files.map((file) => (
+              <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
+                <span className="truncate">{file.name}</span>
+                <button
+                  className="ml-2 text-red-500 hover:text-red-700"
+                  type="button"
+                  onClick={() => {
+                    removeFile(files.indexOf(file))
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
 
             {/* Mensaje de error si es necesario */}
             {errors.files ? <span className="text-red-500">Debes cargar al menos un documento</span> : null}

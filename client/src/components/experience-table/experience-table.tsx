@@ -15,8 +15,6 @@ import { CustomTooltip } from '../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
 import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 
-
-
 import { ActionsMenu } from './ActionsMenu'
 
 const data: Payment[] = [

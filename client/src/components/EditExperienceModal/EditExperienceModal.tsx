@@ -580,16 +580,16 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             {/* Mostrar documentos subidos previamente */}
             {documentoSoporteUrls.length > 0 && (
               <ul className="mt-2 space-y-2">
-                {documentoSoporteUrls.map((doc, index) => (
-                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                {documentoSoporteUrls.map((doc) => (
+                  <li key={doc.name} className="flex items-center justify-between text-sm text-gray-600">
                     <a className="truncate" href={doc.url} rel="noopener noreferrer" target="_blank">
-                      {doc.name} {/* Usar directamente el nombre del documento */}
+                      {doc.name}
                     </a>
                     <button
                       className="ml-2 text-red-500 hover:text-red-700"
                       type="button"
                       onClick={() => {
-                        removeUploadedFile(index)
+                        removeUploadedFile(documentoSoporteUrls.indexOf(doc))
                       }}
                     >
                       <X className="h-4 w-4" />
@@ -599,25 +599,20 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               </ul>
             )}
 
-            {files.length > 0 && (
-              <ul className="mt-2 space-y-2">
-                {files.map((file, index) => (
-                  <li key={index} className="flex items-center justify-between text-sm text-gray-600">
-                    <span className="truncate">{file.name}</span>
-                    <button
-                      className="ml-2 text-red-500 hover:text-red-700"
-                      type="button"
-                      onClick={() => {
-                        removeFile(index)
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
+            {files.map((file) => (
+              <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
+                <span className="truncate">{file.name}</span>
+                <button
+                  className="ml-2 text-red-500 hover:text-red-700"
+                  type="button"
+                  onClick={() => {
+                    removeFile(files.indexOf(file))
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </li>
+            ))}
             {/* Campo para cargar nuevos documentos */}
             <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
               <input
