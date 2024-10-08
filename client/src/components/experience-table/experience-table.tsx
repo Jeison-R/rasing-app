@@ -460,7 +460,7 @@ export function CustomTable() {
       rowSelection,
       pagination: {
         pageIndex: currentPage,
-        pageSize: 10
+        pageSize: 8
       }
     }
   })
