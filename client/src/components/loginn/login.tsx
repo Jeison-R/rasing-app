@@ -1,43 +1,88 @@
 'use client'
 
-import React, { useState } from 'react'
+import type { FormEvent } from 'react'
+
+import { useState } from 'react'
+import { FcGoogle } from 'react-icons/fc'
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 export function Login() {
-  const [showForm, setShowForm] = useState(false)
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
 
-  const handleLoginClick = () => {
-    setShowForm(true)
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault()
+    // Aquí iría la lógica de autenticación, puedes conectarlo a tu API de login.
+    console.log('Email:', email)
+    console.log('Password:', password)
+  }
+
+  // Manejar el inicio de sesión con Google
+  const handleGoogleLogin = () => {
+    console.log('Iniciar sesión con Google')
+    // Aquí deberías agregar la lógica de autenticación con Google.
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center">
-      {!showForm ? (
-        <>
-          <h1 className="mb-6 text-3xl font-bold">Bienvenido Ingeniero</h1>
-          <button className="rounded-lg px-6 py-2 text-lg transition" type="button" onClick={handleLoginClick}>
-            Loguearse
-          </button>
-        </>
-      ) : (
-        <form className="rounded-lg p-8 shadow-lg">
-          <h2 className="mb-4 text-2xl font-bold">Iniciar sesión</h2>
-          <div className="mb-4">
-            <label className="block text-sm font-medium" htmlFor="email">
-              Email:
-            </label>
-            <input required className="mt-1 w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2" id="email" name="email" type="email" />
+    <div className="flex h-screen items-center justify-center">
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle>Iniciar sesión</CardTitle>
+          <CardDescription>Accede a tu cuenta</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4" onSubmit={handleLogin}>
+            <div>
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Input
+                required
+                id="email"
+                placeholder="correo@ejemplo.com"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                }}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                required
+                id="password"
+                placeholder="••••••••"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                }}
+              />
+            </div>
+            <Button className="w-full" type="submit">
+              Iniciar sesión
+            </Button>
+          </form>
+          <div className="my-4 flex justify-center">
+            <p className="text-sm text-muted-foreground">o</p>
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium" htmlFor="password">
-              Contraseña:
-            </label>
-            <input required className="mt-1 w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2" id="password" name="password" type="password" />
-          </div>
-          <button className="w-full rounded-lg py-2 transition" type="submit">
-            Entrar
-          </button>
-        </form>
-      )}
+          <Button className="w-full" variant="outline" onClick={handleGoogleLogin}>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Iniciar sesión con Google
+          </Button>
+        </CardContent>
+        <CardFooter>
+          <p className="text-sm text-muted-foreground">
+            ¿No tienes una cuenta?{' '}
+            <a className="underline" href="/register">
+              Regístrate
+            </a>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
