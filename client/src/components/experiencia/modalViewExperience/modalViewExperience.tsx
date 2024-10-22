@@ -30,79 +30,79 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h4 className="text-sm font-medium">RUP:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.RUP}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.rup}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Entidad:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Entidad}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.entidad}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Contrato:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Contrato}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.contrato}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Contratista:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Contratista}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.contratista}</p>
           </div>
 
           <div className="col-span-1 md:col-span-2 lg:col-span-4">
             <h4 className="text-sm font-medium">Objeto:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Objeto}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.objeto}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Modalidad:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Modalidad}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.modalidad}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Tipo de Contrato:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.TipoContrato}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.tipoContrato}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Documentos Soporte:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.DocumentoSoporte}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.documentoSoporte}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Actividad Principal:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.ActividadPrincipal}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.actividadPrincipal}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Fecha de Inicio:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.FechaInicio}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.fechaInicio}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Fecha de Terminación:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.FechaTerminacion}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.fechaTerminacion}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Año de terminación:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800"> {payment.AnioTerminacion}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800"> {payment.anioTerminacion}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Part. %:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.PartPorcentaje}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.partPorcentaje}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor Inicial:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorInicial)}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorInicial)}</p>
           </div>
 
           <div>
             <h4 className="text-sm font-medium">Valor Final Afectado:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorFinalAfectado)}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorFinalAfectado)}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor en SMMLV:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorSmmlv)}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorSmmlv)}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor en SMMLV % PART2:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorSmmlvPart2)}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorSmmlvPart2)}</p>
           </div>
           {/* Si existen adiciones, las mostramos */}
           <div className="mb-2 flex flex-col items-start lg:flex-col">
-            {payment.Adiciones && payment.Adiciones.length > 0 ? (
+            {payment.adiciones && payment.adiciones.length > 0 ? (
               <div className="space-y-2">
-                {payment.Adiciones.map((adicion, index) => (
+                {payment.adiciones.map((adicion, index) => (
                   <div key={adicion.id}>
                     <span className="font-medium">Adición {index + 1}: </span>
                     <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(adicion.value)}</p>
@@ -113,7 +113,7 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
           </div>
           <div>
             <h4 className="text-sm font-medium">Valor Actual</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.ValorActual)}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorActual)}</p>
           </div>
 
           <div>
@@ -123,8 +123,8 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
 
             {/* Mostrar los documentos cargados */}
             <div className="space-y-2">
-              {payment.DocumentoCargado.length > 0 ? (
-                payment.DocumentoCargado.map((doc) => (
+              {payment.documentoCargado.length > 0 ? (
+                payment.documentoCargado.map((doc) => (
                   <div key={doc.name} className="flex items-center space-x-2">
                     <span className="max-w-[6rem] truncate text-sm text-gray-600">{doc.name}</span>
                     <a

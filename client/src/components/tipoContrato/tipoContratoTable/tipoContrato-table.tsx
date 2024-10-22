@@ -4,41 +4,21 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { CustomTooltip } from '../commons/tooltip'
-import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
+import { CustomTooltip } from '../../commons/tooltip'
+import { AddContratoModal } from '../modalAddTipoContrato/AddContratoModal'
 
-export const data: { id: string; documentoSoporte: string }[] = [
-  { id: '1', documentoSoporte: 'CONTRATO' },
-  { id: '2', documentoSoporte: 'CARTA UNION TEMPORAL' },
-  { id: '3', documentoSoporte: 'CARTA CONSORCIAL' },
-  { id: '4', documentoSoporte: 'ADICCIÓN' },
-  { id: '5', documentoSoporte: 'ACTA DE RECIBO FINAL' },
-  { id: '6', documentoSoporte: 'ACTA DE LIQUIDACIÓN' },
-  { id: '7', documentoSoporte: 'CERTIFICACIÓN' },
-  { id: '8', documentoSoporte: 'ACTA DE INICIO' },
-  { id: '9', documentoSoporte: 'COMPROMISO DE CONFIDENCIALIDAD' },
-  { id: '10', documentoSoporte: 'POLIZA' },
-  { id: '11', documentoSoporte: 'RUT' },
-  { id: '12', documentoSoporte: 'CARTA PLURAL' },
-  { id: '13', documentoSoporte: 'ACTA FINAL' }
-]
-
-// Si necesitas transformarlo en el formato que usa react-select:
-export const documentOptions = data.map((doc) => ({
-  value: doc.documentoSoporte,
-  label: doc.documentoSoporte
-}))
+import { deleteContrato } from './deleteTipoContrato'
 
 export interface Payment {
   id: string
-  documentoSoporte: string
+  nombre: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -62,7 +42,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="text-center lowercase">{row.getValue('id')}</div>
   },
   {
-    accessorKey: 'documentoSoporte',
+    accessorKey: 'nombre',
     header: ({ column }) => {
       return (
         <div className="flex justify-center">
@@ -72,23 +52,49 @@ export const columns: ColumnDef<Payment>[] = [
               column.toggleSorting(column.getIsSorted() === 'asc')
             }}
           >
-            Tipo de Documentos
+            Tipo Contrato
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('documentoSoporte')}</div>
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
   }
 ]
 
-export function CustomTableDocumento() {
+export function CustomTableTipoContrato() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [data, setData] = useState<Payment[]>([])
+
+  const fetchContratos = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/tiposContratos/obtenerTiposContratos') // Cambia esta URL según tu entorno
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`) // Proporciona más información sobre el error
+      }
+
+      const contratosData = (await response.json()) as Payment[] // Cambiar 'actividadesData' a 'contratosData' para claridad
+
+      setData(contratosData) // Cambia 'actividadesData' a 'contratosData'
+    } catch (error) {
+      if (error instanceof Error) {
+        global.console.error('Error al obtener contratos:', error.message) // Mensaje de error más específico
+      } else {
+        global.console.error('Error desconocido al obtener contratos') // Manejo de errores no específico
+      }
+    }
+  }
+
+  // Usar useEffect para cargar los datos al montar el componente
+  useEffect(() => {
+    void fetchContratos() // Llama a la función sin .catch aquí, el manejo de errores está dentro de la función
+  }, [])
 
   const table = useReactTable({
     data,
@@ -121,10 +127,14 @@ export function CustomTableDocumento() {
     setIsModalOpen(false)
   }
 
+  const handleContratoAdded = () => {
+    void fetchContratos() // Llama a la función para obtener la lista actualizada
+  }
+
   return (
     <>
       <div className="flex flex-col items-center justify-center py-4">
-        <h2 className="mb-2">Tipos de documentos</h2>
+        <h1 className="mb-2">Tipo de Contrato</h1>
         <div className="flex items-center space-x-2">
           <Input
             className="max-w-sm"
@@ -150,6 +160,7 @@ export function CustomTableDocumento() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -160,6 +171,23 @@ export function CustomTableDocumento() {
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
+                      <TableCell>
+                        <div className="flex justify-center space-x-2">
+                          {/* Botón Editar */}
+                          <CustomTooltip content="Editar">
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                          </CustomTooltip>
+
+                          {/* Botón Eliminar */}
+                          <CustomTooltip content="Eliminar">
+                            <Button size="icon" variant="ghost" onClick={() => void deleteContrato(row.original.id, row.original.nombre, fetchContratos)}>
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </Button>
+                          </CustomTooltip>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -208,7 +236,7 @@ export function CustomTableDocumento() {
         </div>
       </div>
 
-      <AddDocumentoModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AddContratoModal isOpen={isModalOpen} onClose={handleCloseModal} onContratoAdded={handleContratoAdded} />
     </>
   )
 }

@@ -4,57 +4,24 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
+import { useState, useEffect, type ChangeEvent } from 'react'
+import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { CustomTooltip } from '../commons/tooltip'
+import { CustomTooltip } from '../../commons/tooltip'
 import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
 
-export const data: { id: string; actividad: string }[] = [
-  { id: '1', actividad: 'ADECUACION' },
-  { id: '2', actividad: 'AGUAS' },
-  { id: '3', actividad: 'AMPLIACION' },
-  { id: '4', actividad: 'COLOCACION' },
-  { id: '5', actividad: 'CONSERVACION' },
-  { id: '6', actividad: 'CONSTRUCCIÓN' },
-  { id: '7', actividad: 'DISEÑOS' },
-  { id: '8', actividad: 'DOTACION' },
-  { id: '9', actividad: 'ESTRUCTURAL' },
-  { id: '10', actividad: 'ESTUDIOS' },
-  { id: '11', actividad: 'FIGURACION' },
-  { id: '12', actividad: 'HIDRAULICO' },
-  { id: '13', actividad: 'LLUVIAS' },
-  { id: '14', actividad: 'MANTENIMIENTO' },
-  { id: '15', actividad: 'MEJORAMIENTO' },
-  { id: '16', actividad: 'OPTIMIZACION' },
-  { id: '17', actividad: 'PUENTE' },
-  { id: '18', actividad: 'RECONSTRUCCION' },
-  { id: '19', actividad: 'RED' },
-  { id: '20', actividad: 'REHABILITACION' },
-  { id: '21', actividad: 'REMODELACION' },
-  { id: '22', actividad: 'REPARACION' },
-  { id: '23', actividad: 'REPOSICION' },
-  { id: '24', actividad: 'SANITARIO' },
-  { id: '25', actividad: 'SUELO' },
-  { id: '26', actividad: 'SUMINISTRO' },
-  { id: '27', actividad: 'TERMINACION' }
-]
-
-// Si necesitas transformarlo en el formato que usa react-select:
-export const activityOptions = data.map((doc) => ({
-  value: doc.actividad,
-  label: doc.actividad
-}))
+import { deleteActividad } from './deleteActividad' // Importa la función
 
 export interface Payment {
   id: string
-  actividad: string
+  nombre: string // Asegúrate de que la propiedad coincide con tu API
 }
 
+// Define las columnas aquí
 export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: 'id',
@@ -74,7 +41,7 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue('id')}</div>
   },
   {
-    accessorKey: 'actividad',
+    accessorKey: 'nombre',
     header: ({ column }) => {
       return (
         <div className="flex justify-end">
@@ -90,7 +57,7 @@ export const columns: ColumnDef<Payment>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('actividad')}</div>
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
   }
 ]
 
@@ -101,6 +68,45 @@ export function CustomTableActividad() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [data, setData] = useState<Payment[]>([]) // Cambiar el estado inicial a un array vacío
+
+  // Función para obtener las actividades desde la API
+  const fetchActividades = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/actividades/obtenerActividades')
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+
+      const actividadesData = (await response.json()) as Payment[]
+
+      setData(actividadesData)
+    } catch (error) {
+      if (error instanceof Error) {
+        // Imprimir el mensaje de error
+        global.console.error('Error al obtener actividades:', error.message)
+      } else {
+        global.console.error('Error desconocido al obtener actividades')
+      }
+    }
+  }
+
+  useEffect(() => {
+    void fetchActividades()
+  }, [])
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleActividadAdded = () => {
+    void fetchActividades()
+  }
 
   const table = useReactTable({
     data,
@@ -125,14 +131,6 @@ export function CustomTableActividad() {
     }
   })
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-  }
-
   return (
     <>
       <div className="flex flex-col items-center justify-center py-4">
@@ -141,10 +139,10 @@ export function CustomTableActividad() {
           <Input
             className="max-w-sm"
             placeholder="Filtrar..."
-            value={table.getColumn('email')?.getFilterValue() as string}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('email')?.setFilterValue(event.target.value)}
+            value={table.getColumn('actividad')?.getFilterValue() as string}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('actividad')?.setFilterValue(event.target.value)}
           />
-          <CustomTooltip content="Añadir salario">
+          <CustomTooltip content="Añadir actividad">
             <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>
               <CirclePlus className="h-5 w-5" />
             </Button>
@@ -162,6 +160,8 @@ export function CustomTableActividad() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
+                    {/* Agregar la columna de acciones aquí */}
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -172,11 +172,31 @@ export function CustomTableActividad() {
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
+                      {/* Renderizar los botones de editar y eliminar aquí */}
+                      <TableCell>
+                        <div className="flex justify-center space-x-2">
+                          {/* Botón Editar */}
+                          <CustomTooltip content="Editar">
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                          </CustomTooltip>
+
+                          {/* Botón Eliminar */}
+                          <CustomTooltip content="Eliminar">
+                            <Button size="icon" variant="ghost" onClick={() => void deleteActividad(row.original.id, row.original.nombre, fetchActividades)}>
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </Button>
+                          </CustomTooltip>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="h-24 text-center" colSpan={columns.length}>
+                    <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
+                      {' '}
+                      {/* Incrementar el colspan aquí */}
                       Sin resultados
                     </TableCell>
                   </TableRow>
@@ -220,7 +240,7 @@ export function CustomTableActividad() {
         </div>
       </div>
 
-      <AddActividadModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AddActividadModal isOpen={isModalOpen} onActividadAdded={handleActividadAdded} onClose={handleCloseModal} />
     </>
   )
 }

@@ -6,7 +6,7 @@ import 'sweetalert2/dist/sweetalert2.min.css'
 export const deleteExperience = async (payment: Payment) => {
   const result = await Swal.fire({
     title: '¿Estás seguro?',
-    text: `No podrás revertir esta acción. Se eliminará el contrato: ${payment.Contrato}`,
+    text: `No podrás revertir esta acción. Se eliminará el contrato: ${payment.contrato}`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -19,7 +19,7 @@ export const deleteExperience = async (payment: Payment) => {
     // Aquí iría la lógica para eliminar el registro (llamada a API, etc.)
     await Swal.fire({
       title: 'Eliminado',
-      text: `El contrato ${payment.Contrato} ha sido eliminado.`,
+      text: `El contrato ${payment.contrato} ha sido eliminado.`,
       icon: 'success',
       timer: 3000,
       showConfirmButton: false

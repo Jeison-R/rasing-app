@@ -9,11 +9,12 @@ import Select from 'react-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-import { activityOptions } from '../actividad-documentos/actividad-table'
-import { documentOptions } from '../actividad-documentos/documento-table'
-import { tipoContratoOptions } from '../actividad-documentos/tipoContrato-table'
-import { salariosMinimos } from '../salarios-table/salarios'
+// import { activityOptions } from '../../actividad/actividadTable/actividad-table'
+// import { documentOptions } from '../../documentoSoporte/documentoTable/documento-table'
+// import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
+import { salariosMinimos } from '../../salario/salarioTable/salarios'
 import { opcionesModalidad } from '../modalAddExperiencia/AddExperienciaModal'
+import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
 interface EditExperienceModalProps {
   isOpen: boolean
@@ -48,31 +49,31 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
   useEffect(() => {
     if (payment) {
       // Poblar los campos con los datos actuales de 'payment'
-      setRup(payment.RUP)
-      setEntidadContratante(payment.Entidad)
-      setContratoNo(payment.Contrato)
-      setSocio(payment.Contratista)
-      setModalidad(payment.Modalidad)
-      setObjeto(payment.Objeto)
-      setTipoContrato(payment.TipoContrato.split(', '))
-      setActividadPrincipal(payment.ActividadPrincipal.split(', '))
-      setDocumentoSoporte(payment.DocumentoSoporte.split(', '))
+      setRup(payment.rup)
+      setEntidadContratante(payment.entidad)
+      setContratoNo(payment.contrato)
+      setSocio(payment.contratista)
+      setModalidad(payment.modalidad)
+      setObjeto(payment.objeto)
+      setTipoContrato(payment.tipoContrato.split(', '))
+      setActividadPrincipal(payment.actividadPrincipal.split(', '))
+      setDocumentoSoporte(payment.documentoSoporte.split(', '))
       setDocumentoSoporteUrls(
-        payment.DocumentoCargado.map((doc) => ({
+        payment.documentoCargado.map((doc) => ({
           name: doc.name,
           url: doc.url
         }))
       )
-      setFechaInicio(payment.FechaInicio)
-      setFechaTerminacion(payment.FechaTerminacion)
-      setValorInicial(payment.ValorInicial)
-      setPartPorcentaje(payment.PartPorcentaje)
-      setValorFinalAfectado(payment.ValorFinalAfectado)
-      setValorSmmlv(payment.ValorSmmlv)
-      setValorSmmlvPart2(payment.ValorSmmlvPart2)
-      setAnioTerminacion(payment.AnioTerminacion)
-      setAdiciones(payment.Adiciones || [])
-      setValorActual(payment.ValorActual)
+      setFechaInicio(payment.fechaInicio)
+      setFechaTerminacion(payment.fechaTerminacion)
+      setValorInicial(payment.valorInicial)
+      setPartPorcentaje(payment.partPorcentaje)
+      setValorFinalAfectado(payment.valorFinalAfectado)
+      setValorSmmlv(payment.valorSmmlv)
+      setValorSmmlvPart2(payment.valorSmmlvPart2)
+      setAnioTerminacion(payment.anioTerminacion)
+      setAdiciones(payment.adiciones || [])
+      setValorActual(payment.valorActual)
     }
   }, [payment])
 
@@ -155,16 +156,16 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
 
     const updatedPayment: Payment = {
       ...payment,
-      RUP: rup,
-      Entidad: entidadContratante,
-      Contrato: contratoNo,
-      Contratista: socio,
-      Modalidad: modalidad,
-      Objeto: objeto,
-      TipoContrato: tipoContrato.join(', '),
-      ActividadPrincipal: actividadPrincipal.join(', '),
-      DocumentoSoporte: documentoSoporte.join(', '),
-      DocumentoCargado: [
+      rup: rup,
+      entidad: entidadContratante,
+      contrato: contratoNo,
+      contratista: socio,
+      modalidad: modalidad,
+      objeto: objeto,
+      tipoContrato: tipoContrato.join(', '),
+      actividadPrincipal: actividadPrincipal.join(', '),
+      documentoSoporte: documentoSoporte.join(', '),
+      documentoCargado: [
         ...documentoSoporteUrls.map((doc) => ({
           name: doc.name,
           url: doc.url
@@ -174,16 +175,16 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
           url: URL.createObjectURL(file)
         }))
       ],
-      FechaInicio: fechaInicio,
-      FechaTerminacion: fechaTerminacion,
-      ValorInicial: valorInicial,
-      PartPorcentaje: partPorcentaje,
-      ValorFinalAfectado: valorFinalAfectado,
-      AnioTerminacion: anioTerminacion,
-      ValorSmmlv: valorSmmlv,
-      ValorSmmlvPart2: valorSmmlvPart2,
-      Adiciones: adiciones,
-      ValorActual: valorActual
+      fechaInicio: fechaInicio,
+      fechaTerminacion: fechaTerminacion,
+      valorInicial: valorInicial,
+      partPorcentaje: partPorcentaje,
+      valorFinalAfectado: valorFinalAfectado,
+      anioTerminacion: anioTerminacion,
+      valorSmmlv: valorSmmlv,
+      valorSmmlvPart2: valorSmmlvPart2,
+      adiciones: adiciones,
+      valorActual: valorActual
     }
 
     onSave(updatedPayment)
@@ -315,7 +316,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white p-6 shadow-lg dark:bg-black">
+      <div className="max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white p-6 shadow-lg dark:bg-[hsl(20,14.3%,4.1%)]">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Editar Experiencia</h3>
           <Button size="icon" variant="ghost" onClick={onClose}>
@@ -418,7 +419,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             </label>
             <Select
               isMulti
-              options={documentOptions}
+              // options={documentOptions}
+              styles={getCustomSelectStyles}
               value={documentoSoporte.map((tc) => ({ value: tc, label: tc }))}
               onChange={(selected) => {
                 setDocumentoSoporte(selected.map((option) => option.value))
@@ -431,7 +433,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             </label>
             <Select
               isMulti
-              options={tipoContratoOptions}
+              // options={tipoContratoOptions}
+              styles={getCustomSelectStyles}
               value={tipoContrato.map((tc) => ({ value: tc, label: tc }))}
               onChange={(selected) => {
                 setTipoContrato(selected.map((option) => option.value))
@@ -444,7 +447,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             </label>
             <Select
               isMulti
-              options={activityOptions}
+              // options={activityOptions}
+              styles={getCustomSelectStyles}
               value={actividadPrincipal.map((ap) => ({ value: ap, label: ap }))}
               onChange={(selected) => {
                 setActividadPrincipal(selected.map((option) => option.value))

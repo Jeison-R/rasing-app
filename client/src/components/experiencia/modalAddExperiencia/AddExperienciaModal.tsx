@@ -1,4 +1,5 @@
 import type { MultiValue } from 'react-select'
+import type { Payment } from '../experience-table/experience-table'
 
 import { X } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
@@ -9,10 +10,11 @@ import Select from 'react-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-import { documentOptions } from '../actividad-documentos/documento-table'
-import { activityOptions } from '../actividad-documentos/actividad-table'
-import { tipoContratoOptions } from '../actividad-documentos/tipoContrato-table'
-import { salariosMinimos } from '../salarios-table/salarios'
+// import { documentOptions } from '../../documentoSoporte/documentoTable/documento-table'
+// import { activityOptions } from '../../actividad/actividadTable/actividad-table'
+// import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
+import { salariosMinimos } from '../../salario/salarioTable/salarios'
+import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
 interface AddExperenciaModalProps {
   isOpen: boolean
@@ -40,30 +42,6 @@ interface Adicion {
   value: number
 }
 
-export interface Payment {
-  id: string
-  RUP: string
-  Entidad: string
-  Contrato: string
-  Contratista: string
-  Modalidad: string
-  Objeto: string
-  DocumentoSoporte: string
-  TipoContrato: string
-  ActividadPrincipal: string
-  FechaInicio: string
-  FechaTerminacion: string
-  ValorSmmlv: number
-  ValorSmmlvPart2: number
-  ValorActual: number
-  ValorInicial: number // Valor inicial del contrato
-  PartPorcentaje: number // Participación porcentual
-  ValorFinalAfectado: number // Valor final afectado después de adiciones
-  AnioTerminacion: number // Año de terminación
-  Adiciones?: Adicion[] // Array opcional de adiciones
-  DocumentoCargado: { name: string; url: string }[]
-}
-
 export const opcionesModalidad = [
   { value: '', label: 'Seleccione una modalidad' },
   { value: 'Individual', label: 'Individual' },
@@ -71,7 +49,7 @@ export const opcionesModalidad = [
   { value: 'Unión Temporal', label: 'Unión Temporal' }
 ]
 
-export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExperenciaModalProps>) {
+export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaModalProps>) {
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorInicial, setValorInicial] = useState<number>(0)
   const [partPorcentaje, setPartPorcentaje] = useState<number>(0)
@@ -256,7 +234,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!validateForm()) {
@@ -265,46 +243,70 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
 
     const newData: Payment = {
       id: uuidv4(),
-      RUP: rup,
-      Entidad: entidadContratante,
-      Contrato: contratoNo,
-      Objeto: objeto,
-      Contratista: socio,
-      Modalidad: modalidad,
-      DocumentoSoporte: documentoSoporte.join(', '),
-      TipoContrato: tipoContrato.join(', '),
-      ActividadPrincipal: actividadPrincipal.join(', '),
-      FechaInicio: fechaInicio,
-      FechaTerminacion: fechaTerminacion,
-      ValorInicial: valorInicial,
-      PartPorcentaje: partPorcentaje,
-      ValorFinalAfectado: valorFinalAfectado,
-      AnioTerminacion: anioTerminacion,
-      ValorSmmlv: valorSmmlv,
-      ValorActual: valorActual,
-      ValorSmmlvPart2: valorSmmlvPart2,
-      DocumentoCargado: files.map((file) => ({
-        name: file.name,
-        url: URL.createObjectURL(file)
-      })), // Incluye el archivo en los datos enviados
-      Adiciones: adiciones.map((adicion) => ({
+      rup: rup,
+      entidad: entidadContratante,
+      contrato: contratoNo,
+      objeto: objeto,
+      contratista: socio,
+      modalidad: modalidad,
+      documentoSoporte: documentoSoporte.join(', '),
+      tipoContrato: tipoContrato.join(', '),
+      actividadPrincipal: actividadPrincipal.join(', '),
+      fechaInicio: fechaInicio,
+      fechaTerminacion: fechaTerminacion,
+      valorInicial: valorInicial,
+      partPorcentaje: partPorcentaje,
+      valorFinalAfectado: valorFinalAfectado,
+      anioTerminacion: anioTerminacion,
+      valorSmmlv: valorSmmlv,
+      valorActual: valorActual,
+      valorSmmlvPart2: valorSmmlvPart2,
+      adiciones: adiciones.map((adicion) => ({
         id: adicion.id,
         value: adicion.value
-      }))
+      })),
+      documentoCargado: files.map((file) => ({
+        name: file.name,
+        url: URL.createObjectURL(file)
+      })) // Incluye el archivo en los datos enviados
     }
 
-    handleClose()
-    onSave(newData)
+    try {
+      const response = await fetch('http://localhost:3000/experiencias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+      })
 
-    // Mostrar alerta de éxito
-    void Swal.fire({
-      title: 'Guardado',
-      text: 'La experiencia se ha guardado exitosamente',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    })
+      if (!response.ok) {
+        throw new Error('Error al guardar la experiencia')
+      }
 
-    onClose()
+      // Mostrar alerta de éxito
+      void Swal.fire({
+        title: 'Guardado',
+        text: 'La experiencia se ha guardado exitosamente',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      })
+
+      onClose() // Cierra el formulario o la modal
+    } catch (error) {
+      global.console.error('Error:', error)
+      void Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al guardar la experiencia',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      })
+    }
+  }
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    void handleSave(e) // Usar void para ignorar el valor devuelto
   }
 
   const handleClose = () => {
@@ -460,7 +462,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleSave}>
+        <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleFormSubmit}>
           <div>
             <label className="block text-sm font-medium" htmlFor="rup">
               Nº RUP
@@ -576,8 +578,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              options={documentOptions}
-              value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
+              // options={documentOptions}
+              styles={getCustomSelectStyles}
+              // value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
               onChange={handleSelectDocument}
             />
             {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
@@ -591,8 +594,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              options={tipoContratoOptions}
-              value={tipoContratoOptions.filter((option) => tipoContrato.includes(option.value))}
+              // options={tipoContratoOptions}
+              styles={getCustomSelectStyles}
+              // value={tipoContratoOptions.filter((option) => tipoContrato.includes(option.value))}
               onChange={handleSelectTipoContrato}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
@@ -606,8 +610,9 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              options={activityOptions}
-              value={activityOptions.filter((option) => actividadPrincipal.includes(option.value))}
+              // options={activityOptions}
+              styles={getCustomSelectStyles}
+              // value={activityOptions.filter((option) => actividadPrincipal.includes(option.value))}
               onChange={handleSelectActivity}
             />
             {errors.actividadPrincipal ? <span className="text-red-500">Campo requerido</span> : null}
@@ -736,7 +741,7 @@ export function AddExperienciaModal({ isOpen, onClose, onSave }: Readonly<AddExp
                   type="text"
                   value={formatNumber(adicion.value)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    updateAdicion(adicion.id, Number(e.target.value))
+                    updateAdicion(adicion.id, parseFloat(e.target.value.replace(/\./g, '')) || 0)
                   }}
                 />
                 <Button

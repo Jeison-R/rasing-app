@@ -2,8 +2,8 @@ import { ListFilter, Plus } from 'lucide-react'
 
 import { Input } from '@/components/ui/input'
 
-import { Button } from '../ui/button'
-import { CustomTooltip } from '../commons/tooltip'
+import { Button } from '../../../ui/button'
+import { CustomTooltip } from '../../../commons/tooltip'
 
 export function Filters() {
   return (

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { CustomTooltip } from '../commons/tooltip'
+import { CustomTooltip } from '../../commons/tooltip'
 import { AddSalaryModal } from '../modalAddSalary/AddSalaryModal'
 
 export const salariosMinimos: Payment[] = [

@@ -35,6 +35,7 @@
     "typescript-coverage-report": "^0.8.0"
   },
   "dependencies": {
-    "@types/uuid": "^10.0.0"
+    "@types/uuid": "^10.0.0",
+    "firebase": "^10.14.1"
   }
 }

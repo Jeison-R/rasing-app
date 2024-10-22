@@ -1,4 +1,4 @@
-import { CustomTable } from '@/components/salarios-table/salarios'
+import { CustomTable } from '@/components/salario/salarioTable/salarios'
 
 export default function SalaryPage() {
   return (

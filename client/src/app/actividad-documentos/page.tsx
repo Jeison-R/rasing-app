@@ -1,6 +1,6 @@
-import { CustomTableActividad } from '@/components/actividad-documentos/actividad-table'
-import { CustomTableDocumento } from '@/components/actividad-documentos/documento-table'
-import { CustomTableTipoContrato } from '@/components/actividad-documentos/tipoContrato-table'
+import { CustomTableActividad } from '@/components/actividad/actividadTable/actividad-table'
+import { CustomTableDocumento } from '@/components/documentoSoporte/documentoTable/documento-table'
+import { CustomTableTipoContrato } from '@/components/tipoContrato/tipoContratoTable/tipoContrato-table'
 
 export default function ActividadContratoPage() {
   return (

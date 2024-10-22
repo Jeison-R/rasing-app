@@ -4,62 +4,21 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-import { CustomTooltip } from '../commons/tooltip'
-import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
+import { CustomTooltip } from '../../commons/tooltip'
+import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
 
-export const data: { id: string; tipoContrato: string }[] = [
-  { id: '1', tipoContrato: 'ACUEDUCTO' },
-  { id: '2', tipoContrato: 'ADECUACION' },
-  { id: '3', tipoContrato: 'ALCANTARILLADO' },
-  { id: '4', tipoContrato: 'AMBIENTAL' },
-  { id: '5', tipoContrato: 'BATERIAS' },
-  { id: '6', tipoContrato: 'CAÑO' },
-  { id: '7', tipoContrato: 'CERRAMIENTO' },
-  { id: '8', tipoContrato: 'CIC' },
-  { id: '9', tipoContrato: 'CONSULTORIA' },
-  { id: '10', tipoContrato: 'CUBIERTAS' },
-  { id: '11', tipoContrato: 'DE' },
-  { id: '12', tipoContrato: 'DEPORTIVO' },
-  { id: '13', tipoContrato: 'EDIFICACION' },
-  { id: '14', tipoContrato: 'EDIFICACIONES' },
-  { id: '15', tipoContrato: 'ELECTRICO' },
-  { id: '16', tipoContrato: 'EN' },
-  { id: '17', tipoContrato: 'ESCENARIO' },
-  { id: '18', tipoContrato: 'GAVIONES' },
-  { id: '19', tipoContrato: 'INTERVENTORIA' },
-  { id: '20', tipoContrato: 'MANTENIMIENTO' },
-  { id: '21', tipoContrato: 'METALICA' },
-  { id: '22', tipoContrato: 'MOVIMIENTO' },
-  { id: '23', tipoContrato: 'PARQUES' },
-  { id: '24', tipoContrato: 'PONTONES' },
-  { id: '25', tipoContrato: 'POZOS' },
-  { id: '26', tipoContrato: 'PUENTE' },
-  { id: '27', tipoContrato: 'PUENTES' },
-  { id: '28', tipoContrato: 'RELLENOS' },
-  { id: '29', tipoContrato: 'SANITARIAS' },
-  { id: '30', tipoContrato: 'SUMINISTRO' },
-  { id: '31', tipoContrato: 'TANQUE' },
-  { id: '32', tipoContrato: 'TANQUES' },
-  { id: '33', tipoContrato: 'TIERRAS' },
-  { id: '34', tipoContrato: 'UNIDADES' },
-  { id: '35', tipoContrato: 'VIAS' }
-]
-
-export const tipoContratoOptions = data.map((doc) => ({
-  value: doc.tipoContrato,
-  label: doc.tipoContrato
-}))
+import { deleteDocumento } from './deleteDocumento'
 
 export interface Payment {
   id: string
-  tipoContrato: string
+  nombre: string
 }
 
 export const columns: ColumnDef<Payment>[] = [
@@ -67,47 +26,75 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: 'id',
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }}
-        >
-          Id
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('id')}</div>
-  },
-  {
-    accessorKey: 'tipoContrato',
-    header: ({ column }) => {
-      return (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <Button
             variant="ghost"
             onClick={() => {
               column.toggleSorting(column.getIsSorted() === 'asc')
             }}
           >
-            Tipo Contrato
+            ID
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('tipoContrato')}</div>
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('id')}</div>
+  },
+  {
+    accessorKey: 'nombre',
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              column.toggleSorting(column.getIsSorted() === 'asc')
+            }}
+          >
+            Tipo de Documentos
+            <CaretSortIcon className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
   }
 ]
 
-export function CustomTableTipoContrato() {
+export function CustomTableDocumento() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [data, setData] = useState<Payment[]>([])
+
+  const fetchDocumentos = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/tiposDocumentos/obtenerTiposDocumentos') // Cambia esta URL según tu entorno
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`) // Proporciona más información sobre el error
+      }
+
+      const documentosData = (await response.json()) as Payment[] // Cambiar 'actividadesData' a 'documentosData' para claridad
+
+      setData(documentosData) // Cambia 'actividadesData' a 'documentosData'
+    } catch (error) {
+      if (error instanceof Error) {
+        global.console.error('Error al obtener documentos:', error.message) // Mensaje de error más específico
+      } else {
+        global.console.error('Error desconocido al obtener documentos') // Manejo de errores no específico
+      }
+    }
+  }
+
+  // Usar useEffect para cargar los datos al montar el componente
+  useEffect(() => {
+    void fetchDocumentos() // Llama a la función sin .catch aquí, el manejo de errores está dentro de la función
+  }, [])
 
   const table = useReactTable({
     data,
@@ -140,10 +127,14 @@ export function CustomTableTipoContrato() {
     setIsModalOpen(false)
   }
 
+  const handleDocumentoAdded = () => {
+    void fetchDocumentos() // Llama a la función para obtener la lista actualizada
+  }
+
   return (
     <>
       <div className="flex flex-col items-center justify-center py-4">
-        <h1 className="mb-2">Tipo de Contrato</h1>
+        <h2 className="mb-2">Tipos de documentos</h2>
         <div className="flex items-center space-x-2">
           <Input
             className="max-w-sm"
@@ -169,6 +160,7 @@ export function CustomTableTipoContrato() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
+                    <TableHead>Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -179,6 +171,24 @@ export function CustomTableTipoContrato() {
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
+                      {/* Renderizar los botones de editar y eliminar aquí */}
+                      <TableCell>
+                        <div className="flex justify-center space-x-2">
+                          {/* Botón Editar */}
+                          <CustomTooltip content="Editar">
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                          </CustomTooltip>
+
+                          {/* Botón Eliminar */}
+                          <CustomTooltip content="Eliminar">
+                            <Button size="icon" variant="ghost" onClick={() => void deleteDocumento(row.original.id, row.original.nombre, fetchDocumentos)}>
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </Button>
+                          </CustomTooltip>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
@@ -227,7 +237,7 @@ export function CustomTableTipoContrato() {
         </div>
       </div>
 
-      <AddActividadModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AddDocumentoModal isOpen={isModalOpen} onClose={handleCloseModal} onDocumentoAdded={handleDocumentoAdded} />
     </>
   )
 }

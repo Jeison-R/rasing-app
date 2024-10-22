@@ -1,4 +1,4 @@
-import { CustomTable } from '@/components/experience-table/experience-table'
+import { CustomTable } from '@/components/experiencia/experience-table/experience-table'
 
 export default function ExperiencesPage() {
   return (

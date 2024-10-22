@@ -23,6 +23,9 @@ export function MainNav() {
         <Link className={cn('transition-colors hover:text-foreground/80', pathname.startsWith(ROUTES.MINIMUIM_WAGE) ? 'text-foreground' : 'text-foreground/60')} href={ROUTES.MINIMUIM_WAGE}>
           Salarios mínimos
         </Link>
+        <Link className={cn('transition-colors hover:text-foreground/80', pathname.startsWith(ROUTES.ACTIVIDAD) ? 'text-foreground' : 'text-foreground/60')} href={ROUTES.ACTIVIDAD}>
+          Act, doc, Con
+        </Link>
       </nav>
     </div>
   )
