@@ -1,12 +1,13 @@
-import type { Payment } from './experience-table'
+// utils/deleteExperience.ts
 
 import Swal from 'sweetalert2'
-import 'sweetalert2/dist/sweetalert2.min.css'
 
-export const deleteExperience = async (payment: Payment) => {
+import { eliminarExperiences } from '../../services/experiencia/experienciaService'
+
+export const deleteExperience = async (id: string) => {
   const result = await Swal.fire({
     title: '¿Estás seguro?',
-    text: `No podrás revertir esta acción. Se eliminará el contrato: ${payment.contrato}`,
+    text: `No podrás revertir esta acción.`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -16,15 +17,27 @@ export const deleteExperience = async (payment: Payment) => {
   })
 
   if (result.isConfirmed) {
-    // Aquí iría la lógica para eliminar el registro (llamada a API, etc.)
-    await Swal.fire({
-      title: 'Eliminado',
-      text: `El contrato ${payment.contrato} ha sido eliminado.`,
-      icon: 'success',
-      timer: 3000,
-      showConfirmButton: false
-    })
+    try {
+      await eliminarExperiences(id) // Llama a la API para eliminar la experiencia
+      await Swal.fire({
+        title: 'Eliminado',
+        text: `La experiencia ha sido eliminado.`,
+        icon: 'success',
+        timer: 3000,
+        showConfirmButton: false
+      })
+
+      return true // Confirma que se eliminó correctamente
+    } catch (error) {
+      await Swal.fire({
+        title: 'Error',
+        text: 'No se pudo eliminar la experiencia. Inténtalo de nuevo.',
+        icon: 'error'
+      })
+
+      return false // Indica que la eliminación falló
+    }
   }
 
-  return result
+  return false // Indica que se canceló la eliminación
 }

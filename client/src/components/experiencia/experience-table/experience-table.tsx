@@ -1,11 +1,14 @@
 'use client'
 
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
+import type { Actividad } from '../../actividad/actividadTable/actividad-table'
+import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
+import type { Contrato } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import React from 'react'
 import Select from 'react-select'
 
@@ -19,56 +22,26 @@ import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 // import { activityOptions } from '../../actividad/actividadTable/actividad-table'
 // import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
+import { obtenerExperiences } from '../../services/experiencia/experienciaService'
 
 import { ActionsMenu } from './ActionsMenu'
+import { deleteExperience } from './deleteExperience'
 
-const data: Payment[] = [
-  {
-    id: 'y9kl65n1',
-    rup: '123456789',
-    entidad: 'Gobernación de Antioquia',
-    contrato: '1213',
-    contratista: 'Antioquia Proyectos',
-    modalidad: 'Concesión',
-    objeto: 'gfdggfry tsbdgfddgdfgbdfgsfdbgfsgdf',
-    tipoContrato: 'Concesión de Servicios',
-    actividadPrincipal: 'Operación de peajes',
-    fechaInicio: '2020-09-01',
-    fechaTerminacion: '2025-09-01',
-    valorInicial: 20000000,
-    partPorcentaje: 60,
-    valorFinalAfectado: 25000000,
-    anioTerminacion: 2025,
-    documentoSoporte: '',
-    valorSmmlv: 0,
-    valorSmmlvPart2: 0,
-    valorActual: 0,
-    documentoCargado: [
-      { name: 'tema 1.pdf', url: 'https://ejemplo.com/documentos/tema1.pdf' },
-      { name: 'tema 2.pdf', url: 'https://ejemplo.com/documentos/tema2.pdf' }
-    ],
-    adiciones: [
-      {
-        id: 'adicion3',
-        value: 5000000
-      }
-    ]
-  }
-]
-
-export interface Payment {
-  id: string
+export interface Experiencia {
+  Empresa: string
+  id?: string
   rup: string
   entidad: string
   contrato: string
+  socio: string
   contratista: string
   modalidad: string
   objeto: string
-  tipoContrato: string
-  actividadPrincipal: string
+  tipoContrato?: Contrato[]
+  actividadPrincipal?: Actividad[]
   fechaInicio: string
   fechaTerminacion: string
-  documentoSoporte: string
+  documentoSoporte?: Documento[]
   valorSmmlv: number
   valorSmmlvPart2: number
   valorActual: number
@@ -85,16 +58,31 @@ export interface Adicion {
   value: number // Valor de la adición
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Experiencia>[] = [
+  {
+    accessorKey: 'Empresa',
+    header: 'Empresa',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('Empresa')}</div>
+  },
+  {
+    accessorKey: 'rup',
+    header: 'RUP',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('rup')}</div>
+  },
+  {
+    accessorKey: 'entidad',
+    header: 'Contratante',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('entidad')}</div>
+  },
   {
     accessorKey: 'contrato',
     header: 'Contrato',
     cell: ({ row }) => <div className="capitalize">{row.getValue('contrato')}</div>
   },
   {
-    accessorKey: 'entidad',
-    header: 'Contratante',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('entidad')}</div>
+    accessorKey: 'socio',
+    header: 'Socio',
+    cell: ({ row }) => <div className="capitalize">{row.getValue('socio')}</div>
   },
   {
     accessorKey: 'contratista',
@@ -160,23 +148,38 @@ export function CustomTable() {
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
-  const [tableData, setTableData] = useState<Payment[]>(data)
-  //   const [selectedTipoContrato, setSelectedTipoContrato] = React.useState([])
-  //   const [selectedActividad, setSelectedActividad] = React.useState([])
-  //
-  //   const filteredData = useMemo(() => {
-  //     return tableData.filter((payment) => {
-  //       const matchesTipoContrato = selectedTipoContrato.length ? selectedTipoContrato.some((option) => payment.TipoContrato.toLowerCase().includes(option.value.toLowerCase())) : true
-  //
-  //       const matchesActividad = selectedActividad.length ? selectedActividad.some((option) => payment.ActividadPrincipal.toLowerCase().includes(option.value.toLowerCase())) : true
-  //
-  //       return matchesTipoContrato && matchesActividad
-  //     })
-  //   }, [tableData, selectedTipoContrato, selectedActividad])
+  const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
+  const [data, setData] = useState<Experiencia[]>([])
+
+  const fetchExperiences = async () => {
+    try {
+      const experienciaData = await obtenerExperiences()
+
+      setData(experienciaData)
+    } catch (error) {
+      if (error instanceof Error) {
+        global.console.error('Error al obtener documentos:', error.message)
+      } else {
+        global.console.error('Error desconocido al obtener documentos')
+      }
+    }
+  }
+
+  // useEffect para cargar los datos cuando el componente se monta
+  useEffect(() => {
+    void fetchExperiences()
+  }, [])
+
+  const handleExperienciaAdded = () => {
+    void fetchExperiences() // Llama a la función para obtener la lista actualizada
+  }
+
+  const handleExperienciaEdit = () => {
+    void fetchExperiences() // Llama a la función para obtener la lista actualizada
+  }
 
   const table = useReactTable({
-    data: tableData,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -198,8 +201,12 @@ export function CustomTable() {
     }
   })
 
-  const handleDeleteRow = (id: string) => {
-    setTableData((prevData) => prevData.filter((row) => row.id !== id))
+  const handleDeleteRow = async (id: string) => {
+    const deleted = await deleteExperience(id)
+
+    if (deleted) {
+      setData((prevData) => prevData.filter((row) => row.id !== id)) // Actualiza el estado
+    }
   }
 
   const handleOpenModal = () => {
@@ -210,11 +217,11 @@ export function CustomTable() {
     setIsModalOpen(false)
   }
 
-  const handleAddData = (newData: Payment) => {
-    setTableData((prevData) => [...prevData, newData])
+  const handleAddData = (newData: Experiencia) => {
+    setData((prevData) => [...prevData, newData])
   }
 
-  const handleOpenEditModal = (payment: Payment) => {
+  const handleOpenEditModal = (payment: Experiencia) => {
     setSelectedPayment(payment)
     setIsEditModalOpen(true)
   }
@@ -223,8 +230,8 @@ export function CustomTable() {
     setIsEditModalOpen(false)
   }
 
-  const handleSaveEdit = (updatedPayment: Payment) => {
-    setTableData((prevData) => prevData.map((payment) => (payment.id === updatedPayment.id ? updatedPayment : payment)))
+  const handleSaveEdit = () => {
+    // setData((prevData) => prevData.map((payment) => (payment.id === updatedPayment.id ? updatedPayment : payment)))
     setIsEditModalOpen(false)
   }
 
@@ -273,8 +280,8 @@ export function CustomTable() {
           <Input
             className="w-full sm:max-w-sm"
             placeholder="Filtrar por contratante..."
-            value={table.getColumn('Entidad')?.getFilterValue() as string}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('Entidad')?.setFilterValue(event.target.value)}
+            value={table.getColumn('contratante')?.getFilterValue() as string}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('contratante')?.setFilterValue(event.target.value)}
           />
         </div>
 
@@ -292,9 +299,9 @@ export function CustomTable() {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -302,19 +309,32 @@ export function CustomTable() {
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    // Manejo específico para "tipoContrato" y "actividadPrincipal"
+                    if (cell.column.id === 'tipoContrato' || cell.column.id === 'actividadPrincipal') {
+                      const value = row.original[cell.column.id]
+
+                      return (
+                        <TableCell key={cell.id}>
+                          {Array.isArray(value)
+                            ? value.map((item) => item.nombre).join(', ') // Muestra los nombres de los objetos dentro del array
+                            : 'No especificado'}
+                        </TableCell>
+                      )
+                    }
+
+                    return <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  })}
                   <TableCell>
                     <ActionsMenu
                       row={row}
                       onDelete={() => {
-                        handleDeleteRow(row.original.id)
+                        void handleDeleteRow(row.original.id ?? '')
                       }}
                       onEdit={() => {
                         handleOpenEditModal(row.original)
-                      }} // Pass the payment to edit
-                    />{' '}
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -361,8 +381,10 @@ export function CustomTable() {
           </CustomTooltip>
         </div>
       </div>
-      <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onSave={handleAddData} />
-      {isEditModalOpen && selectedPayment ? <EditExperienceModal isOpen={isEditModalOpen} payment={selectedPayment} onClose={handleCloseEditModal} onSave={handleSaveEdit} /> : null}
+      <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onExperienciaAdded={handleExperienciaAdded} onSave={handleAddData} />
+      {isEditModalOpen && selectedPayment ? (
+        <EditExperienceModal isOpen={isEditModalOpen} payment={selectedPayment} onClose={handleCloseEditModal} onExperienciaEdit={handleExperienciaEdit} onSave={handleSaveEdit} />
+      ) : null}
     </>
   )
 }

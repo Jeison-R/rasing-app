@@ -1,5 +1,7 @@
 import Swal from 'sweetalert2'
 
+import { eliminarTipoContrato } from '../../services/tipoContrato/contratoService'
+
 export const deleteContrato = async (
   id: string,
   nombre: string, // Agrega un nuevo parámetro para el nombre de la actividad
@@ -19,22 +21,15 @@ export const deleteContrato = async (
 
   if (result.isConfirmed) {
     try {
-      const response = await fetch(`http://localhost:3000/tiposContratos/eliminarTipoContrato/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar el contrato')
-      }
-
+      await eliminarTipoContrato(id)
       // Mostrar éxito con SweetAlert
-      void Swal.fire('Eliminado', `El contrato '${nombre}' ha sido eliminado`, 'success')
+      await Swal.fire('Eliminado', `El contrato '${nombre}' ha sido eliminado`, 'success')
 
       // Actualizar la lista de actividades después de eliminar
       await fetchTipoContrato()
     } catch (error) {
       // Manejar errores y mostrar alerta
-      void Swal.fire('Error', 'Hubo un problema al eliminar el contrato', 'error')
+      await Swal.fire('Error', 'Hubo un problema al eliminar el contrato', 'error')
     }
   }
 }

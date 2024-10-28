@@ -1,4 +1,4 @@
-import type { Payment } from './experience-table'
+import type { Experiencia } from './experience-table'
 
 import { MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
@@ -8,22 +8,22 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 
 import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
 
-import { deleteExperience } from './deleteExperience'
+// import { deleteExperience } from './deleteExperience'
 
 interface ActionsMenuProps {
   row: {
-    original: Payment
+    original: Experiencia
   }
   onDelete: () => void
-  onEdit: (data: Payment) => void
+  onEdit: (data: Experiencia) => void
 }
 
 export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
   const payment = row.original
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
+  const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
 
-  const handleView = (data: Payment) => {
+  const handleView = (data: Experiencia) => {
     setSelectedPayment(data)
     setIsModalOpen(true)
   }
@@ -32,13 +32,13 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
     setIsModalOpen(false)
   }
 
-  const handleDelete = async () => {
-    await deleteExperience(payment).then((result) => {
-      if (result.isConfirmed) {
-        onDelete()
-      }
-    })
-  }
+  // const handleDelete = async () => {
+  //   await deleteExperience(payment).then((result) => {
+  //     if (result.isConfirmed) {
+  //       onDelete()
+  //     }
+  //   })
+  // }
 
   return (
     <>
@@ -66,7 +66,7 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
           >
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void handleDelete()}>Eliminar</DropdownMenuItem>
+          <DropdownMenuItem onClick={onDelete}>Eliminar</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

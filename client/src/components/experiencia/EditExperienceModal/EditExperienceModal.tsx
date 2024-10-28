@@ -1,5 +1,13 @@
-import type { Payment, Adicion } from '../experience-table/experience-table'
+import type { Experiencia, Adicion } from '../experience-table/experience-table'
+import type { Salario } from '../../services/salario/salarioService'
+import type { Actividad } from '../../actividad/actividadTable/actividad-table'
+import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
+import type { Contrato } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
+import type { OptionActivity } from '../modalAddExperiencia/AddExperienciaModal'
+import type { OptionDocument } from '../modalAddExperiencia/AddExperienciaModal'
+import type { OptionTipoContrato } from '../modalAddExperiencia/AddExperienciaModal'
 
+import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
 import { useState, useEffect, type ChangeEvent } from 'react'
 import { X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
@@ -9,30 +17,34 @@ import Select from 'react-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-// import { activityOptions } from '../../actividad/actividadTable/actividad-table'
-// import { documentOptions } from '../../documentoSoporte/documentoTable/documento-table'
-// import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
-import { salariosMinimos } from '../../salario/salarioTable/salarios'
+import { storage } from '../../../firebase/firebase'
+import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
+import { obtenerActividades } from '../../services/actividad/actividadService'
+import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
+import { obtenerSalarios } from '../../services/salario/salarioService'
 import { opcionesModalidad } from '../modalAddExperiencia/AddExperienciaModal'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
 interface EditExperienceModalProps {
   isOpen: boolean
   onClose: () => void
-  payment: Payment | null
-  onSave: (updatedPayment: Payment) => void
+  payment: Experiencia | null
+  onSave: (updatedPayment: Experiencia) => void
+  onExperienciaEdit: () => void
 }
 
-export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditExperienceModalProps): JSX.Element | null {
+export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperienciaEdit }: EditExperienceModalProps): JSX.Element | null {
   const [rup, setRup] = useState<string>('')
   const [entidadContratante, setEntidadContratante] = useState<string>('')
   const [contratoNo, setContratoNo] = useState<string>('')
   const [socio, setSocio] = useState<string>('')
   const [modalidad, setModalidad] = useState<string>('')
   const [objeto, setObjeto] = useState<string>('')
-  const [documentoSoporte, setDocumentoSoporte] = useState<string[]>([])
-  const [tipoContrato, setTipoContrato] = useState<string[]>([])
-  const [actividadPrincipal, setActividadPrincipal] = useState<string[]>([])
+  const [contratista, setContratista] = useState<string>('')
+  const [empresa, setEmpresa] = useState<string>('')
+  const [documentoSoporte, setDocumentoSoporte] = useState<Documento[]>([])
+  const [tipoContrato, setTipoContrato] = useState<Contrato[]>([])
+  const [actividadPrincipal, setActividadPrincipal] = useState<Actividad[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
   const [valorInicial, setValorInicial] = useState<number>(0)
@@ -43,8 +55,13 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
   const [valorSmmlvPart2, setValorSmmlvPart2] = useState<number>(0)
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorActual, setValorActual] = useState<number>(0)
+  const [salariosMinimos, setSalariosMinimos] = useState<Salario[]>([])
   const [files, setFiles] = useState<File[]>([]) // Para almacenar nuevos archivos cargados
   const [documentoSoporteUrls, setDocumentoSoporteUrls] = useState<{ name: string; url: string }[]>([])
+  const [opcionesDocumentoSoporte, setOpcionesDocumentoSoporte] = useState<OptionDocument[]>([])
+  const [opcionesActividadPrincipal, setOpcionesActividadPrincipal] = useState<OptionActivity[]>([])
+  const [opcionesTipoContrato, setOpcionesTipoContrato] = useState<OptionTipoContrato[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (payment) {
@@ -52,17 +69,22 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
       setRup(payment.rup)
       setEntidadContratante(payment.entidad)
       setContratoNo(payment.contrato)
-      setSocio(payment.contratista)
+      setSocio(payment.socio)
+      setContratista(payment.contratista)
+      setEmpresa(payment.Empresa)
       setModalidad(payment.modalidad)
       setObjeto(payment.objeto)
-      setTipoContrato(payment.tipoContrato.split(', '))
-      setActividadPrincipal(payment.actividadPrincipal.split(', '))
-      setDocumentoSoporte(payment.documentoSoporte.split(', '))
-      setDocumentoSoporteUrls(
-        payment.documentoCargado.map((doc) => ({
-          name: doc.name,
-          url: doc.url
-        }))
+      setTipoContrato(payment.tipoContrato ?? [])
+      setActividadPrincipal(payment.actividadPrincipal ?? [])
+      setDocumentoSoporte(payment.documentoSoporte ?? [])
+      setFiles(
+        payment.documentoCargado.map((file) => {
+          const newFile = new File([file.url], file.name, {
+            type: 'application/octet-stream'
+          })
+
+          return newFile
+        })
       )
       setFechaInicio(payment.fechaInicio)
       setFechaTerminacion(payment.fechaTerminacion)
@@ -77,20 +99,45 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     }
   }, [payment])
 
-  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFiles = Array.from(e.target.files) // Convertimos FileList en array
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files
 
-      setFiles([...files, ...selectedFiles]) // Añadir archivos seleccionados a la lista
+    if (selectedFiles) {
+      setFiles(Array.from(selectedFiles))
     }
   }
 
+  useEffect(() => {
+    const cargarOpciones = async () => {
+      try {
+        // Cargar opciones de documento soporte
+        const documentos = await obtenerDocumentosSoporte()
+
+        setOpcionesDocumentoSoporte(
+          documentos.map((doc: Documento) => ({ value: doc.id, label: doc.nombre })) // Ajusta según los campos reales
+        )
+
+        // Cargar opciones de actividad principal
+        const actividades = await obtenerActividades()
+
+        setOpcionesActividadPrincipal(actividades.map((act: Actividad) => ({ value: act.id, label: act.nombre })))
+
+        // Cargar opciones de tipo de contrato
+        const tiposContratos = await obtenerTiposContrato()
+
+        setOpcionesTipoContrato(
+          tiposContratos.map((contrato: Contrato) => ({ value: contrato.id, label: contrato.nombre })) // Ajusta según los campos reales
+        )
+      } catch (error) {
+        global.console.error('Error al cargar opciones:', error)
+      }
+    }
+
+    void cargarOpciones()
+  }, [])
+
   const removeFile = (index: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)) // Eliminar archivo de la lista de nuevos archivos
-  }
-
-  const removeUploadedFile = (index: number) => {
-    setDocumentoSoporteUrls((prevUrls) => prevUrls.filter((_, i) => i !== index)) // Eliminar URL de documento subido
   }
 
   const validateForm = (): boolean => {
@@ -103,10 +150,16 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     } else if (!entidadContratante.trim()) {
       void Swal.fire('Error', 'El campo Entidad no puede estar vacío', 'error')
       isValid = false
+    } else if (!empresa.trim()) {
+      void Swal.fire('Error', 'El campo Empresa no puede estar vacío', 'error')
+      isValid = false
     } else if (!contratoNo.trim()) {
       void Swal.fire('Error', 'El campo Contrato No no puede estar vacío', 'error')
       isValid = false
     } else if (!socio.trim()) {
+      void Swal.fire('Error', 'El campo Socio no puede estar vacío', 'error')
+      isValid = false
+    } else if (!contratista.trim()) {
       void Swal.fire('Error', 'El campo Contratista no puede estar vacío', 'error')
       isValid = false
     } else if (!modalidad.trim()) {
@@ -146,58 +199,111 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     return isValid
   }
 
-  const handleSave = (): void => {
-    if (!payment) return
+  const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
 
     // Validar formulario
     if (!validateForm()) {
-      return // Si la validación falla, no se procederá con el guardado
+      return
     }
 
-    const updatedPayment: Payment = {
-      ...payment,
-      rup: rup,
-      entidad: entidadContratante,
-      contrato: contratoNo,
-      contratista: socio,
-      modalidad: modalidad,
-      objeto: objeto,
-      tipoContrato: tipoContrato.join(', '),
-      actividadPrincipal: actividadPrincipal.join(', '),
-      documentoSoporte: documentoSoporte.join(', '),
-      documentoCargado: [
-        ...documentoSoporteUrls.map((doc) => ({
-          name: doc.name,
-          url: doc.url
-        })),
-        ...files.map((file) => ({
-          name: file.name,
-          url: URL.createObjectURL(file)
-        }))
-      ],
-      fechaInicio: fechaInicio,
-      fechaTerminacion: fechaTerminacion,
-      valorInicial: valorInicial,
-      partPorcentaje: partPorcentaje,
-      valorFinalAfectado: valorFinalAfectado,
-      anioTerminacion: anioTerminacion,
-      valorSmmlv: valorSmmlv,
-      valorSmmlvPart2: valorSmmlvPart2,
-      adiciones: adiciones,
-      valorActual: valorActual
+    setIsLoading(true)
+
+    try {
+      // Primero subimos los archivos y verificamos duplicados
+      const storageDirRef = ref(storage, 'documentos')
+      const existingFiles = await listAll(storageDirRef)
+      const documentosSubidos: { name: string; url: string }[] = []
+
+      for (const file of files) {
+        const duplicateFile = existingFiles.items.find((item) => item.name.startsWith(file.name))
+
+        if (duplicateFile) {
+          // Si el archivo ya existe, obtenemos la URL existente
+          const existingUrl = await getDownloadURL(duplicateFile)
+
+          documentosSubidos.push({ name: file.name, url: existingUrl })
+        } else {
+          // Si no existe, subimos el archivo y obtenemos su URL
+          const storageRef = ref(storage, `documentos/${file.name}-${uuidv4()}`)
+
+          await uploadBytes(storageRef, file)
+
+          const url = await getDownloadURL(storageRef)
+
+          documentosSubidos.push({ name: file.name, url })
+        }
+      }
+      // Esperamos que todas las promesas de carga se resuelvan
+
+      // Actualizamos el objeto de experiencia con los nuevos datos y URLs de los documentos subidos
+      const updatedPayment: Experiencia = {
+        ...payment,
+        Empresa: empresa,
+        rup: rup,
+        entidad: entidadContratante,
+        contrato: contratoNo,
+        contratista: contratista,
+        socio: socio,
+        modalidad: modalidad,
+        objeto: objeto,
+        tipoContrato: tipoContrato,
+        actividadPrincipal: actividadPrincipal,
+        documentoSoporte: documentoSoporte,
+        documentoCargado: [
+          ...documentoSoporteUrls.map((doc) => ({
+            name: doc.name,
+            url: doc.url
+          })),
+          ...documentosSubidos // Agregamos las URLs de los nuevos documentos subidos
+        ],
+        fechaInicio: fechaInicio,
+        fechaTerminacion: fechaTerminacion,
+        valorInicial: valorInicial,
+        partPorcentaje: partPorcentaje,
+        valorFinalAfectado: valorFinalAfectado,
+        anioTerminacion: anioTerminacion,
+        valorSmmlv: valorSmmlv,
+        valorSmmlvPart2: valorSmmlvPart2,
+        adiciones: adiciones,
+        valorActual: valorActual
+      }
+
+      // Enviar los datos actualizados a la API
+      const response = await fetch(`http://localhost:3000/experiencias/ActualizarExperiencia/${updatedPayment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedPayment)
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar la experiencia')
+      }
+
+      // Mostrar mensaje de éxito
+      void Swal.fire({
+        title: 'Guardado',
+        text: 'Los cambios se han guardado exitosamente',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      })
+      onSave(updatedPayment)
+      onExperienciaEdit()
+      resetForm()
+      onClose()
+    } catch (error) {
+      global.console.error('Error:', error)
+      void Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al actualizar la experiencia',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      })
+    } finally {
+      setIsLoading(false)
     }
-
-    onSave(updatedPayment)
-    resetForm() // Restablecer el formulario después de guardar
-    onClose()
-
-    // Mostrar mensaje de guardado exitoso
-    void Swal.fire({
-      title: 'Guardado',
-      text: 'Los cambios se han guardado exitosamente',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    })
   }
 
   const resetForm = (): void => {
@@ -226,7 +332,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
 
   useEffect(() => {
     if (!isOpen) {
-      resetForm() // Restablecer el formulario cuando se cierra el modal
+      resetForm()
     }
   }, [isOpen])
 
@@ -265,14 +371,33 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
     setAdiciones(adiciones.map((adicion) => (adicion.id === id ? { ...adicion, value } : adicion)))
   }
 
+  useEffect(() => {
+    const cargarSalarios = async () => {
+      try {
+        const salarios = await obtenerSalarios() // Llamada a tu servicio API
+
+        setSalariosMinimos(salarios) // Almacena los salarios en el estado
+      } catch (error) {
+        global.console.error('Error al cargar salarios mínimos:', error)
+      }
+    }
+
+    void cargarSalarios()
+  }, [])
+
   const obtenerSalarioMinimo = (anio: number): number | undefined => {
-    const salario = salariosMinimos.find((item) => item.año === anio)
+    const salario = salariosMinimos.find((item) => item.año === anio) // Asegúrate de que 'anio' coincida con la clave correcta de tu respuesta
 
     return salario ? salario.valor : undefined
   }
 
   const obtenerUltimoSalarioMinimo = (): number => {
-    return salariosMinimos[salariosMinimos.length - 1].valor // Último salario mínimo en la tabla
+    if (salariosMinimos.length === 0) return 0
+
+    // Encontrar el salario mínimo con el año más reciente
+    const salarioUltimoAno = salariosMinimos.reduce((max, salario) => (salario.año > max.año ? salario : max))
+
+    return salarioUltimoAno.valor
   }
 
   useEffect(() => {
@@ -327,9 +452,24 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
           className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
           onSubmit={(e) => {
             e.preventDefault()
-            handleSave()
+            void handleEdit(e)
           }}
         >
+          <div>
+            <label className="block text-sm font-medium" htmlFor="empresa">
+              Empresa
+            </label>
+            <Input
+              className="w-full rounded-lg border p-2"
+              id="empresa"
+              name="empresa"
+              placeholder="Nombre empresa"
+              value={empresa}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setEmpresa(e.target.value)
+              }}
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="rup">
               Nº RUP
@@ -344,7 +484,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="entidad">
-              Entidad
+              Entidad Contratante
             </label>
             <Input
               id="entidad"
@@ -368,7 +508,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
           </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="socio">
-              Contratista
+              Socio Aportante / Propio
             </label>
             <Input
               id="socio"
@@ -378,18 +518,35 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               }}
             />
           </div>
-          <div className="col-span-1 md:col-span-2 lg:col-span-4">
-            <label className="block text-sm font-medium" htmlFor="objeto">
-              Objeto
+          <div>
+            <label className="block text-sm font-medium" htmlFor="socio">
+              Contratista
             </label>
-            <textarea
-              className="w-full rounded-lg border p-2"
-              id="objeto"
-              name="objeto"
-              placeholder="Descripción del Objeto"
-              value={objeto}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
-                setObjeto(e.target.value)
+            <Input
+              id="contratista"
+              value={contratista}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setContratista(e.target.value)
+              }}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium" htmlFor="documento-soporte">
+              Documento Soporte
+            </label>
+            <Select
+              isMulti
+              options={opcionesDocumentoSoporte} // Asegúrate de que opcionesDocumentoSoporte esté definido
+              styles={getCustomSelectStyles}
+              value={documentoSoporte.map((ds) => ({ value: ds.id, label: ds.nombre }))} // Ajusta según la estructura de los datos
+              onChange={(selected) => {
+                setDocumentoSoporte(
+                  selected.map((option) => ({
+                    id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
+                    nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
+                  }))
+                ) // Asignamos un array de tipo Documento
               }}
             />
           </div>
@@ -413,48 +570,62 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="contrato">
-              Documento Soporte
+
+          <div className="col-span-1 md:col-span-2 lg:col-span-4">
+            <label className="block text-sm font-medium" htmlFor="objeto">
+              Objeto
             </label>
-            <Select
-              isMulti
-              // options={documentOptions}
-              styles={getCustomSelectStyles}
-              value={documentoSoporte.map((tc) => ({ value: tc, label: tc }))}
-              onChange={(selected) => {
-                setDocumentoSoporte(selected.map((option) => option.value))
+            <textarea
+              className="w-full rounded-lg border p-2"
+              id="objeto"
+              name="objeto"
+              placeholder="Descripción del Objeto"
+              value={objeto}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+                setObjeto(e.target.value)
               }}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium" htmlFor="contrato">
+            <label className="block text-sm font-medium" htmlFor="tipo-contrato">
               Tipo Contrato
             </label>
             <Select
               isMulti
-              // options={tipoContratoOptions}
+              options={opcionesTipoContrato} // Asegúrate de que opcionesTipoContrato esté definido
               styles={getCustomSelectStyles}
-              value={tipoContrato.map((tc) => ({ value: tc, label: tc }))}
+              value={tipoContrato.map((tc) => ({ value: tc.id, label: tc.nombre }))} // Ajusta según la estructura de los datos
               onChange={(selected) => {
-                setTipoContrato(selected.map((option) => option.value))
+                setTipoContrato(
+                  selected.map((option) => ({
+                    id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
+                    nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
+                  }))
+                ) // Asignamos un array de tipo Contrato
               }}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium" htmlFor="actividad">
+            <label className="block text-sm font-medium" htmlFor="actividad-principal">
               Actividad Principal
             </label>
             <Select
               isMulti
-              // options={activityOptions}
+              options={opcionesActividadPrincipal} // Asegúrate de que opcionesActividadPrincipal esté definido
               styles={getCustomSelectStyles}
-              value={actividadPrincipal.map((ap) => ({ value: ap, label: ap }))}
+              value={actividadPrincipal.map((ap) => ({ value: ap.id, label: ap.nombre }))} // Ajusta según la estructura de los datos
               onChange={(selected) => {
-                setActividadPrincipal(selected.map((option) => option.value))
+                setActividadPrincipal(
+                  selected.map((option) => ({
+                    id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
+                    nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
+                  }))
+                ) // Asignamos un array de tipo Actividad
               }}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium" htmlFor="fechaInicio">
               Fecha de Inicio
@@ -542,6 +713,15 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
             <Input disabled id="valorSmmlvPart2" type="number" value={valorSmmlvPart2.toFixed(2)} />
           </div>
           <div>
+            <label className="block text-sm font-medium" htmlFor="valorActual">
+              Valor Actual
+            </label>
+            <Input disabled id="valorActual" type="text" value={formatNumber(valorActual)} />
+          </div>
+
+          <br />
+
+          <div>
             <label className="block text-sm font-medium" htmlFor="adiciones">
               Adiciones
             </label>
@@ -570,38 +750,11 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
               + Agregar Adición
             </Button>
           </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="valorActual">
-              Valor Actual
-            </label>
-            <Input disabled id="valorActual" type="text" value={formatNumber(valorActual)} />
-          </div>
+
           <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
               Documentos Soporte Cargados
             </label>
-
-            {/* Mostrar documentos subidos previamente */}
-            {documentoSoporteUrls.length > 0 && (
-              <ul className="mt-2 space-y-2">
-                {documentoSoporteUrls.map((doc) => (
-                  <li key={doc.name} className="flex items-center justify-between text-sm text-gray-600">
-                    <a className="truncate" href={doc.url} rel="noopener noreferrer" target="_blank">
-                      {doc.name}
-                    </a>
-                    <button
-                      className="ml-2 text-red-500 hover:text-red-700"
-                      type="button"
-                      onClick={() => {
-                        removeUploadedFile(documentoSoporteUrls.indexOf(doc))
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
 
             {files.map((file) => (
               <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
@@ -626,19 +779,19 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave }: EditEx
                 id="documentosCargados"
                 name="documentosCargados"
                 type="file"
-                onChange={handleMultipleFileUpload}
+                onChange={handleFileChange}
               />
               <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
             </div>
 
             {/* Mostrar nombres de los nuevos archivos seleccionados */}
           </div>
+          <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">
+            <Button disabled={isLoading} type="submit" variant="default">
+              {isLoading ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </div>
         </form>
-        <div className="mt-6 flex justify-end">
-          <Button variant="default" onClick={handleSave}>
-            Guardar Cambios
-          </Button>
-        </div>
       </div>
     </div>
   )

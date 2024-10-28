@@ -1,4 +1,4 @@
-import type { Payment } from '../experience-table/experience-table'
+import type { Experiencia } from '../experience-table/experience-table'
 
 import { X } from 'lucide-react'
 
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 interface ViewExperienceModalProps {
   isOpen: boolean
   onClose: () => void
-  payment: Payment | null
+  payment: Experiencia | null
 }
 
 const formatNumber = (num: number): string => {
@@ -29,41 +29,56 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
+            <h4 className="text-sm font-medium">Empresa:</h4>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.Empresa}</p>
+          </div>
+          <div>
             <h4 className="text-sm font-medium">RUP:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.rup}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Entidad:</h4>
+            <h4 className="text-sm font-medium">Entidad Contratante:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.entidad}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Contrato:</h4>
+            <h4 className="text-sm font-medium">Contrato No:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.contrato}</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-medium">Socio Aportante / Propio:</h4>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.socio}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Contratista:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.contratista}</p>
-          </div>
-
-          <div className="col-span-1 md:col-span-2 lg:col-span-4">
-            <h4 className="text-sm font-medium">Objeto:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.objeto}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Modalidad:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.modalidad}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Tipo de Contrato:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.tipoContrato}</p>
-          </div>
-          <div>
             <h4 className="text-sm font-medium">Documentos Soporte:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.documentoSoporte}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
+              {Array.isArray(payment.documentoSoporte) ? payment.documentoSoporte.map((documento) => documento.nombre).join(', ') || 'No especificado' : 'No especificado'}
+            </p>
           </div>
+          <div className="col-span-1 md:col-span-2 lg:col-span-4">
+            <h4 className="text-sm font-medium">Objeto:</h4>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.objeto}</p>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium">Tipo de Contrato:</h4>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
+              {Array.isArray(payment.tipoContrato) ? payment.tipoContrato.map((contrato) => contrato.nombre).join(', ') || 'No especificado' : 'No especificado'}
+            </p>
+          </div>
+
           <div>
             <h4 className="text-sm font-medium">Actividad Principal:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.actividadPrincipal}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
+              {Array.isArray(payment.actividadPrincipal) ? payment.actividadPrincipal.map((actividad) => actividad.nombre).join(', ') || 'No especificado' : 'No especificado'}
+            </p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Fecha de Inicio:</h4>
@@ -98,6 +113,11 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Valor en SMMLV % PART2:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorSmmlvPart2)}</p>
           </div>
+          <div>
+            <h4 className="text-sm font-medium">Valor Actual</h4>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorActual)}</p>
+          </div>
+          <br />
           {/* Si existen adiciones, las mostramos */}
           <div className="mb-2 flex flex-col items-start lg:flex-col">
             {payment.adiciones && payment.adiciones.length > 0 ? (
@@ -110,10 +130,6 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
                 ))}
               </div>
             ) : null}
-          </div>
-          <div>
-            <h4 className="text-sm font-medium">Valor Actual</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorActual)}</p>
           </div>
 
           <div>

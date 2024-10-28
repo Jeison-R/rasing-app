@@ -7,68 +7,54 @@ import Swal from 'sweetalert2'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+import { agregarActividad } from '../../services/actividad/actividadService' // Importa la función aquí
+
 interface AddActividadModalProps {
   isOpen: boolean
   onClose: () => void
   onActividadAdded: () => void
 }
 
-interface ErrorData {
-  error: string
-  // Add other properties here if needed
-}
-
 export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonly<AddActividadModalProps>) {
-  const [name, setName] = useState<string>('')
+  const [name, setName] = useState<string>('') // Para guardar el nombre de la actividad
+  const [isLoading, setIsLoading] = useState<boolean>(false) // Para controlar el estado de carga
 
   const handleSave = (event: FormEvent) => {
     event.preventDefault()
 
     const saveActividad = async () => {
       if (name.trim() !== '') {
-        try {
-          // Hacemos la solicitud POST al servidor
-          const response = await fetch('http://localhost:3000/actividades/crearActividad', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nombre: name }) // Enviamos el nombre de la actividad
-          })
+        setIsLoading(true) // Iniciar la carga
 
-          // Mostrar SweetAlert de éxito usando el nombre directamente
-          void Swal.fire({
+        try {
+          // Llamamos a la función `agregarActividad` en lugar de hacer el fetch manualmente
+          await agregarActividad({
+            nombre: name,
+            id: ''
+          }) // Enviar solo el nombre de la actividad
+
+          // Mostrar SweetAlert de éxito
+          await Swal.fire({
             title: 'Éxito',
-            text: `Actividad guardada con éxito. Nombre: ${name}`, // Usamos el nombre directamente del estado
+            text: `Actividad guardada con éxito. Nombre: ${name}`,
             icon: 'success',
             confirmButtonText: 'OK'
           })
 
-          if (response.ok) {
-            onActividadAdded() // Llama a la función para actualizar la lista
-          } else {
-            const errorData = (await response.json()) as ErrorData
-
-            // Mostrar SweetAlert de error
-            void Swal.fire({
-              title: 'Error',
-              text: `Error al guardar la actividad: ${errorData.error}`,
-              icon: 'error',
-              confirmButtonText: 'OK'
-            })
-          }
+          onActividadAdded() // Actualizar la lista de actividades
         } catch (error) {
           // Manejar errores de red o cualquier otro error
-          void Swal.fire({
+          await Swal.fire({
             title: 'Error',
             text: `Error de red: ${(error as Error).message}`,
             icon: 'error',
             confirmButtonText: 'OK'
           })
+        } finally {
+          setIsLoading(false) // Terminar la carga
+          setName('') // Limpiar el campo después de guardar
+          onClose() // Cerrar el modal
         }
-
-        setName('') // Limpiar el campo después de guardar
-        onClose() // Cerrar el modal
       }
     }
 
@@ -104,8 +90,8 @@ export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonl
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit" variant="default">
-              Guardar
+            <Button disabled={isLoading} type="submit" variant="default">
+              {isLoading ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
         </form>

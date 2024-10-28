@@ -1,9 +1,11 @@
 import Swal from 'sweetalert2'
 
+import { eliminarActividad } from '../../services/actividad/actividadService'
+
 export const deleteActividad = async (
   id: string,
-  nombreActividad: string, // Agrega un nuevo parámetro para el nombre de la actividad
-  fetchActividades: () => Promise<void>
+  nombreActividad: string, // Parámetro para el nombre de la actividad
+  fetchActividades: () => Promise<void> // Función para refrescar actividades
 ) => {
   // Confirmar con SweetAlert antes de eliminar
   const result = await Swal.fire({
@@ -19,22 +21,17 @@ export const deleteActividad = async (
 
   if (result.isConfirmed) {
     try {
-      const response = await fetch(`http://localhost:3000/actividades/eliminarActividad/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar la actividad')
-      }
+      // Llamar a la función `eliminarActividad` del servicio
+      await eliminarActividad(id)
 
       // Mostrar éxito con SweetAlert
-      void Swal.fire('Eliminado', `La actividad '${nombreActividad}' ha sido eliminada`, 'success')
+      await Swal.fire('Eliminado', `La actividad '${nombreActividad}' ha sido eliminada`, 'success')
 
       // Actualizar la lista de actividades después de eliminar
       await fetchActividades()
     } catch (error) {
       // Manejar errores y mostrar alerta
-      void Swal.fire('Error', 'Hubo un problema al eliminar la actividad', 'error')
+      await Swal.fire('Error', 'Hubo un problema al eliminar la actividad', 'error')
     }
   }
 }

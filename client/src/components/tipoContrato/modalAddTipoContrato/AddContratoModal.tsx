@@ -7,33 +7,30 @@ import Swal from 'sweetalert2'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
+import { agregarTipoContrato } from '../../services/tipoContrato/contratoService'
+
 interface AdEDocumentoModalProps {
   isOpen: boolean
   onClose: () => void
   onContratoAdded: () => void
 }
 
-interface ErrorData {
-  error: string
-  // Add other properties here if needed
-}
-
 export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<AdEDocumentoModalProps>) {
   const [name, setName] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const handleSave = (event: FormEvent) => {
     event.preventDefault()
 
     const saveActividad = async () => {
       if (name.trim() !== '') {
+        setIsLoading(true)
+
         try {
           // Hacemos la solicitud POST al servidor
-          const response = await fetch('http://localhost:3000/tiposContratos/crearTipoContrato', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nombre: name }) // Enviamos el nombre de la actividad
+          await agregarTipoContrato({
+            id: '',
+            nombre: name
           })
 
           // Mostrar SweetAlert de éxito usando el nombre directamente
@@ -44,31 +41,20 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
             confirmButtonText: 'OK'
           })
 
-          if (response.ok) {
-            onContratoAdded() // Llama a la función para actualizar la lista
-          } else {
-            const errorData = (await response.json()) as ErrorData
-
-            // Mostrar SweetAlert de error
-            void Swal.fire({
-              title: 'Error',
-              text: `Error al guardar el Contrato: ${errorData.error}`,
-              icon: 'error',
-              confirmButtonText: 'OK'
-            })
-          }
+          onContratoAdded() // Llama a la función para actualizar la lista
         } catch (error) {
           // Manejar errores de red o cualquier otro error
-          void Swal.fire({
+          await Swal.fire({
             title: 'Error',
             text: `Error de red: ${(error as Error).message}`,
             icon: 'error',
             confirmButtonText: 'OK'
           })
+        } finally {
+          setIsLoading(false) // Terminar la carga
+          setName('') // Limpiar el campo después de guardar
+          onClose() // Cerrar el modal
         }
-
-        setName('') // Limpiar el campo después de guardar
-        onClose() // Cerrar el modal
       }
     }
 
@@ -104,8 +90,8 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit" variant="default">
-              Guardar
+            <Button disabled={isLoading} type="submit" variant="default">
+              {isLoading ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
         </form>

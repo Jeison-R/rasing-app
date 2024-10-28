@@ -1,5 +1,7 @@
 import Swal from 'sweetalert2'
 
+import { eliminarDocumentoSoporte } from '../../services/documento/documentoService'
+
 export const deleteDocumento = async (
   id: string,
   nombre: string, // Agrega un nuevo parámetro para el nombre de la actividad
@@ -19,22 +21,16 @@ export const deleteDocumento = async (
 
   if (result.isConfirmed) {
     try {
-      const response = await fetch(`http://localhost:3000/tiposDocumentos/eliminarTipoDocumento/${id}`, {
-        method: 'DELETE'
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar el documento')
-      }
+      await eliminarDocumentoSoporte(id)
 
       // Mostrar éxito con SweetAlert
-      void Swal.fire('Eliminado', `El documento '${nombre}' ha sido eliminado`, 'success')
+      await Swal.fire('Eliminado', `El documento '${nombre}' ha sido eliminado`, 'success')
 
       // Actualizar la lista de actividades después de eliminar
       await fetchDocumentos()
     } catch (error) {
       // Manejar errores y mostrar alerta
-      void Swal.fire('Error', 'Hubo un problema al eliminar el documento', 'error')
+      await Swal.fire('Error', 'Hubo un problema al eliminar el documento', 'error')
     }
   }
 }

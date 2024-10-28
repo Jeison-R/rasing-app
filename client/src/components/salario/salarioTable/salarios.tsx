@@ -4,8 +4,8 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,227 +13,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddSalaryModal } from '../modalAddSalary/AddSalaryModal'
+import { obtenerSalarios } from '../../services/salario/salarioService'
 
-export const salariosMinimos: Payment[] = [
-  {
-    id: 'm5gr84i9',
-    valor: 11298,
-    año: 1984
-  },
-  {
-    id: '3u1reuv4',
-    valor: 13558,
-    año: 1985
-  },
-  {
-    id: 'derv1ws0',
-    valor: 16811,
-    año: 1986
-  },
-  {
-    id: '5kma53ae',
-    valor: 20510,
-    año: 1987
-  },
-  {
-    id: 'abc123',
-    valor: 25637,
-    año: 1988
-  },
-  {
-    id: 'def456',
-    valor: 32560,
-    año: 1989
-  },
-  {
-    id: 'ghi789',
-    valor: 41025,
-    año: 1990
-  },
-  {
-    id: 'jkl012',
-    valor: 51716,
-    año: 1991
-  },
-  {
-    id: 'mno345',
-    valor: 65190,
-    año: 1992
-  },
-  {
-    id: 'pqr678',
-    valor: 81510,
-    año: 1993
-  },
-  {
-    id: 'stu901',
-    valor: 98700,
-    año: 1994
-  },
-  {
-    id: 'vwx234',
-    valor: 118934,
-    año: 1995
-  },
-  {
-    id: 'yz1234',
-    valor: 142125,
-    año: 1996
-  },
-  {
-    id: 'abc567',
-    valor: 172005,
-    año: 1997
-  },
-  {
-    id: 'def890',
-    valor: 203826,
-    año: 1998
-  },
-  {
-    id: 'ghi123',
-    valor: 236460,
-    año: 1999
-  },
-  {
-    id: 'jkl456',
-    valor: 260100,
-    año: 2000
-  },
-  {
-    id: 'mno789',
-    valor: 286000,
-    año: 2001
-  },
-  {
-    id: 'pqr012',
-    valor: 309000,
-    año: 2002
-  },
-  {
-    id: 'stu345',
-    valor: 332000,
-    año: 2003
-  },
-  {
-    id: 'vwx678',
-    valor: 358000,
-    año: 2004
-  },
-  {
-    id: 'yz9012',
-    valor: 381500,
-    año: 2005
-  },
-  {
-    id: 'abc345',
-    valor: 408000,
-    año: 2006
-  },
-  {
-    id: 'def678',
-    valor: 433700,
-    año: 2007
-  },
-  {
-    id: 'ghi901',
-    valor: 461500,
-    año: 2008
-  },
-  {
-    id: 'jkl234',
-    valor: 496900,
-    año: 2009
-  },
-  {
-    id: 'mno567',
-    valor: 515000,
-    año: 2010
-  },
-  {
-    id: 'pqr890',
-    valor: 535600,
-    año: 2011
-  },
-  {
-    id: 'stu123',
-    valor: 566700,
-    año: 2012
-  },
-  {
-    id: 'vwx456',
-    valor: 589500,
-    año: 2013
-  },
-  {
-    id: 'yz7890',
-    valor: 616000,
-    año: 2014
-  },
-  {
-    id: 'abc901',
-    valor: 644350,
-    año: 2015
-  },
-  {
-    id: 'def234',
-    valor: 689455,
-    año: 2016
-  },
-  {
-    id: 'ghi567',
-    valor: 737717,
-    año: 2017
-  },
-  {
-    id: 'jkl890',
-    valor: 781242,
-    año: 2018
-  },
-  {
-    id: 'mno123',
-    valor: 828116,
-    año: 2019
-  },
-  {
-    id: 'pqr456',
-    valor: 877803,
-    año: 2020
-  },
-  {
-    id: 'stu789',
-    valor: 908526,
-    año: 2021
-  },
-  {
-    id: 'vwx012',
-    valor: 1000000,
-    año: 2022
-  },
-  {
-    id: 'yz3456',
-    valor: 1160000,
-    año: 2023
-  },
-  {
-    id: 'abc789',
-    valor: 1300000,
-    año: 2024
-  }
-]
+import { deleteSalario } from './deleteSalario'
 
-export interface Payment {
+export interface Salario {
   id: string
   año: number
   valor: number
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Salario>[] = [
   {
     accessorKey: 'año',
     header: ({ column }) => {
       return (
         <Button
+          className="justify-center"
           variant="ghost"
           onClick={() => {
             column.toggleSorting(column.getIsSorted() === 'asc')
@@ -244,7 +40,7 @@ export const columns: ColumnDef<Payment>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('año')}</div>
+    cell: ({ row }) => <div className="text-center font-medium">{row.getValue('año')}</div>
   },
   {
     accessorKey: 'valor',
@@ -272,7 +68,7 @@ export const columns: ColumnDef<Payment>[] = [
         currency: 'USD'
       }).format(amount)
 
-      return <div className="text-right font-medium">{formatted}</div>
+      return <div className="text-center font-medium">{formatted}</div>
     }
   }
 ]
@@ -284,9 +80,43 @@ export function CustomTable() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [data, setData] = useState<Salario[]>([]) // Cambiar el estado inicial a un array vacío
+
+  // Función para obtener las actividades desde la API
+  const fetchSalario = async () => {
+    try {
+      const SalarioData = await obtenerSalarios() // Usar la función importada
+
+      setData(SalarioData)
+    } catch (error) {
+      if (error instanceof Error) {
+        global.console.error('Error al obtener actividades:', error.message)
+      } else {
+        global.console.error('Error desconocido al obtener actividades')
+      }
+    }
+  }
+
+  const ultimoSalario = data.length > 0 ? data.reduce((prev, current) => (prev.año > current.año ? prev : current)) : null
+
+  useEffect(() => {
+    void fetchSalario()
+  }, [])
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleSalariodAdded = () => {
+    void fetchSalario()
+  }
 
   const table = useReactTable({
-    data: salariosMinimos,
+    data: data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -307,16 +137,6 @@ export function CustomTable() {
       }
     }
   })
-
-  const ultimoSalario = salariosMinimos[salariosMinimos.length - 1]
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-  }
 
   return (
     <>
@@ -343,6 +163,7 @@ export function CustomTable() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
+                    <TableHead className="justify-center text-center">Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -353,11 +174,28 @@ export function CustomTable() {
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                       ))}
+                      <TableCell>
+                        <div className="flex justify-center space-x-2">
+                          {/* Botón Editar */}
+                          <CustomTooltip content="Editar">
+                            <Button size="icon" variant="ghost">
+                              <Edit className="h-5 w-5" />
+                            </Button>
+                          </CustomTooltip>
+
+                          {/* Botón Eliminar */}
+                          <CustomTooltip content="Eliminar">
+                            <Button size="icon" variant="ghost" onClick={() => void deleteSalario(row.original.id, `${row.original.año}`, fetchSalario)}>
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </Button>
+                          </CustomTooltip>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="h-24 text-center" colSpan={columns.length}>
+                    <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
                       Sin resultados
                     </TableCell>
                   </TableRow>
@@ -402,12 +240,19 @@ export function CustomTable() {
         <div className="flex w-full justify-center lg:w-96">
           <div className="text-center">
             <h4>Salario Actual</h4>
-            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(ultimoSalario.valor)} (Año {ultimoSalario.año})
+            {ultimoSalario ? (
+              <>
+                <p>{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(ultimoSalario.valor)}</p>
+                <p>(Año {ultimoSalario.año})</p>
+              </>
+            ) : (
+              <p>No hay datos de salario.</p>
+            )}
           </div>
         </div>
       </div>
 
-      <AddSalaryModal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AddSalaryModal isOpen={isModalOpen} onClose={handleCloseModal} onSalaryAdded={handleSalariodAdded} />
     </>
   )
 }

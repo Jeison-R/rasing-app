@@ -13,15 +13,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
+import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
 
 import { deleteDocumento } from './deleteDocumento'
 
-export interface Payment {
+export interface Documento {
   id: string
   nombre: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Documento>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => {
@@ -39,7 +40,7 @@ export const columns: ColumnDef<Payment>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('id')}</div>
+    cell: ({ row }) => <div className="text-center">{row.getValue('id')}</div>
   },
   {
     accessorKey: 'nombre',
@@ -52,13 +53,13 @@ export const columns: ColumnDef<Payment>[] = [
               column.toggleSorting(column.getIsSorted() === 'asc')
             }}
           >
-            Tipo de Documentos
+            Documentos
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
+    cell: ({ row }) => <div className="text-center">{row.getValue('nombre')}</div>
   }
 ]
 
@@ -69,17 +70,11 @@ export function CustomTableDocumento() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [data, setData] = useState<Payment[]>([])
+  const [data, setData] = useState<Documento[]>([])
 
   const fetchDocumentos = async () => {
     try {
-      const response = await fetch('http://localhost:3000/tiposDocumentos/obtenerTiposDocumentos') // Cambia esta URL según tu entorno
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`) // Proporciona más información sobre el error
-      }
-
-      const documentosData = (await response.json()) as Payment[] // Cambiar 'actividadesData' a 'documentosData' para claridad
+      const documentosData = await obtenerDocumentosSoporte()
 
       setData(documentosData) // Cambia 'actividadesData' a 'documentosData'
     } catch (error) {
@@ -160,7 +155,7 @@ export function CustomTableDocumento() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
-                    <TableHead>Acciones</TableHead>
+                    <TableHead className="justify-center text-center">Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -193,7 +188,7 @@ export function CustomTableDocumento() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="h-24 text-center" colSpan={columns.length}>
+                    <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
                       Sin resultados
                     </TableCell>
                   </TableRow>

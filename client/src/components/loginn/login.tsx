@@ -38,7 +38,7 @@ export function Login() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex h-screen items-center justify-center overflow-hidden">
       <Card className="w-[800px]">
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Columna izquierda: Logo */}

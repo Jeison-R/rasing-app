@@ -13,16 +13,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
+import { obtenerActividades } from '../../services/actividad/actividadService'
 
-import { deleteActividad } from './deleteActividad' // Importa la función
+import { deleteActividad } from './deleteActividad'
 
-export interface Payment {
+export interface Actividad {
   id: string
   nombre: string // Asegúrate de que la propiedad coincide con tu API
 }
 
 // Define las columnas aquí
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Actividad>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => {
@@ -57,7 +58,7 @@ export const columns: ColumnDef<Payment>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
+    cell: ({ row }) => <div className="text-center ">{row.getValue('nombre')}</div>
   }
 ]
 
@@ -68,23 +69,16 @@ export function CustomTableActividad() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [data, setData] = useState<Payment[]>([]) // Cambiar el estado inicial a un array vacío
+  const [data, setData] = useState<Actividad[]>([]) // Cambiar el estado inicial a un array vacío
 
   // Función para obtener las actividades desde la API
   const fetchActividades = async () => {
     try {
-      const response = await fetch('http://localhost:3000/actividades/obtenerActividades')
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-
-      const actividadesData = (await response.json()) as Payment[]
+      const actividadesData = await obtenerActividades() // Usar la función importada
 
       setData(actividadesData)
     } catch (error) {
       if (error instanceof Error) {
-        // Imprimir el mensaje de error
         global.console.error('Error al obtener actividades:', error.message)
       } else {
         global.console.error('Error desconocido al obtener actividades')
@@ -161,7 +155,7 @@ export function CustomTableActividad() {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
                     {/* Agregar la columna de acciones aquí */}
-                    <TableHead>Acciones</TableHead>
+                    <TableHead className="justify-center text-center">Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>

@@ -13,15 +13,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddContratoModal } from '../modalAddTipoContrato/AddContratoModal'
+import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
 
 import { deleteContrato } from './deleteTipoContrato'
 
-export interface Payment {
+export interface Contrato {
   id: string
   nombre: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Contrato>[] = [
   {
     accessorKey: 'id',
     header: ({ column }) => {
@@ -58,7 +59,7 @@ export const columns: ColumnDef<Payment>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('nombre')}</div>
+    cell: ({ row }) => <div className="text-center">{row.getValue('nombre')}</div>
   }
 ]
 
@@ -69,17 +70,11 @@ export function CustomTableTipoContrato() {
   const [rowSelection, setRowSelection] = useState({})
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [data, setData] = useState<Payment[]>([])
+  const [data, setData] = useState<Contrato[]>([])
 
   const fetchContratos = async () => {
     try {
-      const response = await fetch('http://localhost:3000/tiposContratos/obtenerTiposContratos') // Cambia esta URL según tu entorno
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`) // Proporciona más información sobre el error
-      }
-
-      const contratosData = (await response.json()) as Payment[] // Cambiar 'actividadesData' a 'contratosData' para claridad
+      const contratosData = await obtenerTiposContrato()
 
       setData(contratosData) // Cambia 'actividadesData' a 'contratosData'
     } catch (error) {
@@ -160,7 +155,7 @@ export function CustomTableTipoContrato() {
                     {headerGroup.headers.map((header) => {
                       return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                     })}
-                    <TableHead>Acciones</TableHead>
+                    <TableHead className="justify-center text-center">Acciones</TableHead>
                   </TableRow>
                 ))}
               </TableHeader>
@@ -192,7 +187,8 @@ export function CustomTableTipoContrato() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell className="h-24 text-center" colSpan={columns.length}>
+                    <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
+                      {' '}
                       Sin resultados
                     </TableCell>
                   </TableRow>

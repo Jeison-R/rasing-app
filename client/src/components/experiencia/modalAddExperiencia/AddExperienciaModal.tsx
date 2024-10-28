@@ -1,6 +1,11 @@
 import type { MultiValue } from 'react-select'
-import type { Payment } from '../experience-table/experience-table'
+import type { Experiencia } from '../experience-table/experience-table'
+import type { Salario } from '../../services/salario/salarioService'
+import type { Actividad } from '../../actividad/actividadTable/actividad-table'
+import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
+import type { Contrato } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
 
+import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
 import { X } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -10,29 +15,31 @@ import Select from 'react-select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-// import { documentOptions } from '../../documentoSoporte/documentoTable/documento-table'
-// import { activityOptions } from '../../actividad/actividadTable/actividad-table'
-// import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
-import { salariosMinimos } from '../../salario/salarioTable/salarios'
+import { storage } from '../../../firebase/firebase'
+import { obtenerSalarios } from '../../services/salario/salarioService'
+import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
+import { obtenerActividades } from '../../services/actividad/actividadService'
+import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
 interface AddExperenciaModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (data: Payment) => void
+  onSave: (data: Experiencia) => void
+  onExperienciaAdded: () => void
 }
 
-interface OptionDocument {
+export interface OptionDocument {
   value: string
   label: string
 }
 
-interface OptionActivity {
+export interface OptionActivity {
   value: string
   label: string
 }
 
-interface OptionTipoContrato {
+export interface OptionTipoContrato {
   value: string
   label: string
 }
@@ -49,7 +56,7 @@ export const opcionesModalidad = [
   { value: 'Unión Temporal', label: 'Unión Temporal' }
 ]
 
-export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaModalProps>) {
+export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Readonly<AddExperenciaModalProps>) {
   const [adiciones, setAdiciones] = useState<Adicion[]>([])
   const [valorInicial, setValorInicial] = useState<number>(0)
   const [partPorcentaje, setPartPorcentaje] = useState<number>(0)
@@ -58,19 +65,70 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
   const [anioTerminacion, setAnioTerminacion] = useState<number>(new Date().getFullYear())
   const [rup, setRup] = useState<string>('')
+
+  const [empresa, setEmpresa] = useState<string>('')
   const [entidadContratante, setEntidadContratante] = useState<string>('')
   const [contratoNo, setContratoNo] = useState<string>('')
   const [socio, setSocio] = useState<string>('')
+  const [contratista, setContratista] = useState<string>('')
   const [objeto, setObjeto] = useState<string>('')
   const [modalidad, setModalidad] = useState<string>('')
-  const [documentoSoporte, setDocumentoSoporte] = useState<string[]>([])
-  const [tipoContrato, setTipoContrato] = useState<string[]>([])
-  const [actividadPrincipal, setActividadPrincipal] = useState<string[]>([])
+  const [documentoSoporte, setDocumentoSoporte] = useState<Documento[]>([])
+  const [tipoContrato, setTipoContrato] = useState<Contrato[]>([])
+  const [actividadPrincipal, setActividadPrincipal] = useState<Actividad[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [valorSmmlv, setValorSmmlv] = useState<number>(0)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [valorActual, setValorActual] = useState<number>(0) // Para almacenar el valor actual basado en el año actual
   const [files, setFiles] = useState<File[]>([])
+  const [salariosMinimos, setSalariosMinimos] = useState<Salario[]>([])
+  const [opcionesDocumentoSoporte, setOpcionesDocumentoSoporte] = useState<OptionDocument[]>([])
+  const [opcionesActividadPrincipal, setOpcionesActividadPrincipal] = useState<OptionActivity[]>([])
+  const [opcionesTipoContrato, setOpcionesTipoContrato] = useState<OptionTipoContrato[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  useEffect(() => {
+    const cargarOpciones = async () => {
+      try {
+        // Cargar opciones de documento soporte
+        const documentos = await obtenerDocumentosSoporte()
+
+        setOpcionesDocumentoSoporte(
+          documentos.map((doc: Documento) => ({ value: doc.id, label: doc.nombre })) // Ajusta según los campos reales
+        )
+
+        // Cargar opciones de actividad principal
+        const actividades = await obtenerActividades()
+
+        setOpcionesActividadPrincipal(actividades.map((act: Actividad) => ({ value: act.id, label: act.nombre })))
+
+        // Cargar opciones de tipo de contrato
+        const tiposContratos = await obtenerTiposContrato()
+
+        setOpcionesTipoContrato(
+          tiposContratos.map((contrato: Contrato) => ({ value: contrato.id, label: contrato.nombre })) // Ajusta según los campos reales
+        )
+      } catch (error) {
+        global.console.error('Error al cargar opciones:', error)
+      }
+    }
+
+    void cargarOpciones()
+  }, [])
+
+  useEffect(() => {
+    const cargarSalarios = async () => {
+      try {
+        const salarios = await obtenerSalarios() // Llamada a tu servicio API
+
+        setSalariosMinimos(salarios) // Almacena los salarios en el estado
+      } catch (error) {
+        global.console.error('Error al cargar salarios mínimos:', error)
+      }
+    }
+
+    void cargarSalarios()
+  }, [])
 
   const valorFinalCalculado = useMemo(() => {
     const totalAdiciones = adiciones.reduce((acc, curr) => acc + curr.value, 0)
@@ -92,7 +150,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
 
   useEffect(() => {
     const ultimoSalarioMinimo = obtenerUltimoSalarioMinimo()
-    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo // Multiplicar por el salario mínimo actual
+    const valorCalculado = valorSmmlvPart2 * ultimoSalarioMinimo
 
     setValorActual(valorCalculado)
   }, [valorSmmlvPart2, salariosMinimos])
@@ -122,34 +180,55 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
     }
   }, [anioTerminacion, valorFinalAfectado])
 
+  const obtenerSalarioMinimo = (anio: number): number | undefined => {
+    const salario = salariosMinimos.find((item) => item.año === anio) // Asegúrate de que 'anio' coincida con la clave correcta de tu respuesta
+
+    return salario ? salario.valor : undefined
+  }
+
+  const obtenerUltimoSalarioMinimo = (): number => {
+    if (salariosMinimos.length === 0) return 0
+
+    // Encontrar el salario mínimo con el año más reciente
+    const salarioUltimoAno = salariosMinimos.reduce((max, salario) => (salario.año > max.año ? salario : max))
+
+    return salarioUltimoAno.valor
+  }
+
   const handleSelectDocument = (selectedOptions: MultiValue<OptionDocument>) => {
-    const values = selectedOptions.map((option) => option.value)
+    const values = selectedOptions.map((option) => ({
+      id: option.value,
+      nombre: option.label // O el campo que contiene el nombre
+    }))
 
     setDocumentoSoporte(values)
 
-    // Validar si hay al menos un valor seleccionado
     if (values.length > 0) {
       setErrors((prevErrors) => ({ ...prevErrors, documentoSoporte: false }))
     }
   }
 
   const handleSelectActivity = (selectedOptions: MultiValue<OptionActivity>) => {
-    const values = selectedOptions.map((option) => option.value)
+    const values = selectedOptions.map((option) => ({
+      id: option.value,
+      nombre: option.label // O el campo que contiene el nombre
+    }))
 
     setActividadPrincipal(values)
 
-    // Validar si hay al menos un valor seleccionado
     if (values.length > 0) {
       setErrors((prevErrors) => ({ ...prevErrors, actividadPrincipal: false }))
     }
   }
 
   const handleSelectTipoContrato = (selectedOptions: MultiValue<OptionTipoContrato>) => {
-    const values = selectedOptions.map((option) => option.value)
+    const values = selectedOptions.map((option) => ({
+      id: option.value,
+      nombre: option.label // O el campo que contiene el nombre
+    }))
 
     setTipoContrato(values)
 
-    // Validar si hay al menos un valor seleccionado
     if (values.length > 0) {
       setErrors((prevErrors) => ({ ...prevErrors, tipoContrato: false }))
     }
@@ -171,6 +250,8 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
 
   const validateForm = () => {
     const newErrors: Record<string, boolean> = {}
+
+    if (!empresa) newErrors.empresa = true
 
     if (!rup) newErrors.rup = true
 
@@ -241,38 +322,66 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
       return
     }
 
-    const newData: Payment = {
-      id: uuidv4(),
-      rup: rup,
-      entidad: entidadContratante,
-      contrato: contratoNo,
-      objeto: objeto,
-      contratista: socio,
-      modalidad: modalidad,
-      documentoSoporte: documentoSoporte.join(', '),
-      tipoContrato: tipoContrato.join(', '),
-      actividadPrincipal: actividadPrincipal.join(', '),
-      fechaInicio: fechaInicio,
-      fechaTerminacion: fechaTerminacion,
-      valorInicial: valorInicial,
-      partPorcentaje: partPorcentaje,
-      valorFinalAfectado: valorFinalAfectado,
-      anioTerminacion: anioTerminacion,
-      valorSmmlv: valorSmmlv,
-      valorActual: valorActual,
-      valorSmmlvPart2: valorSmmlvPart2,
-      adiciones: adiciones.map((adicion) => ({
-        id: adicion.id,
-        value: adicion.value
-      })),
-      documentoCargado: files.map((file) => ({
-        name: file.name,
-        url: URL.createObjectURL(file)
-      })) // Incluye el archivo en los datos enviados
-    }
+    setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:3000/experiencias', {
+      // Primero, subimos los archivos a Firebase Storage
+      const storageDirRef = ref(storage, 'documentos')
+      const existingFiles = await listAll(storageDirRef)
+      const documentosSubidos: { name: string; url: string }[] = []
+
+      for (const file of files) {
+        const duplicateFile = existingFiles.items.find((item) => item.name.startsWith(file.name))
+
+        if (duplicateFile) {
+          // Si el archivo ya existe, obtenemos la URL existente
+          const existingUrl = await getDownloadURL(duplicateFile)
+
+          documentosSubidos.push({ name: file.name, url: existingUrl })
+        } else {
+          // Si no existe, subimos el archivo y obtenemos su URL
+          const storageRef = ref(storage, `documentos/${file.name}-${uuidv4()}`)
+
+          await uploadBytes(storageRef, file)
+
+          const url = await getDownloadURL(storageRef)
+
+          documentosSubidos.push({ name: file.name, url })
+        }
+      } // Esperamos que todas las promesas de carga se resuelvan
+
+      // Después de que los archivos se suben, creamos el objeto con los datos de la experiencia
+      const newData: Omit<Experiencia, 'id'> = {
+        Empresa: empresa,
+
+        rup: rup,
+        entidad: entidadContratante,
+        contrato: contratoNo,
+        socio: socio,
+        contratista: contratista,
+        objeto: objeto,
+        modalidad: modalidad,
+        documentoSoporte: documentoSoporte,
+        tipoContrato: tipoContrato,
+        actividadPrincipal: actividadPrincipal,
+        fechaInicio: fechaInicio,
+        fechaTerminacion: fechaTerminacion,
+        valorInicial: valorInicial,
+        partPorcentaje: partPorcentaje,
+        valorFinalAfectado: valorFinalAfectado,
+        anioTerminacion: anioTerminacion,
+        valorSmmlv: valorSmmlv,
+        valorActual: valorActual,
+        valorSmmlvPart2: valorSmmlvPart2,
+        adiciones: adiciones.map((adicion) => ({
+          id: adicion.id,
+          value: adicion.value
+        })),
+        documentoCargado: documentosSubidos // Incluimos los archivos subidos con sus URLs públicas
+      }
+
+      // Enviar los datos a la API
+      const response = await fetch('http://localhost:3000/experiencias/CrearExperiencia', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -291,7 +400,7 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
         icon: 'success',
         confirmButtonText: 'OK'
       })
-
+      onExperienciaAdded()
       onClose() // Cierra el formulario o la modal
     } catch (error) {
       global.console.error('Error:', error)
@@ -310,12 +419,13 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
   }
 
   const handleClose = () => {
-    // Restablece todos los campos a sus valores iniciales
+    setEmpresa('')
     setRup('')
     setEntidadContratante('')
     setContratoNo('')
     setSocio('')
     setObjeto('')
+    setContratista('')
     setModalidad('')
     setDocumentoSoporte([])
     setTipoContrato([])
@@ -334,8 +444,11 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
     onClose() // Llama a la función pasada como prop para cerrar el modal
   }
 
-  const handleFieldChange = (field: string, value: string | number) => {
+  const handleFieldChange = (field: string, value: string | number | { id: string; nombre: string }) => {
     switch (field) {
+      case 'empresa':
+        setEmpresa(value as string)
+        break
       case 'rup':
         setRup(value as string)
         break
@@ -351,17 +464,20 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
       case 'objeto':
         setObjeto(value as string)
         break
+      case 'contratista':
+        setContratista(value as string)
+        break
       case 'modalidad':
         setModalidad(value as string)
         break
       case 'documentoSoporte':
-        setDocumentoSoporte([value as string])
+        setDocumentoSoporte((prevDocs) => [...prevDocs, value as { id: string; nombre: string }])
         break
       case 'tipoContrato':
-        setTipoContrato([value as string])
+        setTipoContrato((prevTipos) => [...prevTipos, value as { id: string; nombre: string }])
         break
       case 'actividadPrincipal':
-        setActividadPrincipal([value as string])
+        setActividadPrincipal((prevActividades) => [...prevActividades, value as { id: string; nombre: string }])
         break
       case 'fechaInicio':
         setFechaInicio(value as string)
@@ -393,16 +509,6 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
 
     // Eliminar el error cuando el usuario comienza a escribir
     setErrors((prevErrors) => ({ ...prevErrors, [field]: false }))
-  }
-
-  const obtenerSalarioMinimo = (anio: number): number | undefined => {
-    const salario = salariosMinimos.find((item) => item.año === anio)
-
-    return salario ? salario.valor : undefined
-  }
-
-  const obtenerUltimoSalarioMinimo = (): number => {
-    return salariosMinimos[salariosMinimos.length - 1].valor // Último salario mínimo en la tabla
   }
 
   const formatNumber = (num: number): string => {
@@ -438,17 +544,16 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
     setValorFinalAfectado(parsedValue)
   }
 
-  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFiles = Array.from(e.target.files) // Convertimos FileList en array
-
-      setFiles(selectedFiles)
-      setErrors((prevErrors) => ({ ...prevErrors, files: false }))
-    }
-  }
-
   const removeFile = (indexToRemove: number) => {
     setFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files
+
+    if (selectedFiles) {
+      setFiles(Array.from(selectedFiles))
+    }
   }
 
   if (!isOpen) return null
@@ -463,6 +568,22 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
           </Button>
         </div>
         <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleFormSubmit}>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="empresa">
+              Empresa
+            </label>
+            <Input
+              className={errors.empresa ? 'border-red-500' : ''}
+              id="empresa"
+              name="empresa"
+              placeholder="Nombre empresa"
+              value={empresa}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleFieldChange('empresa', e.target.value)
+              }}
+            />
+            {errors.empresa ? <span className="text-red-500">Campo requerido</span> : null}
+          </div>
           <div>
             <label className="block text-sm font-medium" htmlFor="rup">
               Nº RUP
@@ -531,21 +652,37 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
             {errors.socio ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-4">
-            <label className="block text-sm font-medium" htmlFor="objeto">
-              Objeto
+          <div>
+            <label className="block text-sm font-medium" htmlFor="contratista">
+              Contratista
             </label>
-            <textarea
-              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.objeto ? 'border-red-500' : ''}`}
-              id="objeto"
-              name="objeto"
-              placeholder="Descripción del Objeto"
-              value={objeto}
-              onChange={(e) => {
-                handleFieldChange('objeto', e.target.value)
+            <Input
+              className={errors.contratista ? 'border-red-500' : ''}
+              id="contratista"
+              name="contratista"
+              placeholder="Contratista"
+              value={contratista}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleFieldChange('contratista', e.target.value)
               }}
             />
-            {errors.objeto ? <span className="text-red-500">Campo requerido</span> : null}
+            {errors.contratista ? <span className="text-red-500">Campo requerido</span> : null}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium" htmlFor="tipoContrato">
+              Documentos de soporte
+            </label>
+            <Select
+              isMulti
+              className="basic-multi-select"
+              classNamePrefix="select"
+              options={opcionesDocumentoSoporte} // Aquí se usan las opciones dinámicas obtenidas del API
+              styles={getCustomSelectStyles}
+              value={opcionesDocumentoSoporte.filter((option) => documentoSoporte.some((documento) => documento.id === option.value))}
+              onChange={handleSelectDocument}
+            />
+            {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
           <div>
@@ -570,20 +707,21 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
             {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium" htmlFor="tipoContrato">
-              Documentos de soporte
+          <div className="col-span-1 md:col-span-2 lg:col-span-4">
+            <label className="block text-sm font-medium" htmlFor="objeto">
+              Objeto
             </label>
-            <Select
-              isMulti
-              className="basic-multi-select"
-              classNamePrefix="select"
-              // options={documentOptions}
-              styles={getCustomSelectStyles}
-              // value={documentOptions.filter((option) => documentoSoporte.includes(option.value))}
-              onChange={handleSelectDocument}
+            <textarea
+              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.objeto ? 'border-red-500' : ''}`}
+              id="objeto"
+              name="objeto"
+              placeholder="Descripción del Objeto"
+              value={objeto}
+              onChange={(e) => {
+                handleFieldChange('objeto', e.target.value)
+              }}
             />
-            {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
+            {errors.objeto ? <span className="text-red-500">Campo requerido</span> : null}
           </div>
 
           <div>
@@ -594,9 +732,9 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              // options={tipoContratoOptions}
+              options={opcionesTipoContrato} // Aquí se usan las opciones dinámicas obtenidas del API
               styles={getCustomSelectStyles}
-              // value={tipoContratoOptions.filter((option) => tipoContrato.includes(option.value))}
+              value={opcionesTipoContrato.filter((option) => tipoContrato.some((contrato) => contrato.id === option.value))}
               onChange={handleSelectTipoContrato}
             />
             {errors.tipoContrato ? <span className="text-red-500">Campo requerido</span> : null}
@@ -610,9 +748,9 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               isMulti
               className="basic-multi-select"
               classNamePrefix="select"
-              // options={activityOptions}
+              options={opcionesActividadPrincipal} // Aquí se usan las opciones dinámicas obtenidas del API
               styles={getCustomSelectStyles}
-              // value={activityOptions.filter((option) => actividadPrincipal.includes(option.value))}
+              value={opcionesActividadPrincipal.filter((option) => actividadPrincipal.some((actividad) => actividad.id === option.value))} // Muestra los valores seleccionados
               onChange={handleSelectActivity}
             />
             {errors.actividadPrincipal ? <span className="text-red-500">Campo requerido</span> : null}
@@ -731,6 +869,16 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
               value={formatNumber(valorSmmlvPart2)} // Formatea el valor con separadores de miles
             />
           </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
+              Valor Actual
+            </label>
+            <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
+          </div>
+
+          <br />
+
           <div>
             <h4 className="mb-1">Adiciones</h4>
             {adiciones.map((adicion, index) => (
@@ -763,32 +911,23 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
-              Valor Actual
-            </label>
-            <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
-          </div>
-
-          <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
               Cargar Documentos Soporte (PDF)
             </label>
 
-            {/* Contenedor personalizado para el campo de carga */}
             <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
               <input
                 multiple
-                accept="application/pdf" // Solo permite archivos PDF
+                accept="application/pdf"
                 className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 id="documentosCargados"
                 name="documentosCargados"
                 type="file"
-                onChange={handleMultipleFileUpload}
+                onChange={handleFileChange}
               />
               <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
             </div>
 
-            {/* Mostrar nombres de archivos seleccionados */}
             {files.map((file) => (
               <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
                 <span className="truncate">{file.name}</span>
@@ -809,8 +948,8 @@ export function AddExperienciaModal({ isOpen, onClose }: Readonly<AddExperenciaM
           </div>
 
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">
-            <Button type="submit" variant="default">
-              Guardar
+            <Button disabled={isLoading} type="submit" variant="default">
+              {isLoading ? 'Guardando...' : 'Guardar'}
             </Button>
           </div>
         </form>
