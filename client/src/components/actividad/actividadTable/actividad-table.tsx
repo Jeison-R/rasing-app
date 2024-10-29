@@ -58,7 +58,7 @@ export const columns: ColumnDef<Actividad>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="text-center ">{row.getValue('nombre')}</div>
+    cell: ({ row }) => <div className="text-center">{row.getValue('nombre')}</div>
   }
 ]
 
