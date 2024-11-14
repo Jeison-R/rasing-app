@@ -1,5 +1,5 @@
 import type { MultiValue } from 'react-select'
-import type { Experiencia } from '../experience-table/experience-table'
+import type { Experiencia } from '../experience-table/interface'
 import type { Salario } from '../../services/salario/salarioService'
 import type { Actividad } from '../../actividad/actividadTable/actividad-table'
 import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
@@ -325,35 +325,36 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     setIsLoading(true)
 
     try {
-      // Primero, subimos los archivos a Firebase Storage
+      // Subimos los archivos a Firebase Storage de forma paralela
       const storageDirRef = ref(storage, 'documentos')
       const existingFiles = await listAll(storageDirRef)
-      const documentosSubidos: { name: string; url: string }[] = []
 
-      for (const file of files) {
+      const uploadPromises = files.map(async (file) => {
         const duplicateFile = existingFiles.items.find((item) => item.name.startsWith(file.name))
 
         if (duplicateFile) {
-          // Si el archivo ya existe, obtenemos la URL existente
+          // Obtener la URL existente si el archivo ya está en Firebase Storage
           const existingUrl = await getDownloadURL(duplicateFile)
 
-          documentosSubidos.push({ name: file.name, url: existingUrl })
+          return { name: file.name, url: existingUrl }
         } else {
-          // Si no existe, subimos el archivo y obtenemos su URL
+          // Subir el archivo si no existe
           const storageRef = ref(storage, `documentos/${file.name}-${uuidv4()}`)
 
           await uploadBytes(storageRef, file)
 
           const url = await getDownloadURL(storageRef)
 
-          documentosSubidos.push({ name: file.name, url })
+          return { name: file.name, url }
         }
-      } // Esperamos que todas las promesas de carga se resuelvan
+      })
 
-      // Después de que los archivos se suben, creamos el objeto con los datos de la experiencia
+      const documentosSubidos = await Promise.all(uploadPromises)
+
+      // Continuar con el envío de los datos de la experiencia
       const newData: Omit<Experiencia, 'id'> = {
+        // Datos de la experiencia
         Empresa: empresa,
-
         rup: rup,
         entidad: entidadContratante,
         contrato: contratoNo,
@@ -377,10 +378,9 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
           id: adicion.id,
           value: adicion.value
         })),
-        documentoCargado: documentosSubidos // Incluimos los archivos subidos con sus URLs públicas
+        documentoCargado: documentosSubidos
       }
 
-      // Enviar los datos a la API
       const response = await fetch('http://localhost:3000/experiencias/CrearExperiencia', {
         method: 'POST',
         headers: {
@@ -401,7 +401,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         confirmButtonText: 'OK'
       })
       onExperienciaAdded()
-      onClose() // Cierra el formulario o la modal
+      handleClose()
     } catch (error) {
       global.console.error('Error:', error)
       void Swal.fire({
@@ -410,6 +410,8 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         icon: 'error',
         confirmButtonText: 'OK'
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 

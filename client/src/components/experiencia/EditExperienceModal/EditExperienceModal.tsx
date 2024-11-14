@@ -1,4 +1,4 @@
-import type { Experiencia, Adicion } from '../experience-table/experience-table'
+import type { Experiencia, Adicion } from '../experience-table/interface'
 import type { Salario } from '../../services/salario/salarioService'
 import type { Actividad } from '../../actividad/actividadTable/actividad-table'
 import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'

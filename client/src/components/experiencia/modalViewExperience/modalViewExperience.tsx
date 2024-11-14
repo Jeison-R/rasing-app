@@ -1,4 +1,4 @@
-import type { Experiencia } from '../experience-table/experience-table'
+import type { Experiencia } from '../experience-table/interface'
 
 import { X } from 'lucide-react'
 

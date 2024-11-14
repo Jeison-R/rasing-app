@@ -1,62 +1,36 @@
 'use client'
 
 import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
-import type { Actividad } from '../../actividad/actividadTable/actividad-table'
-import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
-import type { Contrato } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
+import type { Experiencia } from './interface'
+import type { Contrato } from '@/components/tipoContrato/tipoContratoTable/tipoContrato-table'
+import type { Actividad } from '@/components/actividad/actividadTable/actividad-table'
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
-import { ChevronLeft, ChevronRight, CirclePlus } from 'lucide-react'
+import { CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useEffect, useState, type ChangeEvent } from 'react'
+import { useEffect, useState } from 'react'
 import React from 'react'
-import Select from 'react-select'
+import ReactSelect from 'react-select'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
 import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
-// import { activityOptions } from '../../actividad/actividadTable/actividad-table'
-// import { tipoContratoOptions } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
-import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 import { obtenerExperiences } from '../../services/experiencia/experienciaService'
+import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
+import { obtenerActividades } from '../../services/actividad/actividadService'
+import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
 import { ActionsMenu } from './ActionsMenu'
 import { deleteExperience } from './deleteExperience'
-
-export interface Experiencia {
-  Empresa: string
-  id?: string
-  rup: string
-  entidad: string
-  contrato: string
-  socio: string
-  contratista: string
-  modalidad: string
-  objeto: string
-  tipoContrato?: Contrato[]
-  actividadPrincipal?: Actividad[]
-  fechaInicio: string
-  fechaTerminacion: string
-  documentoSoporte?: Documento[]
-  valorSmmlv: number
-  valorSmmlvPart2: number
-  valorActual: number
-  valorInicial: number // Valor inicial del contrato
-  partPorcentaje: number // Participación porcentual
-  valorFinalAfectado: number // Valor final afectado después de adiciones
-  anioTerminacion: number // Año de terminación
-  adiciones?: Adicion[] // Array opcional de adiciones
-  documentoCargado: { name: string; url: string }[]
-}
-
-export interface Adicion {
-  id: string
-  value: number // Valor de la adición
-}
 
 export const columns: ColumnDef<Experiencia>[] = [
   {
@@ -66,12 +40,24 @@ export const columns: ColumnDef<Experiencia>[] = [
   },
   {
     accessorKey: 'rup',
-    header: 'RUP',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('rup')}</div>
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => {
+            column.toggleSorting(column.getIsSorted() === 'asc')
+          }}
+        >
+          Rup
+          <CaretSortIcon className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('rup')}</div>
   },
   {
     accessorKey: 'entidad',
-    header: 'Contratante',
+    header: 'Entidad Contratante',
     cell: ({ row }) => <div className="capitalize">{row.getValue('entidad')}</div>
   },
   {
@@ -96,13 +82,79 @@ export const columns: ColumnDef<Experiencia>[] = [
   },
   {
     accessorKey: 'tipoContrato',
-    header: 'Tipo de contrato',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('tipoContrato')}</div>
+    header: 'Tipo de Contrato',
+    cell: ({ row }) => {
+      const tiposContrato: Contrato[] = row.getValue('tipoContrato')
+
+      return (
+        <div>
+          {tiposContrato.map((tipo, index) => (
+            <span key={tipo.id} className="mr-2">
+              {tipo.nombre}
+              {index < tiposContrato.length - 1 && ', '}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    filterFn: (row, id, filterValue: string[]) => {
+      const tiposContrato: Contrato[] = row.getValue(id)
+
+      return filterValue.length === 0 || filterValue.some((filter: string) => tiposContrato.some((tipo: Contrato) => tipo.nombre === filter))
+    }
   },
   {
     accessorKey: 'actividadPrincipal',
     header: 'Actividad Principal',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('actividadPrincipal')}</div>
+    cell: ({ row }) => {
+      const actividad: Actividad[] = row.getValue('actividadPrincipal')
+
+      return (
+        <div>
+          {actividad.map((tipo, index) => (
+            <span key={tipo.id} className="mr-2">
+              {tipo.nombre}
+              {index < actividad.length - 1 && ', '}
+            </span>
+          ))}
+        </div>
+      )
+    },
+    filterFn: (row, id, filterValue: string[]) => {
+      const actividad: Actividad[] = row.getValue(id)
+
+      return filterValue.length === 0 || filterValue.some((filter: string) => actividad.some((tipo: Actividad) => tipo.nombre === filter))
+    }
+  },
+  {
+    accessorKey: 'valorSmmlvPart2',
+    header: 'Valor en SMMLV*%PART2',
+    cell: ({ row }) => {
+      const value = row.getValue('valorSmmlvPart2')
+      const formattedValue = typeof value === 'number' ? value.toFixed(3) : parseFloat(value as string).toFixed(3)
+
+      return <div className="capitalize">{formattedValue}</div>
+    }
+  },
+  {
+    accessorKey: 'valorSmmlv',
+    header: 'Valor en SMMLV',
+    cell: ({ row }) => {
+      const value = row.getValue('valorSmmlv')
+      const formattedValue = typeof value === 'number' ? value.toFixed(3) : parseFloat(value as string).toFixed(3)
+
+      return <div className="capitalize">{formattedValue}</div>
+    }
+  },
+  {
+    accessorKey: 'objeto',
+    header: 'Objeto',
+    cell: ({ row }) => {
+      const value = row.getValue('objeto')
+      const formattedValue = typeof value === 'string' ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : value
+
+      return <div>{formattedValue as string}</div>
+    }
   },
   {
     accessorKey: 'fechaInicio',
@@ -140,16 +192,60 @@ export const columns: ColumnDef<Experiencia>[] = [
   }
 ]
 
+const getColumnVisibilityFromLocalStorage = () => {
+  const storedVisibility = localStorage.getItem('columnVisibility')
+
+  return storedVisibility ? (JSON.parse(storedVisibility) as VisibilityState) : {}
+}
+
+export interface OptionTipoContrato {
+  value: string
+  label: string
+}
+
+export interface OptionActividad {
+  value: string
+  label: string
+}
+
 export function CustomTable() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
   const [data, setData] = useState<Experiencia[]>([])
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(getColumnVisibilityFromLocalStorage)
+  const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
+  const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
+  const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
+  const [selectedActividad, setSelectedActividad] = useState<string[]>([])
+
+  const fetchFilters = async () => {
+    try {
+      // Cargar opciones de tipo de contrato
+      const tiposContratos = await obtenerTiposContrato()
+      const actividad = await obtenerActividades()
+
+      setTipoContratoOptions(
+        tiposContratos.map((contrato: Contrato) => ({
+          value: contrato.id.toString(),
+          label: contrato.nombre
+        }))
+      )
+
+      setActividadOptions(
+        actividad.map((act: Actividad) => ({
+          value: act.id.toString(),
+          label: act.nombre
+        }))
+      )
+    } catch (error) {
+      global.console.error('Error al cargar opciones:', error)
+    }
+  }
 
   const fetchExperiences = async () => {
     try {
@@ -165,41 +261,63 @@ export function CustomTable() {
     }
   }
 
+  useEffect(() => {
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility))
+  }, [columnVisibility])
+
   // useEffect para cargar los datos cuando el componente se monta
   useEffect(() => {
     void fetchExperiences()
+    void fetchFilters()
   }, [])
 
   const handleExperienciaAdded = () => {
-    void fetchExperiences() // Llama a la función para obtener la lista actualizada
+    void fetchExperiences()
   }
 
   const handleExperienciaEdit = () => {
-    void fetchExperiences() // Llama a la función para obtener la lista actualizada
+    void fetchExperiences()
   }
 
   const table = useReactTable({
     data,
     columns,
+    onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: (newVisibility) => {
+      setColumnVisibility(newVisibility)
+    },
     onRowSelectionChange: setRowSelection,
+    globalFilterFn: 'includesString',
     state: {
       sorting,
       columnFilters,
+      globalFilter,
       columnVisibility,
-      rowSelection,
-      pagination: {
-        pageIndex: currentPage,
-        pageSize: 8
-      }
+      rowSelection
     }
   })
+
+  useEffect(() => {
+    if (selectedTiposContrato.length > 0) {
+      table.getColumn('tipoContrato')?.setFilterValue(selectedTiposContrato)
+    } else {
+      table.getColumn('tipoContrato')?.setFilterValue(undefined)
+    }
+  }, [selectedTiposContrato, table])
+
+  useEffect(() => {
+    if (selectedActividad.length > 0) {
+      table.getColumn('actividadPrincipal')?.setFilterValue(selectedActividad)
+    } else {
+      table.getColumn('actividadPrincipal')?.setFilterValue(undefined)
+    }
+  }, [selectedActividad, table])
 
   const handleDeleteRow = async (id: string) => {
     const deleted = await deleteExperience(id)
@@ -231,67 +349,186 @@ export function CustomTable() {
   }
 
   const handleSaveEdit = () => {
-    // setData((prevData) => prevData.map((payment) => (payment.id === updatedPayment.id ? updatedPayment : payment)))
     setIsEditModalOpen(false)
+  }
+
+  const resetFilters = () => {
+    table.setGlobalFilter('')
+    table.setColumnFilters([])
+    setSelectedActividad([])
+    setSelectedTiposContrato([])
   }
 
   return (
     <>
       <div className="flex flex-wrap items-center justify-between py-4">
-        <div className="flex w-full flex-col sm:w-auto">
-          <label className="text-sm font-medium" htmlFor="tipoContrato">
-            Tipo de Contrato
-          </label>
-          <Select
-            isClearable
-            isMulti
-            className="mt-1 w-full sm:w-[250px]"
-            id="tipoContrato"
-            // options={tipoContratoOptions}
-            placeholder="Seleccione"
-            styles={getCustomSelectStyles}
-            // value={selectedTipoContrato}
-            // onChange={setSelectedTipoContrato}
-          />
-        </div>
-
-        <div className="ml-2 flex w-full flex-col sm:w-auto">
-          <label className="text-sm font-medium" htmlFor="actividad">
-            Actividad
-          </label>
-          <Select
-            isClearable
-            isMulti
-            className="mt-1 w-full sm:w-[250px]"
-            id="actividad"
-            // options={activityOptions}
-            placeholder="Seleccione"
-            styles={getCustomSelectStyles}
-            // value={selectedActividad}
-            // onChange={setSelectedActividad}
-          />
-        </div>
-
-        <div className="ml-2 flex w-full flex-col sm:w-auto">
-          {/* Label para el input de Contratante */}
-          <label className="mb-1 text-sm font-medium" htmlFor="contratante">
-            Contratante
-          </label>
+        <div className="relative mr-2 w-64">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            className="w-full sm:max-w-sm"
-            placeholder="Filtrar por contratante..."
-            value={table.getColumn('contratante')?.getFilterValue() as string}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('contratante')?.setFilterValue(event.target.value)}
+            className="pl-8"
+            placeholder="Buscar en todas las columnas..."
+            value={globalFilter || ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setGlobalFilter(e.target.value)
+            }} // Setea el filtro global
           />
         </div>
+        <div className="flex w-full flex-col sm:w-auto">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline">
+                <SlidersHorizontal className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Filtros</SheetTitle>
+                <SheetDescription>Aplica filtros específicos a cada columna</SheetDescription>
+              </SheetHeader>
+              <ScrollArea className="h-[calc(100vh-8rem)] px-1">
+                <div className="space-y-4 py-4">
+                  {/* Filtro por Empresa */}
+                  <div className="space-y-2">
+                    <Label>Empresa</Label>
+                    <Input
+                      placeholder="Filtrar por empresa"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const value = e.target.value
 
-        {/* Botón para añadir experiencia alineado a la derecha */}
+                        table.getColumn('Empresa')?.setFilterValue(value)
+                      }}
+                    />{' '}
+                  </div>
+
+                  {/* Filtro por Modalidad */}
+                  <div className="space-y-2">
+                    <Label>Modalidad</Label>
+                    <Select
+                      defaultValue="Todas"
+                      onValueChange={(value: string) => {
+                        if (value === 'Todas') {
+                          table.getColumn('modalidad')?.setFilterValue(undefined)
+                        } else {
+                          table.getColumn('modalidad')?.setFilterValue(value)
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar modalidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todas">Todas</SelectItem>
+                        <SelectItem value="Individual">Individual</SelectItem>
+                        <SelectItem value="Consorcio">Consorcio</SelectItem>
+                        <SelectItem value="Unión Temporal">Unión Temporal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Tipo de Contrato</Label>
+                    <ReactSelect
+                      isMulti
+                      aria-label="Seleccionar"
+                      className="basic-multi-select w-[280px]"
+                      classNamePrefix="select"
+                      name="tiposContrato"
+                      options={tipoContratoOptions}
+                      placeholder="Seleccionar Tipo C."
+                      styles={getCustomSelectStyles}
+                      value={tipoContratoOptions.filter((option) => selectedTiposContrato.includes(option.label))}
+                      onChange={(selectedOptions) => {
+                        const selectedValues = selectedOptions.map((option) => option.label)
+
+                        setSelectedTiposContrato(selectedValues)
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Actividad Principal</Label>
+                    <ReactSelect
+                      isMulti
+                      aria-label="Seleccionar"
+                      className="basic-multi-select w-[280px]"
+                      classNamePrefix="select"
+                      name="tiposContrato"
+                      options={actividadOptions}
+                      placeholder="Seleccionar Actividad"
+                      styles={getCustomSelectStyles}
+                      value={actividadOptions.filter((option) => selectedActividad.includes(option.label))}
+                      onChange={(selectedOptions) => {
+                        const selectedValues = selectedOptions.map((option) => option.label)
+
+                        setSelectedActividad(selectedValues)
+                      }}
+                    />
+                  </div>
+
+                  {/* Filtro por Objeto */}
+                  <div className="space-y-2">
+                    <Label>Objeto</Label>
+                    <Input
+                      placeholder="Buscar en el objeto del contrato"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const value = e.target.value
+                        const column = table.getColumn('objeto')
+
+                        column?.setFilterValue(value)
+
+                        if (value && !column?.getIsVisible()) {
+                          column?.toggleVisibility()
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {/* Botón para restablecer filtros */}
+                  <div className="mt-4">
+                    <Button variant="outline" onClick={resetFilters}>
+                      Restablecer Filtros
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+        </div>
+
         <div className="ml-auto mt-4 sm:mt-0">
           <CustomTooltip content="Añadir experiencia">
             <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>
               <CirclePlus className="h-5 w-5" />
             </Button>
           </CustomTooltip>
+        </div>
+        <div className="ml-3 mt-4 sm:mt-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="ml-auto" variant="outline">
+                Columnas <MoreHorizontal className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      checked={column.getIsVisible()}
+                      className="capitalize"
+                      onCheckedChange={(value) => {
+                        column.toggleVisibility(!!value)
+                      }}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className="rounded-md border">
@@ -309,22 +546,9 @@ export function CustomTable() {
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => {
-                    // Manejo específico para "tipoContrato" y "actividadPrincipal"
-                    if (cell.column.id === 'tipoContrato' || cell.column.id === 'actividadPrincipal') {
-                      const value = row.original[cell.column.id]
-
-                      return (
-                        <TableCell key={cell.id}>
-                          {Array.isArray(value)
-                            ? value.map((item) => item.nombre).join(', ') // Muestra los nombres de los objetos dentro del array
-                            : 'No especificado'}
-                        </TableCell>
-                      )
-                    }
-
-                    return <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  })}
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  ))}
                   <TableCell>
                     <ActionsMenu
                       row={row}
@@ -349,36 +573,27 @@ export function CustomTable() {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {currentPage + 1} de {table.getPageCount()} páginas
-        </div>
         <div className="space-x-2">
-          <CustomTooltip content="Anterior">
-            <Button
-              disabled={!table.getCanPreviousPage()}
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                table.previousPage()
-                setCurrentPage(table.getState().pagination.pageIndex - 1)
-              }}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-          </CustomTooltip>
-          <CustomTooltip content="Siguiente">
-            <Button
-              disabled={!table.getCanNextPage()}
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                table.nextPage()
-                setCurrentPage(table.getState().pagination.pageIndex + 1)
-              }}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </CustomTooltip>
+          <Button
+            disabled={!table.getCanPreviousPage()}
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              table.previousPage()
+            }}
+          >
+            Anterior
+          </Button>
+          <Button
+            disabled={!table.getCanNextPage()}
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              table.nextPage()
+            }}
+          >
+            Siguiente
+          </Button>
         </div>
       </div>
       <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onExperienciaAdded={handleExperienciaAdded} onSave={handleAddData} />

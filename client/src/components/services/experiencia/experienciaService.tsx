@@ -1,4 +1,4 @@
-import type { Experiencia } from '../../experiencia/experience-table/experience-table'
+import type { Experiencia } from '../../experiencia/experience-table/interface'
 
 export const obtenerExperiences = async (): Promise<Experiencia[]> => {
   const response = await fetch('http://localhost:3000/experiencias/obtenerExperiencia')
