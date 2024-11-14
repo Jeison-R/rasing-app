@@ -88,7 +88,7 @@ export function Login() {
               <CardDescription>Accede a tu cuenta</CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4" onSubmit={handleLogin}>
+              <form className="space-y-4" onSubmit={void handleLogin}>
                 <div>
                   <Label htmlFor="email">Correo electrónico</Label>
                   <Input required className="mt-2" id="email" placeholder="correo@ejemplo.com" type="email" value={email} onChange={handleEmailChange} />

@@ -519,7 +519,7 @@ export function CustomTable() {
                       key={column.id}
                       checked={column.getIsVisible()}
                       className="capitalize"
-                      onCheckedChange={(value) => {
+                      onCheckedChange={(value: boolean) => {
                         column.toggleVisibility(!!value)
                       }}
                     >

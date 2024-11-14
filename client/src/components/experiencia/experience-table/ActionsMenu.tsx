@@ -1,4 +1,4 @@
-import type { Experiencia } from './experience-table'
+import type { Experiencia } from './interface'
 
 import { MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
