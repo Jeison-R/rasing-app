@@ -11,6 +11,7 @@ import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel
 import { useEffect, useState } from 'react'
 import React from 'react'
 import ReactSelect from 'react-select'
+import { Toaster, toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -20,6 +21,8 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
@@ -33,6 +36,29 @@ import { ActionsMenu } from './ActionsMenu'
 import { deleteExperience } from './deleteExperience'
 
 export const columns: ColumnDef<Experiencia>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        aria-label="Seleccionar todo"
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => {
+          table.toggleAllPageRowsSelected(!!value)
+        }}
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        aria-label="Seleccionar fila"
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => {
+          row.toggleSelected(!!value)
+        }}
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false
+  },
   {
     accessorKey: 'Empresa',
     header: 'Empresa',
@@ -57,7 +83,7 @@ export const columns: ColumnDef<Experiencia>[] = [
   },
   {
     accessorKey: 'entidad',
-    header: 'Entidad Contratante',
+    header: 'Entidad',
     cell: ({ row }) => <div className="capitalize">{row.getValue('entidad')}</div>
   },
   {
@@ -222,6 +248,7 @@ export function CustomTable() {
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
   const [selectedActividad, setSelectedActividad] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const fetchFilters = async () => {
     try {
@@ -252,6 +279,7 @@ export function CustomTable() {
       const experienciaData = await obtenerExperiences()
 
       setData(experienciaData)
+      setIsLoading(false)
     } catch (error) {
       if (error instanceof Error) {
         global.console.error('Error al obtener documentos:', error.message)
@@ -319,6 +347,22 @@ export function CustomTable() {
     }
   }, [selectedActividad, table])
 
+  useEffect(() => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows
+    const sum = selectedRows.reduce((acc, row) => acc + row.original.valorSmmlvPart2, 0)
+
+    if (selectedRows.length > 0) {
+      const formatted = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP'
+      }).format(sum)
+
+      toast.success(`Suma total: ${formatted}`, {
+        description: `${selectedRows.length} fila(s) seleccionada(s)`
+      })
+    }
+  }, [rowSelection, table])
+
   const handleDeleteRow = async (id: string) => {
     const deleted = await deleteExperience(id)
 
@@ -362,6 +406,7 @@ export function CustomTable() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between py-4">
+        <Toaster richColors expand={false} />
         <div className="relative mr-2 w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -543,7 +588,19 @@ export function CustomTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {isLoading ? (
+              // Skeleton loader
+              Array.from({ length: 10 }).map((_, index) => (
+                <TableRow key={`skeleton-${index}`}>
+                  {Array.from({ length: columns.length + 1 }).map((_1, cellIndex) => (
+                    <TableCell key={`skeleton-cell-${cellIndex}`}>
+                      <Skeleton className="h-8 w-full dark:bg-gray-800" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length ? (
+              // Datos reales
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
@@ -563,8 +620,9 @@ export function CustomTable() {
                 </TableRow>
               ))
             ) : (
+              // Mensaje de "Sin resultados"
               <TableRow>
-                <TableCell className="h-24 text-center" colSpan={columns.length}>
+                <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
                   Sin resultados
                 </TableCell>
               </TableRow>
