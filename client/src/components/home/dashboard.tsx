@@ -1,0 +1,94 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Activity, CreditCard, Users, User } from 'lucide-react'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton' // Asegúrate de importar el Skeleton de Shadcn
+
+export function Dashboard() {
+  const [sumValorSmmlv, setSumValorSmmlv] = useState<number | null>(null)
+  const [sumValorSmmlvPart2, setSumValorSmmlvPart2] = useState<number | null>(null)
+  const [sumExperiencia, setSumExperiencia] = useState<number | null>(null)
+  const [sumValorFinal, setSumValorFinal] = useState<string | null>(null)
+
+  // Obtener los datos desde la API cuando el componente se monta
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response1 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv')
+        const data1 = (await response1.json()) as { sumValorSmmlv: number | null }
+
+        setSumValorSmmlv(data1.sumValorSmmlv)
+
+        const response2 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv-part2')
+        const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
+
+        setSumValorSmmlvPart2(data2.sumValorSmmlvPart2)
+
+        const response3 = await fetch('http://localhost:3000/dashboard/count-experiencias')
+        const data3 = (await response3.json()) as { countExperiencias: number | null }
+
+        setSumExperiencia(data3.countExperiencias)
+
+        const response4 = await fetch('http://localhost:3000/dashboard/sumValorFinalAfectado')
+        const data4 = (await response4.json()) as { sumValorFinalAfectado: number | null }
+
+        // Formatear el número con puntos de miles
+        const formattedValue = data4.sumValorFinalAfectado ? new Intl.NumberFormat('es-CO').format(data4.sumValorFinalAfectado) : null
+
+        setSumValorFinal(formattedValue)
+      } catch (error) {
+        global.console.error('Error fetching data:', error)
+      }
+    }
+
+    void fetchData()
+  }, [])
+
+  return (
+    <div className="flex min-h-screen w-full flex-col">
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+          {/* Card 1: Total Valor SMMLV */}
+          <Card x-chunk="dashboard-01-chunk-0">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Valor SMMLV</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>{sumValorSmmlv === null ? <Skeleton className="h-16 w-full rounded" /> : <div className="text-2xl font-bold">{sumValorSmmlv.toFixed(2)}</div>}</CardContent>
+          </Card>
+
+          {/* Card 2: Total Valor SMMLV Part2 */}
+          <Card x-chunk="dashboard-01-chunk-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Valor SMMLV Part2</CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {sumValorSmmlvPart2 === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumValorSmmlvPart2.toFixed(2)}</div>}
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Sales */}
+          <Card x-chunk="dashboard-01-chunk-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Experiencias</CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>{sumExperiencia === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumExperiencia}</div>}</CardContent>
+          </Card>
+
+          {/* Card 4: Active Now */}
+          <Card x-chunk="dashboard-01-chunk-3">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Valor Final Afectado</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>{sumValorFinal === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumValorFinal}</div>}</CardContent>
+          </Card>
+        </div>
+      </main>
+    </div>
+  )
+}

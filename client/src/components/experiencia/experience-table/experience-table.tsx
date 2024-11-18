@@ -4,6 +4,7 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 import type { Experiencia } from './interface'
 import type { Contrato } from '@/components/tipoContrato/tipoContratoTable/tipoContrato-table'
 import type { Actividad } from '@/components/actividad/actividadTable/actividad-table'
+import type { CheckedState } from '@radix-ui/react-checkbox'
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
@@ -12,6 +13,7 @@ import { useEffect, useState } from 'react'
 import React from 'react'
 import ReactSelect from 'react-select'
 import { Toaster, toast } from 'sonner'
+import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -42,8 +44,8 @@ export const columns: ColumnDef<Experiencia>[] = [
       <Checkbox
         aria-label="Seleccionar todo"
         checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => {
-          table.toggleAllPageRowsSelected(!!value)
+        onCheckedChange={(checked: CheckedState) => {
+          table.toggleAllPageRowsSelected(!!checked)
         }}
       />
     ),
@@ -51,8 +53,8 @@ export const columns: ColumnDef<Experiencia>[] = [
       <Checkbox
         aria-label="Seleccionar fila"
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => {
-          row.toggleSelected(!!value)
+        onCheckedChange={(checked: CheckedState) => {
+          row.toggleSelected(!!checked)
         }}
       />
     ),
@@ -219,7 +221,9 @@ export const columns: ColumnDef<Experiencia>[] = [
 ]
 
 const getColumnVisibilityFromLocalStorage = () => {
-  const storedVisibility = localStorage.getItem('columnVisibility')
+  if (typeof window === 'undefined') return {} // No ejecutar en SSR
+
+  const storedVisibility = window.localStorage.getItem('columnVisibility')
 
   return storedVisibility ? (JSON.parse(storedVisibility) as VisibilityState) : {}
 }
@@ -243,7 +247,7 @@ export function CustomTable() {
   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
   const [data, setData] = useState<Experiencia[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(getColumnVisibilityFromLocalStorage)
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
@@ -290,8 +294,11 @@ export function CustomTable() {
   }
 
   useEffect(() => {
-    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility))
-  }, [columnVisibility])
+    // Se ejecuta solo en el cliente
+    const visibility = getColumnVisibilityFromLocalStorage()
+
+    setColumnVisibility(visibility)
+  }, [])
 
   // useEffect para cargar los datos cuando el componente se monta
   useEffect(() => {
@@ -475,7 +482,6 @@ export function CustomTable() {
                     <ReactSelect
                       isMulti
                       aria-label="Seleccionar"
-                      className="basic-multi-select w-[280px]"
                       classNamePrefix="select"
                       name="tiposContrato"
                       options={tipoContratoOptions}
@@ -495,7 +501,6 @@ export function CustomTable() {
                     <ReactSelect
                       isMulti
                       aria-label="Seleccionar"
-                      className="basic-multi-select w-[280px]"
                       classNamePrefix="select"
                       name="tiposContrato"
                       options={actividadOptions}
@@ -590,10 +595,10 @@ export function CustomTable() {
           <TableBody>
             {isLoading ? (
               // Skeleton loader
-              Array.from({ length: 10 }).map((_, index) => (
-                <TableRow key={`skeleton-${index}`}>
-                  {Array.from({ length: columns.length + 1 }).map((_1, cellIndex) => (
-                    <TableCell key={`skeleton-cell-${cellIndex}`}>
+              Array.from({ length: 10 }).map(() => (
+                <TableRow key={uuidv4()}>
+                  {Array.from({ length: columns.length + 1 }).map(() => (
+                    <TableCell key={uuidv4()}>
                       <Skeleton className="h-8 w-full dark:bg-gray-800" />
                     </TableCell>
                   ))}

@@ -55,7 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </div>
           </div>
         </header>
-        <main className="mx-auto flex min-h-[calc(100vh-4rem-1px)] w-full max-w-[1352px] px-4 pt-6">{children}</main>
+        <main className="mx-auto flex min-h-[calc(100vh-4rem-1px)] w-full max-w-[auto] px-4 pt-6">{children}</main>
       </body>
     </html>
   )
