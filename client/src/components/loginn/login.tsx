@@ -34,7 +34,7 @@ export function Login() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const idToken = await userCredential.user.getIdToken()
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch('https://servidor-rasing.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
