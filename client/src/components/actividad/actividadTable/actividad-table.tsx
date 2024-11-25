@@ -6,10 +6,12 @@ import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useState, useEffect, type ChangeEvent } from 'react'
 import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
@@ -70,6 +72,7 @@ export function CustomTableActividad() {
   const [currentPage, setCurrentPage] = useState(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Actividad[]>([]) // Cambiar el estado inicial a un array vacío
+  const [isLoading, setIsLoading] = useState(true)
 
   // Función para obtener las actividades desde la API
   const fetchActividades = async () => {
@@ -77,6 +80,7 @@ export function CustomTableActividad() {
       const actividadesData = await obtenerActividades() // Usar la función importada
 
       setData(actividadesData)
+      setIsLoading(false)
     } catch (error) {
       if (error instanceof Error) {
         global.console.error('Error al obtener actividades:', error.message)
@@ -160,7 +164,18 @@ export function CustomTableActividad() {
                 ))}
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows.length ? (
+                {isLoading ? (
+                  // Skeleton loader
+                  Array.from({ length: 10 }).map(() => (
+                    <TableRow key={uuidv4()}>
+                      {Array.from({ length: columns.length + 1 }).map(() => (
+                        <TableCell key={uuidv4()}>
+                          <Skeleton className="h-8 w-full dark:bg-gray-800" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : table.getRowModel().rows.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                       {row.getVisibleCells().map((cell) => (

@@ -46,13 +46,13 @@ export function Login() {
 
       if (response.ok) {
         void setCookie('auth_token', idToken, {
-          maxAge: 1 * 60,
+          maxAge: 60 * 60,
           path: '/',
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict'
         })
         setTimeout(() => {
-          router.push('/dashboard')
+          router.push('/')
         }, 500) // Redirigir a /experiencias
       } else {
         await Swal.fire({
