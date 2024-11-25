@@ -17,22 +17,17 @@ export function Dashboard() {
     const fetchData = async () => {
       try {
         const response1 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv')
+        const response2 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv-part2')
+        const response3 = await fetch('http://localhost:3000/dashboard/count-experiencias')
+        const response4 = await fetch('http://localhost:3000/dashboard/sumValorFinalAfectado')
         const data1 = (await response1.json()) as { sumValorSmmlv: number | null }
+        const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
+        const data3 = (await response3.json()) as { countExperiencias: number | null }
+        const data4 = (await response4.json()) as { sumValorFinalAfectado: number | null }
 
         setSumValorSmmlv(data1.sumValorSmmlv)
-
-        const response2 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv-part2')
-        const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
-
         setSumValorSmmlvPart2(data2.sumValorSmmlvPart2)
-
-        const response3 = await fetch('http://localhost:3000/dashboard/count-experiencias')
-        const data3 = (await response3.json()) as { countExperiencias: number | null }
-
         setSumExperiencia(data3.countExperiencias)
-
-        const response4 = await fetch('http://localhost:3000/dashboard/sumValorFinalAfectado')
-        const data4 = (await response4.json()) as { sumValorFinalAfectado: number | null }
 
         // Formatear el número con puntos de miles
         const formattedValue = data4.sumValorFinalAfectado ? new Intl.NumberFormat('es-CO').format(data4.sumValorFinalAfectado) : null

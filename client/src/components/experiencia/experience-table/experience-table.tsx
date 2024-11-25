@@ -7,7 +7,7 @@ import type { Actividad } from '@/components/actividad/actividadTable/actividad-
 import type { CheckedState } from '@radix-ui/react-checkbox'
 
 import { CaretSortIcon } from '@radix-ui/react-icons'
-import { CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useEffect, useState } from 'react'
 import React from 'react'
@@ -43,9 +43,9 @@ export const columns: ColumnDef<Experiencia>[] = [
     header: ({ table }) => (
       <Checkbox
         aria-label="Seleccionar todo"
-        checked={table.getIsAllPageRowsSelected()}
+        checked={table.getIsAllRowsSelected()}
         onCheckedChange={(checked: CheckedState) => {
-          table.toggleAllPageRowsSelected(!!checked)
+          table.toggleAllRowsSelected(!!checked)
         }}
       />
     ),
@@ -159,9 +159,13 @@ export const columns: ColumnDef<Experiencia>[] = [
     header: 'Valor en SMMLV*%PART2',
     cell: ({ row }) => {
       const value = row.getValue('valorSmmlvPart2')
-      const formattedValue = typeof value === 'number' ? value.toFixed(3) : parseFloat(value as string).toFixed(3)
+      const formatted = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP'
+      }).format(typeof value === 'number' ? value : parseFloat(value as string))
+      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-      return <div className="capitalize">{formattedValue}</div>
+      return <div className="capitalize">{formattedWithoutSymbol}</div>
     }
   },
   {
@@ -169,9 +173,13 @@ export const columns: ColumnDef<Experiencia>[] = [
     header: 'Valor en SMMLV',
     cell: ({ row }) => {
       const value = row.getValue('valorSmmlv')
-      const formattedValue = typeof value === 'number' ? value.toFixed(3) : parseFloat(value as string).toFixed(3)
+      const formatted = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP'
+      }).format(typeof value === 'number' ? value : parseFloat(value as string))
+      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-      return <div className="capitalize">{formattedValue}</div>
+      return <div className="capitalize">{formattedWithoutSymbol}</div>
     }
   },
   {
@@ -363,8 +371,9 @@ export function CustomTable() {
         style: 'currency',
         currency: 'COP'
       }).format(sum)
+      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-      toast.success(`Suma total: ${formatted}`, {
+      toast.success(`Suma total: ${formattedWithoutSymbol}`, {
         description: `${selectedRows.length} fila(s) seleccionada(s)`
       })
     }
@@ -408,6 +417,37 @@ export function CustomTable() {
     table.setColumnFilters([])
     setSelectedActividad([])
     setSelectedTiposContrato([])
+  }
+
+  const pageCount = table.getPageCount()
+
+  // Función para generar el array de páginas a mostrar
+  const getPageRange = () => {
+    const currentPage = table.getState().pagination.pageIndex + 1
+    const totalPages = pageCount
+    const delta = 2 // Número de páginas a mostrar antes y después de la página actual
+
+    const range = []
+
+    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+      range.push(i)
+    }
+
+    if (currentPage - delta > 2) {
+      range.unshift('...')
+    }
+
+    if (currentPage + delta < totalPages - 1) {
+      range.push('...')
+    }
+
+    range.unshift(1)
+
+    if (totalPages !== 1) {
+      range.push(totalPages)
+    }
+
+    return range
   }
 
   return (
@@ -555,9 +595,11 @@ export function CustomTable() {
         <div className="ml-3 mt-4 sm:mt-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              {/* <CustomTooltip content="Ocultar o Anadir Columnas"> */}
               <Button className="ml-auto" variant="outline">
                 Columnas <MoreHorizontal className="ml-2 h-4 w-4" />
               </Button>
+              {/* </CustomTooltip> */}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {table
@@ -636,29 +678,46 @@ export function CustomTable() {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="space-x-2">
-          <Button
-            disabled={!table.getCanPreviousPage()}
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              table.previousPage()
-            }}
-          >
-            Anterior
-          </Button>
-          <Button
-            disabled={!table.getCanNextPage()}
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              table.nextPage()
-            }}
-          >
-            Siguiente
-          </Button>
-        </div>
+        <Button
+          disabled={!table.getCanPreviousPage()}
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            table.previousPage()
+          }}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        {getPageRange().map((pageNumber) =>
+          pageNumber === '...' ? (
+            <span key={pageNumber} className="px-2">
+              ...
+            </span>
+          ) : (
+            <Button
+              key={pageNumber}
+              size="sm"
+              variant={table.getState().pagination.pageIndex === Number(pageNumber) - 1 ? 'default' : 'outline'}
+              onClick={() => {
+                table.setPageIndex(Number(pageNumber) - 1)
+              }}
+            >
+              {pageNumber}
+            </Button>
+          )
+        )}
+        <Button
+          disabled={!table.getCanNextPage()}
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            table.nextPage()
+          }}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
+
       <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onExperienciaAdded={handleExperienciaAdded} onSave={handleAddData} />
       {isEditModalOpen && selectedPayment ? (
         <EditExperienceModal isOpen={isEditModalOpen} payment={selectedPayment} onClose={handleCloseEditModal} onExperienciaEdit={handleExperienciaEdit} onSave={handleSaveEdit} />

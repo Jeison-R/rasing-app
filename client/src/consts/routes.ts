@@ -1,5 +1,5 @@
 export const ROUTES = {
-  HOME: '/',
+  HOME: '/dashboard',
   EXPERIENCES: '/experiencias',
   MINIMUIM_WAGE: '/salarios-minimos',
   LOGIN: '/login',
