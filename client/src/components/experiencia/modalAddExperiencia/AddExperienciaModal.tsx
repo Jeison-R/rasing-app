@@ -382,7 +382,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         documentoCargado: documentosSubidos
       }
 
-      const response = await fetch('http://localhost:3000/experiencias/CrearExperiencia', {
+      const response = await fetch('https://servidor-rasing.onrender.com/experiencias/CrearExperiencia', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

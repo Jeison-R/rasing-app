@@ -17,7 +17,7 @@ export const obtenerActividades = async (): Promise<Payment[]> => {
 
 // Agregar una nueva actividad
 export const agregarActividad = async (actividad: Payment): Promise<void> => {
-  const response = await fetch('http://localhost:3000/actividades/crearActividad', {
+  const response = await fetch('https://servidor-rasing.onrender.com/actividades/crearActividad', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ export const agregarActividad = async (actividad: Payment): Promise<void> => {
 
 // Eliminar una actividad por ID
 export const eliminarActividad = async (id: string): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/actividades/eliminarActividad/${id}`, {
+  const response = await fetch(`https://servidor-rasing.onrender.com/actividades/eliminarActividad/${id}`, {
     method: 'DELETE'
   })
 

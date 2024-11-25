@@ -6,7 +6,7 @@ export interface TipoContrato {
 
 // Obtener todos los tipos de contrato
 export const obtenerTiposContrato = async (): Promise<TipoContrato[]> => {
-  const response = await fetch('http://localhost:3000/tiposContratos/obtenerTiposContratos')
+  const response = await fetch('https://servidor-rasing.onrender.com/tiposContratos/obtenerTiposContratos')
 
   if (!response.ok) {
     throw new Error('Error al obtener los tipos de contrato')
@@ -17,7 +17,7 @@ export const obtenerTiposContrato = async (): Promise<TipoContrato[]> => {
 
 // Agregar un nuevo tipo de contrato
 export const agregarTipoContrato = async (tipoContrato: TipoContrato): Promise<void> => {
-  const response = await fetch('http://localhost:3000/tiposContratos/crearTipoContrato', {
+  const response = await fetch('https://servidor-rasing.onrender.com/tiposContratos/crearTipoContrato', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ export const agregarTipoContrato = async (tipoContrato: TipoContrato): Promise<v
 
 // Eliminar un tipo de contrato por ID
 export const eliminarTipoContrato = async (id: string): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/tiposContratos/eliminarTipoContrato/${id}`, {
+  const response = await fetch(`https://servidor-rasing.onrender.com/tiposContratos/eliminarTipoContrato/${id}`, {
     method: 'DELETE'
   })
 

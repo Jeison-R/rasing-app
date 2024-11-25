@@ -6,7 +6,7 @@ export interface DocumentoSoporte {
 
 // Obtener todos los documentos de soporte
 export const obtenerDocumentosSoporte = async (): Promise<DocumentoSoporte[]> => {
-  const response = await fetch('http://localhost:3000/tiposDocumentos/obtenerTiposDocumentos')
+  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/obtenerTiposDocumentos')
 
   if (!response.ok) {
     throw new Error('Error al obtener los documentos de soporte')
@@ -17,7 +17,7 @@ export const obtenerDocumentosSoporte = async (): Promise<DocumentoSoporte[]> =>
 
 // Agregar un nuevo documento de soporte
 export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte): Promise<void> => {
-  const response = await fetch('http://localhost:3000/tiposDocumentos/crearTipoDocumento', {
+  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/crearTipoDocumento', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -32,7 +32,7 @@ export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte
 
 // Eliminar un documento de soporte por ID
 export const eliminarDocumentoSoporte = async (id: string): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/tiposDocumentos/eliminarTipoDocumento/${id}`, {
+  const response = await fetch(`https://servidor-rasing.onrender.com/tiposDocumentos/eliminarTipoDocumento/${id}`, {
     method: 'DELETE'
   })
 

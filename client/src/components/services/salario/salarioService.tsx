@@ -7,7 +7,7 @@ export interface Salario {
 
 // Obtener todos los salarios
 export const obtenerSalarios = async (): Promise<Salario[]> => {
-  const response = await fetch('http://localhost:3000/salarios/obtenerSalarios')
+  const response = await fetch('https://servidor-rasing.onrender.com/salarios/obtenerSalarios')
 
   if (!response.ok) {
     throw new Error('Error al obtener los salarios')
@@ -18,7 +18,7 @@ export const obtenerSalarios = async (): Promise<Salario[]> => {
 
 // Agregar un nuevo salario
 export const agregarSalario = async (salario: Salario): Promise<void> => {
-  const response = await fetch('http://localhost:3000/salarios/crearSalario', {
+  const response = await fetch('https://servidor-rasing.onrender.com/salarios/crearSalario', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -33,7 +33,7 @@ export const agregarSalario = async (salario: Salario): Promise<void> => {
 
 // Eliminar un salario por ID
 export const eliminarSalario = async (id: string): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/salarios/eliminarSalario/${id}`, {
+  const response = await fetch(`https://servidor-rasing.onrender.com/salarios/eliminarSalario/${id}`, {
     method: 'DELETE'
   })
 
@@ -44,7 +44,7 @@ export const eliminarSalario = async (id: string): Promise<void> => {
 
 // Actualizar un salario
 export const actualizarSalario = async (id: string, año: number, valor: number): Promise<void> => {
-  const response = await fetch(`http://localhost:3000/salarios/actualizarSalario/${id}`, {
+  const response = await fetch(`https://servidor-rasing.onrender.com/salarios/actualizarSalario/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

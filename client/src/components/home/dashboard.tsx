@@ -16,10 +16,10 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv')
-        const response2 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv-part2')
-        const response3 = await fetch('http://localhost:3000/dashboard/count-experiencias')
-        const response4 = await fetch('http://localhost:3000/dashboard/sumValorFinalAfectado')
+        const response1 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv')
+        const response2 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv-part2')
+        const response3 = await fetch('https://servidor-rasing.onrender.com/dashboard/count-experiencias')
+        const response4 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumValorFinalAfectado')
         const data1 = (await response1.json()) as { sumValorSmmlv: number | null }
         const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
         const data3 = (await response3.json()) as { countExperiencias: number | null }
