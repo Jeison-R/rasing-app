@@ -6,7 +6,7 @@ export interface Payment {
 
 // Obtener todas las actividades
 export const obtenerActividades = async (): Promise<Payment[]> => {
-  const response = await fetch('http://localhost:3000/actividades/obtenerActividades')
+  const response = await fetch('https://servidor-rasing.onrender.com/actividades/obtenerActividades')
 
   if (!response.ok) {
     throw new Error('Error al obtener las actividades')

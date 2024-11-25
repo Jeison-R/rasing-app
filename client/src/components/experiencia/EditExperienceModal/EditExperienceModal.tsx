@@ -270,7 +270,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
       }
 
       // Enviar los datos actualizados a la API
-      const response = await fetch(`http://localhost:3000/experiencias/ActualizarExperiencia/${updatedPayment.id}`, {
+      const response = await fetch(`https://servidor-rasing.onrender.com/experiencias/ActualizarExperiencia/${updatedPayment.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
