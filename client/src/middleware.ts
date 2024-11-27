@@ -6,14 +6,20 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
 
   // Lista de rutas protegidas
-  const protectedRoutes = ['/dashboard', '/experiencias', '/salarios-minimos', '/actividad-documentos']
+  const protectedRoutes = ['/', '/experiencias', '/salarios-minimos', '/actividad-documentos']
 
   // Verifica si la ruta actual está en la lista de rutas protegidas
   const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
 
   if (isProtectedRoute && !token) {
-    // Si es una ruta protegida y no hay token, redirige al login
-    return NextResponse.redirect(new URL('/login', request.url))
+    if (request.nextUrl.pathname !== '/login') {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  }
+
+  // Evitar que un usuario autenticado acceda a /login y redirigirlo a la raíz
+  if (request.nextUrl.pathname === '/login' && token) {
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // Si no es una ruta protegida o hay un token, permite el acceso

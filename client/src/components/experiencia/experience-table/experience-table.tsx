@@ -9,7 +9,7 @@ import type { CheckedState } from '@radix-ui/react-checkbox'
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { ChevronLeft, ChevronRight, CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import React from 'react'
 import ReactSelect from 'react-select'
 import { Toaster, toast } from 'sonner'
@@ -228,14 +228,6 @@ export const columns: ColumnDef<Experiencia>[] = [
   }
 ]
 
-const getColumnVisibilityFromLocalStorage = () => {
-  if (typeof window === 'undefined') return {} // No ejecutar en SSR
-
-  const storedVisibility = window.localStorage.getItem('columnVisibility')
-
-  return storedVisibility ? (JSON.parse(storedVisibility) as VisibilityState) : {}
-}
-
 export interface OptionTipoContrato {
   value: string
   label: string
@@ -261,6 +253,28 @@ export function CustomTable() {
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
   const [selectedActividad, setSelectedActividad] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isAtBottom, setIsAtBottom] = useState(false)
+  const tableEndRef = useRef<HTMLDivElement | null>(null)
+  const navRef = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsAtBottom(entry.isIntersecting)
+      },
+      { threshold: 0.1 }
+    )
+
+    if (tableEndRef.current) {
+      observer.observe(tableEndRef.current)
+    }
+
+    return () => {
+      if (tableEndRef.current) {
+        observer.unobserve(tableEndRef.current)
+      }
+    }
+  }, [])
 
   const fetchFilters = async () => {
     try {
@@ -300,13 +314,6 @@ export function CustomTable() {
       }
     }
   }
-
-  useEffect(() => {
-    // Se ejecuta solo en el cliente
-    const visibility = getColumnVisibilityFromLocalStorage()
-
-    setColumnVisibility(visibility)
-  }, [])
 
   // useEffect para cargar los datos cuando el componente se monta
   useEffect(() => {
@@ -677,7 +684,13 @@ export function CustomTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div ref={tableEndRef} className="h-1" />
+      <div
+        ref={navRef}
+        className={`flex items-center justify-center space-x-2 py-4 transition-all duration-500 ${
+          isAtBottom ? 'static bg-transparent' : 'fixed bottom-2 left-1/2 max-w-max -translate-x-1/2 scale-x-100 transform rounded-lg bg-white px-4 shadow-lg dark:bg-[hsl(20,14.3%,4.1%)]'
+        } z-50 ${isAtBottom ? '' : 'scale-x-90'}`}
+      >
         <Button
           disabled={!table.getCanPreviousPage()}
           size="sm"
