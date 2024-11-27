@@ -247,7 +247,11 @@ export function CustomTable() {
   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
   const [data, setData] = useState<Experiencia[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
+    const savedVisibility = localStorage.getItem('columnVisibility')
+
+    return savedVisibility ? (JSON.parse(savedVisibility) as VisibilityState) : {}
+  })
   const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
@@ -256,6 +260,18 @@ export function CustomTable() {
   const [isAtBottom, setIsAtBottom] = useState(false)
   const tableEndRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility))
+  }, [columnVisibility])
+
+  useEffect(() => {
+    const savedVisibility = localStorage.getItem('columnVisibility')
+
+    if (savedVisibility) {
+      setColumnVisibility(JSON.parse(savedVisibility) as VisibilityState)
+    }
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -618,8 +634,11 @@ export function CustomTable() {
                       key={column.id}
                       checked={column.getIsVisible()}
                       className="capitalize"
-                      onCheckedChange={(value: boolean) => {
-                        column.toggleVisibility(!!value)
+                      onCheckedChange={(isVisible: boolean) => {
+                        const updatedVisibility = { ...columnVisibility, [column.id]: isVisible }
+
+                        setColumnVisibility(updatedVisibility) // Actualiza el estado global
+                        column.toggleVisibility(isVisible) // Asegura la sincronización con React Table
                       }}
                     >
                       {column.id}
