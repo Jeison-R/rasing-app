@@ -238,6 +238,16 @@ export interface OptionActividad {
   label: string
 }
 
+const getColumnVisibilityFromLocalStorage = () => {
+  if (typeof window !== 'undefined') {
+    const savedVisibility = localStorage.getItem('columnVisibility')
+
+    return savedVisibility ? (JSON.parse(savedVisibility) as VisibilityState) : {}
+  }
+
+  return {} // Default value if on the server
+}
+
 export function CustomTable() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -247,11 +257,8 @@ export function CustomTable() {
   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
   const [data, setData] = useState<Experiencia[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(() => {
-    const savedVisibility = localStorage.getItem('columnVisibility')
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(getColumnVisibilityFromLocalStorage)
 
-    return savedVisibility ? (JSON.parse(savedVisibility) as VisibilityState) : {}
-  })
   const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
@@ -262,16 +269,10 @@ export function CustomTable() {
   const navRef = useRef(null)
 
   useEffect(() => {
-    localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility))
-  }, [columnVisibility])
-
-  useEffect(() => {
-    const savedVisibility = localStorage.getItem('columnVisibility')
-
-    if (savedVisibility) {
-      setColumnVisibility(JSON.parse(savedVisibility) as VisibilityState)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('columnVisibility', JSON.stringify(columnVisibility))
     }
-  }, [])
+  }, [columnVisibility])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -355,9 +356,7 @@ export function CustomTable() {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: (newVisibility) => {
-      setColumnVisibility(newVisibility)
-    },
+    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     globalFilterFn: 'includesString',
     state: {
