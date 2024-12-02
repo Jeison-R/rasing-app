@@ -90,9 +90,9 @@ export function CustomTable() {
       setData(SalarioData)
     } catch (error) {
       if (error instanceof Error) {
-        global.console.error('Error al obtener actividades:', error.message)
+        global.console.error('Error al obtener los salarios:', error.message)
       } else {
-        global.console.error('Error desconocido al obtener actividades')
+        global.console.error('Error desconocido al obtener los salarios')
       }
     }
   }

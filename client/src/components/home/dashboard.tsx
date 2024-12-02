@@ -16,10 +16,35 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv')
-        const response2 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv-part2')
-        const response3 = await fetch('https://servidor-rasing.onrender.com/dashboard/count-experiencias')
-        const response4 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumValorFinalAfectado')
+        const response1 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+        const response2 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv-part2', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+        const response3 = await fetch('https://servidor-rasing.onrender.com/dashboard/count-experiencias', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+        const response4 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumValorFinalAfectado', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+
         const data1 = (await response1.json()) as { sumValorSmmlv: number | null }
         const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
         const data3 = (await response3.json()) as { countExperiencias: number | null }
@@ -29,8 +54,11 @@ export function Dashboard() {
         setSumValorSmmlvPart2(data2.sumValorSmmlvPart2)
         setSumExperiencia(data3.countExperiencias)
 
-        // Formatear el número con puntos de miles
-        const formattedValue = data4.sumValorFinalAfectado ? new Intl.NumberFormat('es-CO').format(data4.sumValorFinalAfectado) : null
+        // Asegurarse de que sumValorFinalAfectado no sea null ni undefined
+        const sumValorFinalAfectado = data4.sumValorFinalAfectado
+
+        // Formatear el número con puntos de miles, validando que sea un número
+        const formattedValue = sumValorFinalAfectado != null ? new Intl.NumberFormat('es-CO').format(sumValorFinalAfectado) : '0' // Valor predeterminado si no hay valor
 
         setSumValorFinal(formattedValue)
       } catch (error) {
@@ -51,7 +79,13 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium">Total Valor SMMLV</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>{sumValorSmmlv === null ? <Skeleton className="h-16 w-full rounded" /> : <div className="text-2xl font-bold">{sumValorSmmlv.toFixed(2)}</div>}</CardContent>
+            <CardContent>
+              {sumValorSmmlv === null ? (
+                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
+              ) : (
+                <div className="text-2xl font-bold">{sumValorSmmlv.toFixed(2)}</div> // Aseguramos que no sea null y usamos toFixed
+              )}
+            </CardContent>
           </Card>
 
           {/* Card 2: Total Valor SMMLV Part2 */}
@@ -61,7 +95,11 @@ export function Dashboard() {
               <User className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {sumValorSmmlvPart2 === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumValorSmmlvPart2.toFixed(2)}</div>}
+              {sumValorSmmlvPart2 === null ? (
+                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
+              ) : (
+                <div className="text-2xl font-bold">{sumValorSmmlvPart2.toFixed(2)}</div> // Aseguramos que no sea null y usamos toFixed
+              )}
             </CardContent>
           </Card>
 
@@ -71,7 +109,13 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium">Total Experiencias</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>{sumExperiencia === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumExperiencia}</div>}</CardContent>
+            <CardContent>
+              {sumExperiencia === null ? (
+                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
+              ) : (
+                <div className="text-2xl font-bold">{sumExperiencia}</div> // Aseguramos que no sea null y mostramos el valor
+              )}
+            </CardContent>
           </Card>
 
           {/* Card 4: Active Now */}
@@ -80,7 +124,13 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium">Total Valor Final Afectado</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>{sumValorFinal === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumValorFinal}</div>}</CardContent>
+            <CardContent>
+              {sumValorFinal === null ? (
+                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
+              ) : (
+                <div className="text-2xl font-bold">{sumValorFinal}</div> // Aseguramos que no sea null y mostramos el valor
+              )}
+            </CardContent>
           </Card>
         </div>
       </main>

@@ -4,16 +4,18 @@ import { CustomTableTipoContrato } from '@/components/tipoContrato/tipoContratoT
 
 export default function ActividadContratoPage() {
   return (
-    <>
-      <div className="w-1/3">
-        <CustomTableActividad />
+    <div className="container mx-auto p-4">
+      <div className="flex flex-col gap-4 lg:flex-row">
+        <div className="w-full lg:w-1/3">
+          <CustomTableActividad />
+        </div>
+        <div className="w-full lg:w-1/3">
+          <CustomTableDocumento />
+        </div>
+        <div className="w-full lg:w-1/3">
+          <CustomTableTipoContrato />
+        </div>
       </div>
-      <div className="w-1/3">
-        <CustomTableDocumento />
-      </div>
-      <div className="w-1/3">
-        <CustomTableTipoContrato />
-      </div>
-    </>
+    </div>
   )
 }

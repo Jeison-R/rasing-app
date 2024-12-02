@@ -7,7 +7,13 @@ export interface Salario {
 
 // Obtener todos los salarios
 export const obtenerSalarios = async (): Promise<Salario[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/salarios/obtenerSalarios')
+  const response = await fetch('https://servidor-rasing.onrender.com/salarios/obtenerSalarios', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Error al obtener los salarios')
@@ -23,7 +29,8 @@ export const agregarSalario = async (salario: Salario): Promise<void> => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(salario) // Enviar año y valor como objeto
+    credentials: 'include',
+    body: JSON.stringify(salario)
   })
 
   if (!response.ok) {

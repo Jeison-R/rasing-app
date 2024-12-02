@@ -54,6 +54,15 @@ export function NavMobile() {
                 }}
               >
                 Salarios mínimos
+              </Link>{' '}
+              <Link
+                className="text-black dark:text-white"
+                href={ROUTES.ACTIVIDAD}
+                onClick={() => {
+                  setIsOpen(false)
+                }}
+              >
+                Act, doc, Con
               </Link>
             </section>
           </nav>

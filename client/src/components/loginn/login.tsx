@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { auth } from '@/firebase/firebase'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 import { Logo } from '../../assets/icons/logo'
 
@@ -22,6 +23,7 @@ export function Login() {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter() // Inicializar router
 
   const togglePasswordVisibility = () => {
@@ -30,11 +32,13 @@ export function Login() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const idToken = await userCredential.user.getIdToken()
-      const response = await fetch('https://servidor-rasing.onrender.com/auth/login', {
+
+      const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -45,7 +49,7 @@ export function Login() {
       const data = (await response.json()) as { token: string; message: string }
 
       if (response.ok) {
-        void setCookie('auth_token', idToken, {
+        void setCookie('auth_token', data.token, {
           maxAge: 60 * 60,
           path: '/',
           secure: process.env.NODE_ENV === 'production',
@@ -53,7 +57,7 @@ export function Login() {
         })
         setTimeout(() => {
           router.push('/')
-        }, 500) // Redirigir a /experiencias
+        }, 50) // Redirigir a /experiencias
       } else {
         await Swal.fire({
           icon: 'error',
@@ -70,7 +74,7 @@ export function Login() {
         })
       }
     } finally {
-      return // Add this line to return void
+      setIsLoading(false)
     }
   }
 
@@ -84,6 +88,7 @@ export function Login() {
 
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden">
+      {isLoading ? <LoadingSpinner /> : null}
       <Card className="w-[800px]">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="flex items-center justify-center bg-gray-100 p-6">
@@ -121,7 +126,7 @@ export function Login() {
                     </Button>
                   </div>
                 </div>
-                <Button className="w-full" type="submit">
+                <Button className="w-full" disabled={isLoading} type="submit">
                   Iniciar sesión
                 </Button>
               </form>

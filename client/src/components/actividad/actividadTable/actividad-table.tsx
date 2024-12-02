@@ -5,7 +5,7 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useState, useEffect, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CirclePlus, Trash } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
@@ -36,12 +36,12 @@ export const columns: ColumnDef<Actividad>[] = [
             column.toggleSorting(column.getIsSorted() === 'asc')
           }}
         >
-          Id
+          ID
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('id')}</div>
+    cell: ({ row }) => <div className="text-center">{row.getValue('id')}</div>
   },
   {
     accessorKey: 'nombre',
@@ -137,8 +137,8 @@ export function CustomTableActividad() {
           <Input
             className="max-w-sm"
             placeholder="Filtrar..."
-            value={table.getColumn('actividad')?.getFilterValue() as string}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('actividad')?.setFilterValue(event.target.value)}
+            value={table.getColumn('nombre')?.getFilterValue() as string}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('nombre')?.setFilterValue(event.target.value)}
           />
           <CustomTooltip content="Añadir actividad">
             <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>
@@ -184,13 +184,6 @@ export function CustomTableActividad() {
                       {/* Renderizar los botones de editar y eliminar aquí */}
                       <TableCell>
                         <div className="flex justify-center space-x-2">
-                          {/* Botón Editar */}
-                          <CustomTooltip content="Editar">
-                            <Button size="icon" variant="ghost">
-                              <Edit className="h-5 w-5" />
-                            </Button>
-                          </CustomTooltip>
-
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
                             <Button size="icon" variant="ghost" onClick={() => void deleteActividad(row.original.id, row.original.nombre, fetchActividades)}>
