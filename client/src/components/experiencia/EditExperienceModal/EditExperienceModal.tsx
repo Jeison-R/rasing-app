@@ -103,7 +103,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
     const selectedFiles = event.target.files
 
     if (selectedFiles) {
-      setFiles(Array.from(selectedFiles))
+      setFiles((prevFiles) => [...prevFiles, ...Array.from(selectedFiles)])
     }
   }
 

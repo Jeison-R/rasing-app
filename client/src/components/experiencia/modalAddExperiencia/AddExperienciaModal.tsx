@@ -556,7 +556,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     const selectedFiles = event.target.files
 
     if (selectedFiles) {
-      setFiles(Array.from(selectedFiles))
+      setFiles((prevFiles) => [...prevFiles, ...Array.from(selectedFiles)])
     }
   }
 
