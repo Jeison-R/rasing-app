@@ -38,8 +38,9 @@ export function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const idToken = await userCredential.user.getIdToken()
 
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch('https://servidor-rasing.onrender.com/auth/login', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -49,7 +50,7 @@ export function Login() {
       const data = (await response.json()) as { token: string; message: string }
 
       if (response.ok) {
-        void setCookie('auth_token', data.token, {
+        await setCookie('auth_token', data.token, {
           maxAge: 60 * 60,
           path: '/',
           secure: process.env.NODE_ENV === 'production',

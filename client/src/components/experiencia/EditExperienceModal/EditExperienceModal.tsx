@@ -275,6 +275,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(updatedPayment)
       })
 

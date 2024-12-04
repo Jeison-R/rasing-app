@@ -6,7 +6,13 @@ export interface DocumentoSoporte {
 
 // Obtener todos los documentos de soporte
 export const obtenerDocumentosSoporte = async (): Promise<DocumentoSoporte[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/obtenerTiposDocumentos')
+  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/obtenerTiposDocumentos', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Error al obtener los documentos de soporte')
@@ -22,6 +28,7 @@ export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte
     headers: {
       'Content-Type': 'application/json'
     },
+    credentials: 'include',
     body: JSON.stringify(documentoSoporte)
   })
 
@@ -33,7 +40,11 @@ export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte
 // Eliminar un documento de soporte por ID
 export const eliminarDocumentoSoporte = async (id: string): Promise<void> => {
   const response = await fetch(`https://servidor-rasing.onrender.com/tiposDocumentos/eliminarTipoDocumento/${id}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
   })
 
   if (!response.ok) {

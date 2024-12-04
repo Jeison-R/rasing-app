@@ -143,9 +143,9 @@ export function CustomTable() {
       <div className="flex items-center justify-between py-4">
         <Input
           className="max-w-sm"
-          placeholder="Filtrar..."
-          value={table.getColumn('email')?.getFilterValue() as string}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('email')?.setFilterValue(event.target.value)}
+          placeholder="Filtrar por año"
+          value={table.getColumn('año')?.getFilterValue() as string}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('año')?.setFilterValue(event.target.value)}
         />
         <CustomTooltip content="Añadir salario">
           <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>

@@ -6,7 +6,13 @@ export interface Payment {
 
 // Obtener todas las actividades
 export const obtenerActividades = async (): Promise<Payment[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/actividades/obtenerActividades')
+  const response = await fetch('https://servidor-rasing.onrender.com/actividades/obtenerActividades', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Error al obtener las actividades')
@@ -19,6 +25,7 @@ export const obtenerActividades = async (): Promise<Payment[]> => {
 export const agregarActividad = async (actividad: Payment): Promise<void> => {
   const response = await fetch('https://servidor-rasing.onrender.com/actividades/crearActividad', {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -33,7 +40,11 @@ export const agregarActividad = async (actividad: Payment): Promise<void> => {
 // Eliminar una actividad por ID
 export const eliminarActividad = async (id: string): Promise<void> => {
   const response = await fetch(`https://servidor-rasing.onrender.com/actividades/eliminarActividad/${id}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
   })
 
   if (!response.ok) {

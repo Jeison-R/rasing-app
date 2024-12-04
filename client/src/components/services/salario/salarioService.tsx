@@ -41,7 +41,11 @@ export const agregarSalario = async (salario: Salario): Promise<void> => {
 // Eliminar un salario por ID
 export const eliminarSalario = async (id: string): Promise<void> => {
   const response = await fetch(`https://servidor-rasing.onrender.com/salarios/eliminarSalario/${id}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
   })
 
   if (!response.ok) {
@@ -54,7 +58,8 @@ export const actualizarSalario = async (id: string, año: number, valor: number)
   const response = await fetch(`https://servidor-rasing.onrender.com/salarios/actualizarSalario/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      credentials: 'include'
     },
     body: JSON.stringify({ año, valor }) // Enviar año y valor como objeto
   })

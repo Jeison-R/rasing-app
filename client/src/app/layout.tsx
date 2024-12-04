@@ -21,7 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   // Manejar la acción de cerrar sesión
   const handleLogout = () => {
-    void deleteCookie('auth_token') // Eliminar la cookie
+    void deleteCookie('auth_token')
     router.push(ROUTES.LOGIN) // Redirigir al login
   }
 

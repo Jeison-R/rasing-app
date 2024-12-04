@@ -16,7 +16,7 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await fetch('http://localhost:3000/dashboard/sum-valor-smmlv', {
+        const response1 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'

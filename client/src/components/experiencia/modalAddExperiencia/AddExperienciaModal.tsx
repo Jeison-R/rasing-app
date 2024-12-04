@@ -387,6 +387,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(newData)
       })
 
