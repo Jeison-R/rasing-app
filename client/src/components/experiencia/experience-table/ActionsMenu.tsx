@@ -1,6 +1,6 @@
 import type { Experiencia } from './interface'
 
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, Trash } from 'lucide-react' // Agregado los iconos de Lucide
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -57,6 +57,7 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
               handleView(payment)
             }}
           >
+            <Eye className="mr-2 h-4 w-4" />
             Visualizar
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -64,9 +65,13 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
               onEdit(payment)
             }}
           >
+            <Edit className="mr-2 h-4 w-4" />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onDelete}>Eliminar</DropdownMenuItem>
+          <DropdownMenuItem onClick={onDelete}>
+            <Trash className="mr-2 h-4 w-4" />
+            Eliminar
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
