@@ -447,25 +447,30 @@ export function CustomTable() {
   const getPageRange = () => {
     const currentPage = table.getState().pagination.pageIndex + 1
     const totalPages = pageCount
-    const delta = 2 // Número de páginas a mostrar antes y después de la página actual
-
+    const delta = 2 // Número de páginas antes y después de la actual
     const range = []
 
-    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
-      range.push(i)
-    }
+    // Asegurar siempre incluir la primera página
+    range.push(1)
 
-    if (currentPage - delta > 2) {
-      range.unshift('...')
-    }
+    // Determinar las páginas intermedias
+    const start = Math.max(2, currentPage - delta)
+    const end = Math.min(totalPages - 1, currentPage + delta)
 
-    if (currentPage + delta < totalPages - 1) {
+    if (start > 2) {
       range.push('...')
     }
 
-    range.unshift(1)
+    for (let i = start; i <= end; i++) {
+      range.push(i)
+    }
 
-    if (totalPages !== 1) {
+    if (end < totalPages - 1) {
+      range.push('...')
+    }
+
+    // Incluir siempre la última página si es diferente a la primera
+    if (totalPages > 1) {
       range.push(totalPages)
     }
 

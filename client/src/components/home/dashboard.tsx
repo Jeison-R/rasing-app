@@ -1,15 +1,15 @@
 'use client'
 
-import type { ChartConfig } from '@/components/ui/chart'
+// import type { ChartConfig } from '@/components/ui/chart'
 
 import { useState, useEffect } from 'react'
 import { Activity, CreditCard, Users, User } from 'lucide-react'
-import { TrendingUp } from 'lucide-react'
-import { Bar, BarChart, XAxis, YAxis } from 'recharts'
+// import { TrendingUp } from 'lucide-react'
+// import { Bar, BarChart, XAxis, YAxis } from 'recharts'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton' // Asegúrate de importar el Skeleton de Shadcn
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+// import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 export function Dashboard() {
   const [sumValorSmmlv, setSumValorSmmlv] = useState<number | null>(null)
@@ -74,39 +74,39 @@ export function Dashboard() {
     void fetchData()
   }, [])
 
-  const chartData = [
-    { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
-    { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
-    { browser: 'firefox', visitors: 187, fill: 'var(--color-firefox)' },
-    { browser: 'edge', visitors: 173, fill: 'var(--color-edge)' },
-    { browser: 'other', visitors: 90, fill: 'var(--color-other)' }
-  ]
-
-  const chartConfig = {
-    visitors: {
-      label: 'Visitors'
-    },
-    chrome: {
-      label: 'Chrome',
-      color: 'hsl(var(--chart-1))'
-    },
-    safari: {
-      label: 'Safari',
-      color: 'hsl(var(--chart-2))'
-    },
-    firefox: {
-      label: 'Firefox',
-      color: 'hsl(var(--chart-3))'
-    },
-    edge: {
-      label: 'Edge',
-      color: 'hsl(var(--chart-4))'
-    },
-    other: {
-      label: 'Other',
-      color: 'hsl(var(--chart-5))'
-    }
-  } satisfies ChartConfig
+  //   const chartData = [
+  //     { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
+  //     { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
+  //     { browser: 'firefox', visitors: 187, fill: 'var(--color-firefox)' },
+  //     { browser: 'edge', visitors: 173, fill: 'var(--color-edge)' },
+  //     { browser: 'other', visitors: 90, fill: 'var(--color-other)' }
+  //   ]
+  //
+  //   const chartConfig = {
+  //     visitors: {
+  //       label: 'Visitors'
+  //     },
+  //     chrome: {
+  //       label: 'Chrome',
+  //       color: 'hsl(var(--chart-1))'
+  //     },
+  //     safari: {
+  //       label: 'Safari',
+  //       color: 'hsl(var(--chart-2))'
+  //     },
+  //     firefox: {
+  //       label: 'Firefox',
+  //       color: 'hsl(var(--chart-3))'
+  //     },
+  //     edge: {
+  //       label: 'Edge',
+  //       color: 'hsl(var(--chart-4))'
+  //     },
+  //     other: {
+  //       label: 'Other',
+  //       color: 'hsl(var(--chart-5))'
+  //     }
+  //   } satisfies ChartConfig
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -174,8 +174,8 @@ export function Dashboard() {
         </div>
 
         {/* Segunda fila (2 Cards más grandes) */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
-          {/* Card 5: Bar Chart - Mixed */}
+        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
+
           <Card>
             <CardHeader>
               <CardTitle>Bar Chart - Mixed</CardTitle>
@@ -205,7 +205,7 @@ export function Dashboard() {
               <div className="leading-none text-muted-foreground">Showing total visitors for the last 6 months</div>
             </CardFooter>
           </Card>
-        </div>
+        </div> */}
       </main>
     </div>
   )
