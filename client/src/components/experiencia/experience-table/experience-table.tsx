@@ -258,6 +258,8 @@ export function CustomTable() {
   const [data, setData] = useState<Experiencia[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(getColumnVisibilityFromLocalStorage)
+  const [filterEmpresa, setFilterEmpresa] = useState<string>('')
+  const [filterObjeto, setFilterObjeto] = useState<string>('')
 
   const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
@@ -434,11 +436,27 @@ export function CustomTable() {
     setIsEditModalOpen(false)
   }
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+
+    setFilterEmpresa(value) // Actualiza el estado local
+    table.getColumn('Empresa')?.setFilterValue(value) // Aplica el filtro
+  }
+
+  const handleFilterChangeObjeto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+
+    setFilterObjeto(value) // Actualiza el estado local
+    table.getColumn('objeto')?.setFilterValue(value) // Aplica el filtro
+  }
+
   const resetFilters = () => {
     table.setGlobalFilter('')
     table.setColumnFilters([])
     setSelectedActividad([])
     setSelectedTiposContrato([])
+    setFilterEmpresa('')
+    setFilterObjeto('')
   }
 
   const pageCount = table.getPageCount()
@@ -509,40 +527,10 @@ export function CustomTable() {
                   {/* Filtro por Empresa */}
                   <div className="space-y-2">
                     <Label>Empresa</Label>
-                    <Input
-                      placeholder="Filtrar por empresa"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const value = e.target.value
-
-                        table.getColumn('Empresa')?.setFilterValue(value)
-                      }}
-                    />{' '}
+                    <Input placeholder="Filtrar por empresa" value={filterEmpresa} onChange={handleFilterChange} />{' '}
                   </div>
 
                   {/* Filtro por Modalidad */}
-                  <div className="space-y-2">
-                    <Label>Modalidad</Label>
-                    <Select
-                      defaultValue="Todas"
-                      onValueChange={(value: string) => {
-                        if (value === 'Todas') {
-                          table.getColumn('modalidad')?.setFilterValue(undefined)
-                        } else {
-                          table.getColumn('modalidad')?.setFilterValue(value)
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar modalidad" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Todas">Todas</SelectItem>
-                        <SelectItem value="Individual">Individual</SelectItem>
-                        <SelectItem value="Consorcio">Consorcio</SelectItem>
-                        <SelectItem value="Unión Temporal">Unión Temporal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
                   <div className="space-y-2">
                     <Label>Tipo de Contrato</Label>
@@ -585,19 +573,31 @@ export function CustomTable() {
                   {/* Filtro por Objeto */}
                   <div className="space-y-2">
                     <Label>Objeto</Label>
-                    <Input
-                      placeholder="Buscar en el objeto del contrato"
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const value = e.target.value
-                        const column = table.getColumn('objeto')
+                    <Input placeholder="Buscar en el objeto del contrato" value={filterObjeto} onChange={handleFilterChangeObjeto} />
+                  </div>
 
-                        column?.setFilterValue(value)
-
-                        if (value && !column?.getIsVisible()) {
-                          column?.toggleVisibility()
+                  <div className="space-y-2">
+                    <Label>Modalidad</Label>
+                    <Select
+                      defaultValue="Todas"
+                      onValueChange={(value: string) => {
+                        if (value === 'Todas') {
+                          table.getColumn('modalidad')?.setFilterValue(undefined)
+                        } else {
+                          table.getColumn('modalidad')?.setFilterValue(value)
                         }
                       }}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar modalidad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Todas">Todas</SelectItem>
+                        <SelectItem value="Individual">Individual</SelectItem>
+                        <SelectItem value="Consorcio">Consorcio</SelectItem>
+                        <SelectItem value="Unión Temporal">Unión Temporal</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Botón para restablecer filtros */}
