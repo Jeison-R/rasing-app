@@ -16,6 +16,7 @@ import Select from 'react-select'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 import { storage } from '../../../firebase/firebase'
 import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
@@ -285,10 +286,12 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
 
       // Mostrar mensaje de éxito
       void Swal.fire({
-        title: 'Guardado',
+        title: 'Actualizado',
         text: 'Los cambios se han guardado exitosamente',
         icon: 'success',
-        confirmButtonText: 'OK'
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false
       })
       onSave(updatedPayment)
       onExperienciaEdit()
@@ -300,7 +303,9 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
         title: 'Error',
         text: 'Hubo un problema al actualizar la experiencia',
         icon: 'error',
-        confirmButtonText: 'OK'
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false
       })
     } finally {
       setIsLoading(false)
@@ -449,6 +454,11 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
             <X className="h-5 w-5" />
           </Button>
         </div>
+        {isLoading ? (
+          <div className="z-60 absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <LoadingSpinner />
+          </div>
+        ) : null}
         <form
           className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
           onSubmit={(e) => {
@@ -789,7 +799,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
           </div>
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">
             <Button disabled={isLoading} type="submit" variant="default">
-              {isLoading ? 'Guardando...' : 'Guardar'}
+              {isLoading ? 'Actualizando...' : 'Actualizar'}
             </Button>
           </div>
         </form>

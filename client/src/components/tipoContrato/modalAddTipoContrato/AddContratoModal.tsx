@@ -38,7 +38,9 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
             title: 'Éxito',
             text: `Contrato guardado con éxito. Nombre: ${name}`, // Usamos el nombre directamente del estado
             icon: 'success',
-            confirmButtonText: 'OK'
+        timer: 4000, 
+        timerProgressBar: true, 
+        showConfirmButton: false
           })
 
           onContratoAdded() // Llama a la función para actualizar la lista
@@ -48,7 +50,9 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
             title: 'Error',
             text: `Error de red: ${(error as Error).message}`,
             icon: 'error',
-            confirmButtonText: 'OK'
+        timer: 4000, 
+        timerProgressBar: true, 
+        showConfirmButton: false
           })
         } finally {
           setIsLoading(false) // Terminar la carga

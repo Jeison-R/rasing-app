@@ -38,7 +38,9 @@ export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonl
             title: 'Éxito',
             text: `Actividad guardada con éxito. Nombre: ${name}`,
             icon: 'success',
-            confirmButtonText: 'OK'
+            timer: 4000,
+            timerProgressBar: true,
+            showConfirmButton: false
           })
 
           onActividadAdded() // Actualizar la lista de actividades
@@ -48,7 +50,9 @@ export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonl
             title: 'Error',
             text: `Error de red: ${(error as Error).message}`,
             icon: 'error',
-            confirmButtonText: 'OK'
+            timer: 4000,
+            timerProgressBar: true,
+            showConfirmButton: false
           })
         } finally {
           setIsLoading(false) // Terminar la carga

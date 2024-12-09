@@ -11,10 +11,10 @@ import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Swal from 'sweetalert2'
 import Select from 'react-select'
-import { HashLoader } from 'react-spinners'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 import { storage } from '../../../firebase/firebase'
 import { obtenerSalarios } from '../../services/salario/salarioService'
@@ -400,7 +400,9 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         title: 'Guardado',
         text: 'La experiencia se ha guardado exitosamente',
         icon: 'success',
-        confirmButtonText: 'OK'
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false
       })
       onExperienciaAdded()
       handleClose()
@@ -410,7 +412,9 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         title: 'Error',
         text: 'Hubo un problema al guardar la experiencia',
         icon: 'error',
-        confirmButtonText: 'OK'
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false
       })
     } finally {
       setIsLoading(false)
@@ -573,7 +577,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         </div>
         {isLoading ? (
           <div className="z-60 absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <HashLoader color="#EE9820" size={50} />
+            <LoadingSpinner />
           </div>
         ) : null}
         <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleFormSubmit}>

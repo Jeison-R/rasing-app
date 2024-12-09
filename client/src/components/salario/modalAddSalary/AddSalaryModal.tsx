@@ -40,7 +40,9 @@ export function AddSalaryModal({ isOpen, onClose, onSalaryAdded }: Readonly<AddS
             title: 'Éxito',
             text: `Salario guardado con éxito. Año: ${year}, Valor: ${value}`,
             icon: 'success',
-            confirmButtonText: 'OK'
+            timer: 4000,
+            timerProgressBar: true,
+            showConfirmButton: false
           })
 
           onSalaryAdded() // Actualizar la lista de salarios
@@ -50,7 +52,9 @@ export function AddSalaryModal({ isOpen, onClose, onSalaryAdded }: Readonly<AddS
             title: 'Error',
             text: `Error de red: ${(error as Error).message}`,
             icon: 'error',
-            confirmButtonText: 'OK'
+            timer: 4000,
+            timerProgressBar: true,
+            showConfirmButton: false
           })
         } finally {
           setIsLoading(false) // Terminar la carga
@@ -63,7 +67,9 @@ export function AddSalaryModal({ isOpen, onClose, onSalaryAdded }: Readonly<AddS
           title: 'Error',
           text: 'Por favor, completa todos los campos.',
           icon: 'error',
-          confirmButtonText: 'OK'
+          timer: 4000,
+          timerProgressBar: true,
+          showConfirmButton: false
         })
       }
     }

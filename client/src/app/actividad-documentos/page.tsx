@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
+
 import { CustomTableActividad } from '@/components/actividad/actividadTable/actividad-table'
 import { CustomTableDocumento } from '@/components/documentoSoporte/documentoTable/documento-table'
 import { CustomTableTipoContrato } from '@/components/tipoContrato/tipoContratoTable/tipoContrato-table'
+
+export const metadata: Metadata = {
+  title: 'Actvidad, Documento y Contrato' // Título específico para la página de login
+}
 
 export default function ActividadContratoPage() {
   return (
