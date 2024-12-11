@@ -19,7 +19,7 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white p-6 shadow-lg dark:bg-black">
+      <div className="max-h-[90vh] w-full max-w-6xl overflow-auto rounded-lg bg-white p-6 shadow-lg dark:bg-[hsl(20,14.3%,4.1%)]">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Detalles</h2>
           <Button size="icon" variant="ghost" onClick={onClose}>

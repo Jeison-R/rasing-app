@@ -28,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
+import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
 import { EditExperienceModal } from '../EditExperienceModal/EditExperienceModal'
 import { obtenerExperiences } from '../../services/experiencia/experienciaService'
 import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
@@ -207,7 +208,13 @@ export const columns: ColumnDef<Experiencia>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('fechaInicio')}</div>
+    cell: ({ row }) => {
+      const fecha = row.getValue('fechaInicio')
+      const [year, month, day] = (fecha as string).split('-') // Dividimos la fecha en partes
+      const fechaFormateada = `${day}/${month}/${year}`
+
+      return <div>{fechaFormateada}</div>
+    }
   },
   {
     accessorKey: 'fechaTerminacion',
@@ -219,12 +226,18 @@ export const columns: ColumnDef<Experiencia>[] = [
             column.toggleSorting(column.getIsSorted() === 'asc')
           }}
         >
-          Fecha fin
+          Fecha Fin
           <CaretSortIcon className="ml-2 h-4 w-4" />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue('fechaTerminacion')}</div>
+    cell: ({ row }) => {
+      const fecha = row.getValue('fechaTerminacion')
+      const [year, month, day] = (fecha as string).split('-') // Dividimos la fecha en partes
+      const fechaFormateada = `${day}/${month}/${year}`
+
+      return <div>{fechaFormateada}</div>
+    }
   }
 ]
 
@@ -254,6 +267,7 @@ export function CustomTable() {
   const [rowSelection, setRowSelection] = useState({})
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
   const [data, setData] = useState<Experiencia[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -428,12 +442,21 @@ export function CustomTable() {
     setIsEditModalOpen(true)
   }
 
+  const handleSaveEdit = () => {
+    setIsEditModalOpen(false)
+  }
+
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false)
   }
 
-  const handleSaveEdit = () => {
-    setIsEditModalOpen(false)
+  const handleOpenViewModal = (payment: Experiencia) => {
+    setSelectedPayment(payment)
+    setIsViewModalOpen(true)
+  }
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false)
   }
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -692,6 +715,9 @@ export function CustomTable() {
                       onEdit={() => {
                         handleOpenEditModal(row.original)
                       }}
+                      onView={() => {
+                        handleOpenViewModal(row.original)
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -758,6 +784,8 @@ export function CustomTable() {
       {isEditModalOpen && selectedPayment ? (
         <EditExperienceModal isOpen={isEditModalOpen} payment={selectedPayment} onClose={handleCloseEditModal} onExperienciaEdit={handleExperienciaEdit} onSave={handleSaveEdit} />
       ) : null}
+
+      {isViewModalOpen && selectedPayment ? <ViewExperienceModal isOpen={isViewModalOpen} payment={selectedPayment} onClose={handleCloseViewModal} /> : null}
     </>
   )
 }

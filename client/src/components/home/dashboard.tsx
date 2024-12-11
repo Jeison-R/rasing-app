@@ -122,7 +122,22 @@ export function Dashboard() {
               {sumValorSmmlv === null ? (
                 <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
               ) : (
-                <div className="text-2xl font-bold">{sumValorSmmlv.toFixed(2)}</div> // Aseguramos que no sea null y usamos toFixed
+                (() => {
+                  // Formateamos el valor como moneda
+                  const formatted = new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP'
+                  }).format(typeof sumValorSmmlv === 'number' ? sumValorSmmlv : parseFloat(sumValorSmmlv as string))
+
+                  // Eliminamos el símbolo de moneda
+                  const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
+
+                  return (
+                    <div className="text-2xl font-bold">
+                      {formattedWithoutSymbol} {/* Mostramos el valor sin el símbolo */}
+                    </div>
+                  )
+                })()
               )}
             </CardContent>
           </Card>
@@ -137,7 +152,22 @@ export function Dashboard() {
               {sumValorSmmlvPart2 === null ? (
                 <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
               ) : (
-                <div className="text-2xl font-bold">{sumValorSmmlvPart2.toFixed(2)}</div> // Aseguramos que no sea null y usamos toFixed
+                (() => {
+                  // Formateamos el valor como moneda
+                  const formatted = new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP'
+                  }).format(typeof sumValorSmmlvPart2 === 'number' ? sumValorSmmlvPart2 : parseFloat(sumValorSmmlvPart2 as string))
+
+                  // Eliminamos el símbolo de moneda
+                  const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
+
+                  return (
+                    <div className="text-2xl font-bold">
+                      {formattedWithoutSymbol} {/* Mostramos el valor sin el símbolo */}
+                    </div>
+                  )
+                })()
               )}
             </CardContent>
           </Card>

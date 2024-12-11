@@ -1,12 +1,12 @@
 import type { Experiencia } from './interface'
 
 import { MoreHorizontal, Eye, Edit, Trash } from 'lucide-react' // Agregado los iconos de Lucide
-import { useState } from 'react'
+// import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 
-import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
+// import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
 
 // import { deleteExperience } from './deleteExperience'
 
@@ -16,21 +16,22 @@ interface ActionsMenuProps {
   }
   onDelete: () => void
   onEdit: (data: Experiencia) => void
+  onView: (data: Experiencia) => void
 }
 
-export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
+export function ActionsMenu({ row, onDelete, onEdit, onView }: ActionsMenuProps) {
   const payment = row.original
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
-
-  const handleView = (data: Experiencia) => {
-    setSelectedPayment(data)
-    setIsModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setIsModalOpen(false)
-  }
+  //   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  //   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
+  //
+  //   const handleView = (data: Experiencia) => {
+  //     setSelectedPayment(data)
+  //     setIsModalOpen(true)
+  //   }
+  //
+  //   const closeModal = () => {
+  //     setIsModalOpen(false)
+  //   }
 
   // const handleDelete = async () => {
   //   await deleteExperience(payment).then((result) => {
@@ -54,7 +55,7 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
-              handleView(payment)
+              onView(payment)
             }}
           >
             <Eye className="mr-2 h-4 w-4" />
@@ -76,7 +77,7 @@ export function ActionsMenu({ row, onDelete, onEdit }: ActionsMenuProps) {
       </DropdownMenu>
 
       {/* Modal para ver los detalles del pago */}
-      <ViewExperienceModal isOpen={isModalOpen} payment={selectedPayment} onClose={closeModal} />
+      {/* <ViewExperienceModal isOpen={isModalOpen} payment={selectedPayment} onClose={closeModal} /> */}
     </>
   )
 }
