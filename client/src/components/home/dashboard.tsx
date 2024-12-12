@@ -1,21 +1,19 @@
 'use client'
 
-// import type { ChartConfig } from '@/components/ui/chart'
-
 import { useState, useEffect } from 'react'
 import { Activity, CreditCard, Users, User } from 'lucide-react'
-// import { TrendingUp } from 'lucide-react'
-// import { Bar, BarChart, XAxis, YAxis } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer } from 'recharts'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton' // Asegúrate de importar el Skeleton de Shadcn
-// import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function Dashboard() {
   const [sumValorSmmlv, setSumValorSmmlv] = useState<number | null>(null)
   const [sumValorSmmlvPart2, setSumValorSmmlvPart2] = useState<number | null>(null)
   const [sumExperiencia, setSumExperiencia] = useState<number | null>(null)
   const [sumValorFinal, setSumValorFinal] = useState<string | null>(null)
+  const [chartData, setChartData] = useState<{ name: string; Total: number }[]>([])
+  const [chartDataAct, setChartDataAct] = useState<{ name: string; Total: number }[]>([])
 
   // Obtener los datos desde la API cuando el componente se monta
   useEffect(() => {
@@ -49,11 +47,27 @@ export function Dashboard() {
           },
           credentials: 'include'
         })
+        const response5 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumTiposContratos', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
+        const response6 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumActividadesPrincipales', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        })
 
         const data1 = (await response1.json()) as { sumValorSmmlv: number | null }
         const data2 = (await response2.json()) as { sumValorSmmlvPart2: number | null }
         const data3 = (await response3.json()) as { countExperiencias: number | null }
         const data4 = (await response4.json()) as { sumValorFinalAfectado: number | null }
+        const data5 = (await response5.json()) as { contractTypeCounts: Record<string, number> }
+        const data6 = (await response6.json()) as { activityTypeCounts: Record<string, number> }
 
         setSumValorSmmlv(data1.sumValorSmmlv)
         setSumValorSmmlvPart2(data2.sumValorSmmlvPart2)
@@ -66,6 +80,20 @@ export function Dashboard() {
         const formattedValue = sumValorFinalAfectado != null ? new Intl.NumberFormat('es-CO').format(sumValorFinalAfectado) : '0' // Valor predeterminado si no hay valor
 
         setSumValorFinal(formattedValue)
+
+        const formattedChartData = Object.entries(data5.contractTypeCounts).map(([name, Total]) => ({
+          name,
+          Total
+        }))
+
+        setChartData(formattedChartData)
+
+        const formattedChartDataAct = Object.entries(data6.activityTypeCounts).map(([name, Total]) => ({
+          name,
+          Total
+        }))
+
+        setChartDataAct(formattedChartDataAct)
       } catch (error) {
         global.console.error('Error fetching data:', error)
       }
@@ -74,39 +102,13 @@ export function Dashboard() {
     void fetchData()
   }, [])
 
-  //   const chartData = [
-  //     { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
-  //     { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
-  //     { browser: 'firefox', visitors: 187, fill: 'var(--color-firefox)' },
-  //     { browser: 'edge', visitors: 173, fill: 'var(--color-edge)' },
-  //     { browser: 'other', visitors: 90, fill: 'var(--color-other)' }
-  //   ]
-  //
-  //   const chartConfig = {
-  //     visitors: {
-  //       label: 'Visitors'
-  //     },
-  //     chrome: {
-  //       label: 'Chrome',
-  //       color: 'hsl(var(--chart-1))'
-  //     },
-  //     safari: {
-  //       label: 'Safari',
-  //       color: 'hsl(var(--chart-2))'
-  //     },
-  //     firefox: {
-  //       label: 'Firefox',
-  //       color: 'hsl(var(--chart-3))'
-  //     },
-  //     edge: {
-  //       label: 'Edge',
-  //       color: 'hsl(var(--chart-4))'
-  //     },
-  //     other: {
-  //       label: 'Other',
-  //       color: 'hsl(var(--chart-5))'
-  //     }
-  //   } satisfies ChartConfig
+  const colors = [
+    '#4A90E2', // Color para Contrato A
+    '#50E3C2', // Color para Contrato B
+    '#F5A623', // Color para Contrato C
+    '#D0021B', // Color para Contrato D
+    '#9013FE' // Color para Contrato E
+  ]
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -123,20 +125,14 @@ export function Dashboard() {
                 <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
               ) : (
                 (() => {
-                  // Formateamos el valor como moneda
                   const formatted = new Intl.NumberFormat('es-CO', {
                     style: 'currency',
                     currency: 'COP'
-                  }).format(typeof sumValorSmmlv === 'number' ? sumValorSmmlv : parseFloat(sumValorSmmlv as string))
+                  }).format(sumValorSmmlv)
 
-                  // Eliminamos el símbolo de moneda
                   const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-                  return (
-                    <div className="text-2xl font-bold">
-                      {formattedWithoutSymbol} {/* Mostramos el valor sin el símbolo */}
-                    </div>
-                  )
+                  return <div className="text-2xl font-bold">{formattedWithoutSymbol}</div>
                 })()
               )}
             </CardContent>
@@ -153,20 +149,14 @@ export function Dashboard() {
                 <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
               ) : (
                 (() => {
-                  // Formateamos el valor como moneda
                   const formatted = new Intl.NumberFormat('es-CO', {
                     style: 'currency',
                     currency: 'COP'
-                  }).format(typeof sumValorSmmlvPart2 === 'number' ? sumValorSmmlvPart2 : parseFloat(sumValorSmmlvPart2 as string))
+                  }).format(sumValorSmmlvPart2)
 
-                  // Eliminamos el símbolo de moneda
                   const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-                  return (
-                    <div className="text-2xl font-bold">
-                      {formattedWithoutSymbol} {/* Mostramos el valor sin el símbolo */}
-                    </div>
-                  )
+                  return <div className="text-2xl font-bold">{formattedWithoutSymbol}</div>
                 })()
               )}
             </CardContent>
@@ -178,13 +168,7 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium">Total Experiencias</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              {sumExperiencia === null ? (
-                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
-              ) : (
-                <div className="text-2xl font-bold">{sumExperiencia}</div> // Aseguramos que no sea null y mostramos el valor
-              )}
-            </CardContent>
+            <CardContent>{sumExperiencia === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumExperiencia}</div>}</CardContent>
           </Card>
 
           {/* Card 4: Active Now */}
@@ -193,49 +177,61 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium">Total Valor Final Afectado</CardTitle>
               <Activity className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              {sumValorFinal === null ? (
-                <Skeleton className="h-16 w-full rounded dark:bg-gray-800" />
-              ) : (
-                <div className="text-2xl font-bold">{sumValorFinal}</div> // Aseguramos que no sea null y mostramos el valor
-              )}
-            </CardContent>
+            <CardContent>{sumValorFinal === null ? <Skeleton className="h-16 w-full rounded dark:bg-gray-800" /> : <div className="text-2xl font-bold">{sumValorFinal}</div>}</CardContent>
           </Card>
         </div>
 
-        {/* Segunda fila (2 Cards más grandes) */}
-        {/* <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
+        {/* Gráfico de barras horizontal */}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Bar Chart - Mixed</CardTitle>
-              <CardDescription>January - June 2024</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig}>
-                <BarChart
-                  accessibilityLayer
-                  data={chartData}
-                  layout="vertical"
-                  margin={{
-                    left: 0
-                  }}
-                >
-                  <YAxis axisLine={false} dataKey="browser" tickFormatter={(value) => chartConfig[value as keyof typeof chartConfig].label} tickLine={false} tickMargin={10} type="category" />
-                  <XAxis hide dataKey="visitors" type="number" />
-                  <ChartTooltip content={<ChartTooltipContent hideLabel />} cursor={false} />
-                  <Bar dataKey="visitors" layout="vertical" radius={5} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Total de cada tipo de Contratos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {chartData.length === 0 ? (
+              <Skeleton className="h-64 w-full rounded dark:bg-gray-800" />
+            ) : (
+              <ResponsiveContainer height={280} width="100%">
+                <BarChart data={chartData} margin={{ bottom: 65 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis angle={-45} dataKey="name" interval={0} textAnchor="end" type="category" />
+                  <YAxis type="number" />
+                  <Tooltip />
+                  <Bar dataKey="Total">
+                    {chartData.map((entry, index) => (
+                      <Cell key={entry.name} fill={colors[index % colors.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
-              </ChartContainer>
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-              <div className="flex gap-2 font-medium leading-none">
-                Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-              </div>
-              <div className="leading-none text-muted-foreground">Showing total visitors for the last 6 months</div>
-            </CardFooter>
-          </Card>
-        </div> */}
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total de cada Actividad</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {chartDataAct.length === 0 ? (
+              <Skeleton className="h-64 w-full rounded dark:bg-gray-800" />
+            ) : (
+              <ResponsiveContainer height={280} width="100%">
+                <BarChart data={chartDataAct} margin={{ bottom: 70 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis angle={-45} dataKey="name" interval={0} textAnchor="end" type="category" />
+                  <YAxis type="number" />
+                  <Tooltip />
+                  <Bar dataKey="Total">
+                    {chartDataAct.map((entry, index) => (
+                      <Cell key={entry.name} fill={colors[index % colors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
       </main>
     </div>
   )

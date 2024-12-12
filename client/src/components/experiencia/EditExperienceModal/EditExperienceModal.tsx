@@ -587,7 +587,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
               Objeto
             </label>
             <textarea
-              className="w-full rounded-lg border p-2"
+              className="w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)]"
               id="objeto"
               name="objeto"
               placeholder="Descripción del Objeto"

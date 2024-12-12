@@ -82,12 +82,25 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
           </div>
           <div>
             <h4 className="text-sm font-medium">Fecha de Inicio:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.fechaInicio}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
+              {(() => {
+                const [year, month, day] = payment.fechaInicio.split('-')
+
+                return `${day}/${month}/${year}`
+              })()}
+            </p>
           </div>
           <div>
             <h4 className="text-sm font-medium">Fecha de Terminación:</h4>
-            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.fechaTerminacion}</p>
+            <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
+              {(() => {
+                const [year, month, day] = payment.fechaTerminacion.split('-')
+
+                return `${day}/${month}/${year}`
+              })()}
+            </p>
           </div>
+
           <div>
             <h4 className="text-sm font-medium">Año de terminación:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800"> {payment.anioTerminacion}</p>

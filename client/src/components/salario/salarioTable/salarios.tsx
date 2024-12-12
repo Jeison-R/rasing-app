@@ -5,7 +5,7 @@ import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } fro
 import { CaretSortIcon } from '@radix-ui/react-icons'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useEffect, useState, type ChangeEvent } from 'react'
-import { ChevronLeft, ChevronRight, CirclePlus, Edit, Trash } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CirclePlus, Trash } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
@@ -191,13 +191,6 @@ export function CustomTable() {
                       ))}
                       <TableCell>
                         <div className="flex justify-center space-x-2">
-                          {/* Botón Editar */}
-                          <CustomTooltip content="Editar">
-                            <Button size="icon" variant="ghost">
-                              <Edit className="h-5 w-5" />
-                            </Button>
-                          </CustomTooltip>
-
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
                             <Button size="icon" variant="ghost" onClick={() => void deleteSalario(row.original.id, `${row.original.año}`, fetchSalario)}>
