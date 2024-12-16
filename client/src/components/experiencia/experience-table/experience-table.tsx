@@ -12,7 +12,6 @@ import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel
 import { useEffect, useState, useRef } from 'react'
 import React from 'react'
 import ReactSelect from 'react-select'
-import { Toaster, toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Button } from '@/components/ui/button'
@@ -35,6 +34,7 @@ import { obtenerTiposContrato } from '../../services/tipoContrato/contratoServic
 import { obtenerActividades } from '../../services/actividad/actividadService'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
+import FloatingBox from './floatingBox'
 import { ActionsMenu } from './ActionsMenu'
 import { deleteExperience } from './deleteExperience'
 
@@ -283,6 +283,7 @@ export function CustomTable() {
   const [isAtBottom, setIsAtBottom] = useState(false)
   const tableEndRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef(null)
+  const [selectedInfo, setSelectedInfo] = useState<{ totalSum: string; rupNumbers: string[] } | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -409,11 +410,16 @@ export function CustomTable() {
         style: 'currency',
         currency: 'COP'
       }).format(sum)
-      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
 
-      toast.success(`Suma total: ${formattedWithoutSymbol}`, {
-        description: `${selectedRows.length} fila(s) seleccionada(s)`
+      // Extraer los números de RUP de las filas seleccionadas
+      const rupNumbers = selectedRows.map((row) => row.original.rup)
+
+      setSelectedInfo({
+        totalSum: formatted,
+        rupNumbers
       })
+    } else {
+      setSelectedInfo(null)
     }
   }, [rowSelection, table])
 
@@ -521,7 +527,7 @@ export function CustomTable() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between py-4">
-        <Toaster richColors expand={false} />
+        {selectedInfo ? <FloatingBox rupNumbers={selectedInfo.rupNumbers} totalSum={selectedInfo.totalSum} /> : null}
         <div className="relative mr-2 w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
