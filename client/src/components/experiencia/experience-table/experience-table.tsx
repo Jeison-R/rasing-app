@@ -494,35 +494,28 @@ export function CustomTable() {
   const getPageRange = () => {
     const currentPage = table.getState().pagination.pageIndex + 1
     const totalPages = pageCount
-    const delta = 2 // Número de páginas antes y después de la actual
+    const pagesPerSession = 9 // Número de páginas por sesión
+
+    // Calcular el índice de sesión actual
+    const currentSession = Math.ceil(currentPage / pagesPerSession)
+
+    // Calcular el rango de páginas de la sesión actual
+    const start = (currentSession - 1) * pagesPerSession + 1
+    const end = Math.min(currentSession * pagesPerSession, totalPages)
+
     const range = []
-
-    // Asegurar siempre incluir la primera página
-    range.push(1)
-
-    // Determinar las páginas intermedias
-    const start = Math.max(2, currentPage - delta)
-    const end = Math.min(totalPages - 1, currentPage + delta)
-
-    if (start > 2) {
-      range.push('...')
-    }
 
     for (let i = start; i <= end; i++) {
       range.push(i)
     }
 
-    if (end < totalPages - 1) {
-      range.push('...')
-    }
-
-    // Incluir siempre la última página si es diferente a la primera
-    if (totalPages > 1) {
-      range.push(totalPages)
-    }
-
     return range
   }
+
+  const currentPage = table.getState().pagination.pageIndex + 1
+  const totalPages = pageCount // Total de páginas (asegúrate de definir `pageCount`)
+  const pagesPerSession = 9 // Número de páginas por sesión
+  const currentSession = Math.ceil(currentPage / pagesPerSession) // Sesión actual
 
   return (
     <>
@@ -746,6 +739,22 @@ export function CustomTable() {
           isAtBottom ? 'static bg-transparent' : 'fixed bottom-2 left-1/2 max-w-max -translate-x-1/2 scale-x-100 transform rounded-lg bg-white px-4 shadow-lg dark:bg-[hsl(20,14.3%,4.1%)]'
         } z-50 ${isAtBottom ? '' : 'scale-x-90'}`}
       >
+        {/* Botón para ir a la sesión anterior */}
+        {currentSession > 1 && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const previousSessionStart = (currentSession - 2) * pagesPerSession
+
+              table.setPageIndex(previousSessionStart)
+            }}
+          >
+            Sesión anterior
+          </Button>
+        )}
+
+        {/* Botón para ir a la página anterior */}
         <Button
           disabled={!table.getCanPreviousPage()}
           size="sm"
@@ -756,24 +765,22 @@ export function CustomTable() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        {getPageRange().map((pageNumber) =>
-          pageNumber === '...' ? (
-            <span key={pageNumber} className="px-2">
-              ...
-            </span>
-          ) : (
-            <Button
-              key={pageNumber}
-              size="sm"
-              variant={table.getState().pagination.pageIndex === Number(pageNumber) - 1 ? 'default' : 'outline'}
-              onClick={() => {
-                table.setPageIndex(Number(pageNumber) - 1)
-              }}
-            >
-              {pageNumber}
-            </Button>
-          )
-        )}
+
+        {/* Mostrar rango de páginas de la sesión actual */}
+        {getPageRange().map((pageNumber) => (
+          <Button
+            key={pageNumber}
+            size="sm"
+            variant={table.getState().pagination.pageIndex === Number(pageNumber) - 1 ? 'default' : 'outline'}
+            onClick={() => {
+              table.setPageIndex(Number(pageNumber) - 1)
+            }}
+          >
+            {pageNumber}
+          </Button>
+        ))}
+
+        {/* Botón para ir a la página siguiente */}
         <Button
           disabled={!table.getCanNextPage()}
           size="sm"
@@ -784,6 +791,21 @@ export function CustomTable() {
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
+
+        {/* Botón para ir a la siguiente sesión */}
+        {currentSession * pagesPerSession < totalPages && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const nextSessionStart = currentSession * pagesPerSession
+
+              table.setPageIndex(nextSessionStart)
+            }}
+          >
+            Siguiente sesión
+          </Button>
+        )}
       </div>
 
       <AddExperienciaModal isOpen={isModalOpen} onClose={handleCloseModal} onExperienciaAdded={handleExperienciaAdded} onSave={handleAddData} />
