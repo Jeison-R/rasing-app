@@ -102,8 +102,8 @@ export function CustomTableActividad() {
     setIsModalOpen(false)
   }
 
-  const handleActividadAdded = () => {
-    void fetchActividades()
+  const handleActividadAdded = async () => {
+    await fetchActividades()
   }
 
   const table = useReactTable({
