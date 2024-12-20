@@ -12,7 +12,7 @@ import { agregarActividad } from '../../services/actividad/actividadService' // 
 interface AddActividadModalProps {
   isOpen: boolean
   onClose: () => void
-  onActividadAdded: () => void
+  onActividadAdded: () => Promise<void>
 }
 
 export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonly<AddActividadModalProps>) {
@@ -43,7 +43,7 @@ export function AddActividadModal({ isOpen, onClose, onActividadAdded }: Readonl
             showConfirmButton: false
           })
 
-          onActividadAdded() // Actualizar la lista de actividades
+          await onActividadAdded() // Actualizar la lista de actividades
         } catch (error) {
           // Manejar errores de red o cualquier otro error
           await Swal.fire({

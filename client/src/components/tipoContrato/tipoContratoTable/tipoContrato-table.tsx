@@ -126,8 +126,8 @@ export function CustomTableTipoContrato() {
     setIsModalOpen(false)
   }
 
-  const handleContratoAdded = () => {
-    void fetchContratos() // Llama a la función para obtener la lista actualizada
+  const handleContratoAdded = async () => {
+    await fetchContratos() // Llama a la función para obtener la lista actualizada
   }
 
   return (

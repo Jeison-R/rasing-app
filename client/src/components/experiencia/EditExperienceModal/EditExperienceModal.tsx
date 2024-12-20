@@ -25,6 +25,8 @@ import { obtenerTiposContrato } from '../../services/tipoContrato/contratoServic
 import { obtenerSalarios } from '../../services/salario/salarioService'
 import { opcionesModalidad } from '../modalAddExperiencia/AddExperienciaModal'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
+import { AddContratoModal } from '../../tipoContrato/modalAddTipoContrato/AddContratoModal'
+import { AddActividadModal } from '../../actividad/modalAddActividad/AddActividadModal'
 
 interface EditExperienceModalProps {
   isOpen: boolean
@@ -63,6 +65,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
   const [opcionesActividadPrincipal, setOpcionesActividadPrincipal] = useState<OptionActivity[]>([])
   const [opcionesTipoContrato, setOpcionesTipoContrato] = useState<OptionTipoContrato[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isModalOpenActividad, setIsModalOpenActividad] = useState<boolean>(false)
 
   useEffect(() => {
     if (payment) {
@@ -108,33 +112,33 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
     }
   }
 
-  useEffect(() => {
-    const cargarOpciones = async () => {
-      try {
-        // Cargar opciones de documento soporte
-        const documentos = await obtenerDocumentosSoporte()
+  const cargarOpciones = async () => {
+    try {
+      // Cargar opciones de documento soporte
+      const documentos = await obtenerDocumentosSoporte()
 
-        setOpcionesDocumentoSoporte(
-          documentos.map((doc: Documento) => ({ value: doc.id, label: doc.nombre })) // Ajusta según los campos reales
-        )
+      setOpcionesDocumentoSoporte(
+        documentos.map((doc: Documento) => ({ value: doc.id, label: doc.nombre })) // Ajusta según los campos reales
+      )
 
-        // Cargar opciones de actividad principal
-        const actividades = await obtenerActividades()
+      // Cargar opciones de actividad principal
+      const actividades = await obtenerActividades()
 
-        setOpcionesActividadPrincipal(actividades.map((act: Actividad) => ({ value: act.id, label: act.nombre })))
+      setOpcionesActividadPrincipal(actividades.map((act: Actividad) => ({ value: act.id, label: act.nombre })))
 
-        // Cargar opciones de tipo de contrato
-        const tiposContratos = await obtenerTiposContrato()
+      // Cargar opciones de tipo de contrato
+      const tiposContratos = await obtenerTiposContrato()
 
-        setOpcionesTipoContrato(
-          tiposContratos.map((contrato: Contrato) => ({ value: contrato.id, label: contrato.nombre })) // Ajusta según los campos reales
-        )
-      } catch (error) {
-        global.console.error('Error al cargar opciones:', error)
-      }
+      setOpcionesTipoContrato(
+        tiposContratos.map((contrato: Contrato) => ({ value: contrato.id, label: contrato.nombre })) // Ajusta según los campos reales
+      )
+    } catch (error) {
+      global.console.error('Error al cargar opciones:', error)
     }
+  }
 
-    void cargarOpciones()
+  useEffect(() => {
+    void cargarOpciones() // Cargar opciones al montar el componente
   }, [])
 
   const removeFile = (index: number) => {
@@ -443,6 +447,34 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
     setValorFinalAfectado(valorInicial + totalAdiciones)
   }, [adiciones, valorInicial])
 
+  const handleAddActividad = () => {
+    // Aquí puedes abrir un modal, navegar a otra página, o realizar cualquier acción
+    setIsModalOpenActividad(true)
+  }
+
+  const handleCloseModalActividad = () => {
+    setIsModalOpenActividad(false)
+  }
+
+  const handleAddTipoContrato = () => {
+    // Aquí puedes abrir un modal, navegar a otra página, o realizar cualquier acción
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModalContrato = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleContratoAdded = async () => {
+    await cargarOpciones()
+    setIsModalOpen(false)
+  }
+
+  const handleAddActividadAdded = async () => {
+    await cargarOpciones()
+    setIsModalOpenActividad(false)
+  }
+
   if (!isOpen || !payment) return null
 
   return (
@@ -599,42 +631,69 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
           </div>
 
           <div>
-            <label className="block text-sm font-medium" htmlFor="tipo-contrato">
+            <label className="mb-1 block text-sm font-medium" htmlFor="tipo-contrato">
               Tipo Contrato
             </label>
-            <Select
-              isMulti
-              options={opcionesTipoContrato} // Asegúrate de que opcionesTipoContrato esté definido
-              styles={getCustomSelectStyles}
-              value={tipoContrato.map((tc) => ({ value: tc.id, label: tc.nombre }))} // Ajusta según la estructura de los datos
-              onChange={(selected) => {
-                setTipoContrato(
-                  selected.map((option) => ({
-                    id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
-                    nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
-                  }))
-                ) // Asignamos un array de tipo Contrato
-              }}
-            />
+            <div className="flex items-center space-x-2">
+              <Select
+                isMulti
+                options={opcionesTipoContrato} // Asegúrate de que opcionesTipoContrato esté definido
+                styles={getCustomSelectStyles}
+                value={tipoContrato.map((tc) => ({ value: tc.id, label: tc.nombre }))} // Ajusta según la estructura de los datos
+                onChange={(selected) => {
+                  setTipoContrato(
+                    selected.map((option) => ({
+                      id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
+                      nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
+                    }))
+                  )
+                }}
+              />
+              <button
+                aria-label="Añadir nuevo tipo de contrato"
+                className="rounded-full p-2 text-white focus:outline-none"
+                style={{ backgroundColor: '#EE9820' }}
+                type="button"
+                onClick={handleAddTipoContrato}
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium" htmlFor="actividad-principal">
+            <label className="mb-1 block text-sm font-medium" htmlFor="actividad-principal">
               Actividad Principal
             </label>
-            <Select
-              isMulti
-              options={opcionesActividadPrincipal} // Asegúrate de que opcionesActividadPrincipal esté definido
-              styles={getCustomSelectStyles}
-              value={actividadPrincipal.map((ap) => ({ value: ap.id, label: ap.nombre }))} // Ajusta según la estructura de los datos
-              onChange={(selected) => {
-                setActividadPrincipal(
-                  selected.map((option) => ({
-                    id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
-                    nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
-                  }))
-                ) // Asignamos un array de tipo Actividad
-              }}
-            />
+            <div className="flex items-center space-x-2">
+              <Select
+                isMulti
+                options={opcionesActividadPrincipal} // Asegúrate de que opcionesActividadPrincipal esté definido
+                styles={getCustomSelectStyles}
+                value={actividadPrincipal.map((ap) => ({ value: ap.id, label: ap.nombre }))} // Ajusta según la estructura de los datos
+                onChange={(selected) => {
+                  setActividadPrincipal(
+                    selected.map((option) => ({
+                      id: option.value, // Asegúrate de que 'value' sea el ID correspondiente
+                      nombre: option.label // Asegúrate de que 'label' sea el nombre correspondiente
+                    }))
+                  )
+                }}
+              />
+              <button
+                aria-label="Añadir nueva actividad principal"
+                className="rounded-full p-2 text-white focus:outline-none"
+                style={{ backgroundColor: '#EE9820' }}
+                type="button"
+                onClick={handleAddActividad}
+              >
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div>
@@ -804,6 +863,8 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
           </div>
         </form>
       </div>
+      <AddContratoModal isOpen={isModalOpen} onClose={handleCloseModalContrato} onContratoAdded={handleContratoAdded} />
+      <AddActividadModal isOpen={isModalOpenActividad} onActividadAdded={handleAddActividadAdded} onClose={handleCloseModalActividad} />
     </div>
   )
 }

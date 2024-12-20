@@ -12,7 +12,7 @@ import { agregarTipoContrato } from '../../services/tipoContrato/contratoService
 interface AdEDocumentoModalProps {
   isOpen: boolean
   onClose: () => void
-  onContratoAdded: () => void
+  onContratoAdded: () => Promise<void>
 }
 
 export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<AdEDocumentoModalProps>) {
@@ -43,7 +43,7 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
             showConfirmButton: false
           })
 
-          onContratoAdded() // Llama a la función para actualizar la lista
+          await onContratoAdded() // Llama a la función para actualizar la lista
         } catch (error) {
           // Manejar errores de red o cualquier otro error
           await Swal.fire({
@@ -71,7 +71,7 @@ export function AddContratoModal({ isOpen, onClose, onContratoAdded }: Readonly<
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-[hsl(20,14.3%,4.1%)]">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Añadir Contrato</h3>
+          <h3 className="text-lg font-semibold">Añadir Tipo Contrato</h3>
           <Button size="icon" variant="ghost" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
