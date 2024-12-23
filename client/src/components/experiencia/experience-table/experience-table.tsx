@@ -284,6 +284,7 @@ export function CustomTable() {
   const tableEndRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef(null)
   const [selectedInfo, setSelectedInfo] = useState<{ totalSum: string; rupNumbers: string[] } | null>(null)
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -336,9 +337,16 @@ export function CustomTable() {
 
   const fetchExperiences = async () => {
     try {
+      // Capturar la página actual
+      const currentPage = table.getState().pagination.pageIndex
+      // Obtener los datos
       const experienciaData = await obtenerExperiences()
 
       setData(experienciaData)
+      // Aplicar un timeout para asegurar que React procese los datos antes de restaurar la página
+      setTimeout(() => {
+        table.setPageIndex(currentPage)
+      }, 0)
       setIsLoading(false)
     } catch (error) {
       if (error instanceof Error) {
@@ -356,12 +364,30 @@ export function CustomTable() {
   }, [])
 
   const handleExperienciaAdded = () => {
-    void fetchExperiences()
+    const currentPage = table.getState().pagination.pageIndex
+
+    void fetchExperiences().then(() => {
+      setTimeout(() => {
+        table.setPageIndex(currentPage)
+      }, 0)
+    })
   }
 
   const handleExperienciaEdit = () => {
-    void fetchExperiences()
+    const currentPage = table.getState().pagination.pageIndex
+
+    void fetchExperiences().then(() => {
+      setTimeout(() => {
+        table.setPageIndex(currentPage)
+      }, 0)
+    })
   }
+
+  useEffect(() => {
+    const currentPage = table.getState().pagination.pageIndex
+
+    table.setPageIndex(currentPage)
+  }, [data])
 
   const table = useReactTable({
     data,
@@ -381,8 +407,10 @@ export function CustomTable() {
       columnFilters,
       globalFilter,
       columnVisibility,
-      rowSelection
-    }
+      rowSelection,
+      pagination // Configura el estado inicial de la paginación
+    },
+    onPaginationChange: setPagination
   })
 
   useEffect(() => {
