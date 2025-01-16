@@ -122,9 +122,6 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Valor Actual</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorActual)}</p>
           </div>
-        </div>
-        <hr className="my-4 border-gray-300" />
-        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <h4 className="text-sm font-medium">Tipo de Contrato:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
@@ -132,126 +129,33 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             </p>
           </div>
 
-          {payment.tipoContrato?.some((contrato) => contrato.nombre === 'Vías') ? (
-            <>
-              <div>
-                <h4 className="text-sm font-medium">Información 1:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'informacion1')?.valor || 'No especificado'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Información 2:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'informacion2')?.valor || 'No especificado'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Longitud Intervenida:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'longitudIntervenida')?.valor || 'No especificado'}</p>
-              </div>
-            </>
-          ) : null}
-
-          {payment.tipoContrato?.some((contrato) => contrato.nombre === 'Edificación') ? (
-            <>
-              <div>
-                <h4 className="text-sm font-medium">Información 1:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'informacion1')?.valor || 'No especificado'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium">Área bajo cubierta:</h4>
-                <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion?.find((item) => item.campo === 'areaBajoCubierta')?.valor || 'No especificado'}</p>
-              </div>
-            </>
-          ) : null}
-
-          {payment.tipoContrato?.some((contrato) => contrato.nombre === 'Obras de Urbanismos') ? (
-            <>
-              {payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Parques' ? (
-                <>
-                  <div>
-                    <h4 className="text-sm font-medium">Tipo de obra:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion1')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 1:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion2')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 2:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion3')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 3:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion4')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 4:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion5')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                  </div>
-                </>
-              ) : payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Espacio Publico' ? (
-                <div>
-                  <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                  <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                </div>
-              ) : payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Escenario Deportivo' ? (
-                <>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 1:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion2')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 2:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion3')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                  </div>
-                </>
-              ) : payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Plaza' ? (
-                <div>
-                  <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                  <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                </div>
-              ) : payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Cubierta polideportiva' ? (
-                <div>
-                  <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                  <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                </div>
-              ) : payment.informacion?.find((item) => item.campo === 'informacion1')?.valor === 'Cancha' ? (
-                <>
-                  <div>
-                    <h4 className="text-sm font-medium">Área Intervenida:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'areaIntervenida')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 1:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion2')?.valor || 'No especificado'}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium">Información 2:</h4>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.informacion.find((item) => item.campo === 'informacion3')?.valor || 'No especificado'}</p>
-                  </div>
-                </>
-              ) : (
-                <div>No hay información sobre el contrato</div>
-              )}
-            </>
-          ) : null}
-
           <div>
             <h4 className="text-sm font-medium">Actividad Principal:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
               {Array.isArray(payment.actividadPrincipal) ? payment.actividadPrincipal.map((actividad) => actividad.nombre).join(', ') || 'No especificado' : 'No especificado'}
             </p>
           </div>
+        </div>
+        <hr className="my-4 border-gray-300" />
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {payment.informacion && payment.informacion.length > 0 ? (
+            payment.informacion.map((info) => (
+              <div key={info.id} className="rounded-lg border bg-gray-100 p-4 dark:bg-gray-800">
+                <h4 className="text-sm font-medium">{info.label}:</h4>
+                <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+                  {info.value}
+                  {info.unit ? ` (${info.unit})` : null}
+                </p>
+                {info.calculatedValue && parseFloat(info.calculatedValue) !== 0 ? (
+                  <p className="mt-1 text-xs text-gray-800 dark:text-gray-300">
+                    Valor calculado: {info.calculatedValue} {info.unit ? info.unit : null}
+                  </p>
+                ) : null}
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">No hay información disponible.</p>
+          )}
         </div>
         <hr className="my-4 border-gray-300" />
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

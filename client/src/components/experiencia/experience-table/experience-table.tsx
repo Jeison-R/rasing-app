@@ -33,7 +33,6 @@ import { obtenerExperiences } from '../../services/experiencia/experienciaServic
 import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
 import { obtenerActividades } from '../../services/actividad/actividadService'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
-import { useToast } from '../../../../src/hooks/use-toast'
 
 import FloatingBox from './floatingBox'
 import { ActionsMenu } from './ActionsMenu'
@@ -275,7 +274,6 @@ export function CustomTable() {
   const tableEndRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef(null)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
-  const { toast } = useToast()
   const [selectedInfo, setSelectedInfo] = useState<{
     totalSum: string
     rupNumbers: string[]
@@ -447,28 +445,6 @@ export function CustomTable() {
         }
 
         // Operaciones específicas según el tipo de contrato
-        if (tipoActual === 'Edificación') {
-          const areaIntervenidaObj = row.original.informacion?.find((item) => item.campo === 'areaIntervenida')
-          const areaBajoCubiertaObj = row.original.informacion?.find((item) => item.campo === 'areaBajoCubierta')
-
-          const areaIntervenidaInfo = areaIntervenidaObj?.valor !== undefined ? parseFloat(areaIntervenidaObj.valor) : 0
-          const areaBajoCubiertaInfo = areaBajoCubiertaObj?.valor !== undefined ? parseFloat(areaBajoCubiertaObj.valor) : 0
-
-          acc.areaIntervenida += areaIntervenidaInfo
-          acc.areaBajoCubierta += areaBajoCubiertaInfo
-        } else if (tipoActual === 'Vías') {
-          const longitudIntervenidaObj = row.original.informacion?.find((item) => item.campo === 'longitudIntervenida')
-
-          const longitudIntervenidaInfo = longitudIntervenidaObj?.valor !== undefined ? parseFloat(longitudIntervenidaObj.valor) : 0
-
-          acc.longitudIntervenida += longitudIntervenidaInfo // Aquí puedes usar una lógica específica
-        } else if (tipoActual === 'Acueducto') {
-          const longitudRedObj = row.original.informacion?.find((item) => item.campo === 'longitudRed')
-
-          const longitudRedInfo = longitudRedObj?.valor !== undefined ? parseFloat(longitudRedObj.valor) : 0
-
-          acc.areaIntervenida += longitudRedInfo // Aquí puedes usar una lógica específica
-        }
 
         acc.totalSum += row.original.valorSmmlvPart2
 
@@ -478,12 +454,7 @@ export function CustomTable() {
     )
 
     if (!isValid) {
-      toast({
-        variant: 'destructive',
-        title: 'Error de selección',
-        description: 'No se pueden seleccionar filas con diferentes tipos de contrato.',
-        duration: 2000
-      })
+      alert('Error de selección: No se pueden seleccionar filas con diferentes tipos de contrato')
       table.resetRowSelection()
       setSelectedInfo(null)
 
@@ -509,7 +480,7 @@ export function CustomTable() {
     } else {
       setSelectedInfo(null)
     }
-  }, [rowSelection, table, toast])
+  }, [rowSelection, table])
 
   const handleDeleteRow = async (id: string) => {
     const deleted = await deleteExperience(id)

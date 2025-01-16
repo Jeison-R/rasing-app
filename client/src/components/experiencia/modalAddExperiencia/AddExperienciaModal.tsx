@@ -1,21 +1,23 @@
 import type { MultiValue } from 'react-select'
-import type { Experiencia, Informacion } from '../experience-table/interface'
+import type { Experiencia, Field } from '../experience-table/interface'
 import type { Salario } from '../../services/salario/salarioService'
 import type { Actividad } from '../../actividad/actividadTable/actividad-table'
 import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
 import type { Contrato } from '../../tipoContrato/tipoContratoTable/tipoContrato-table'
 
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
-import { X } from 'lucide-react'
+import { Plus, X, Edit2 } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Swal from 'sweetalert2'
 import SelectR from 'react-select'
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 import { storage } from '../../../firebase/firebase'
 import { obtenerSalarios } from '../../services/salario/salarioService'
@@ -78,22 +80,6 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
   const [modalidad, setModalidad] = useState<string>('')
   const [documentoSoporte, setDocumentoSoporte] = useState<Documento[]>([])
   const [tipoContrato, setTipoContrato] = useState<Contrato[]>([])
-  const [informacion, setInformacion] = useState<Informacion[]>([])
-  const [informacion1, setInformacion1] = useState<string>('')
-  const [informacion2, setInformacion2] = useState<string>('')
-  const [informacion3, setInformacion3] = useState<string>('')
-  const [informacion4, setInformacion4] = useState<string>('')
-  const [informacion5, setInformacion5] = useState<string>('')
-  const [areaIntervenida, setAreaIntervenida] = useState<string>('')
-  const [areaBajoCubierta, setAreaBajoCubierta] = useState<string>('')
-  const [longitudIntervenida, setLongitudIntervenida] = useState<string>('')
-  const [diametro, setDiametro] = useState<string>('')
-  const [materialRed, setMaterialRed] = useState<string>('')
-  const [longitudRed, setLongitudRed] = useState<string>('')
-  const [caudal, setCaudal] = useState<string>('')
-  const [profundidad, setProfundidad] = useState<string>('')
-  const [volumenTanque, setVolumenTanque] = useState<string>('')
-  const [numConexiones, setNumConexiones] = useState<string>('')
   const [actividadPrincipal, setActividadPrincipal] = useState<Actividad[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [valorSmmlv, setValorSmmlv] = useState<number>(0)
@@ -107,6 +93,10 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isModalOpenActividad, setIsModalOpenActividad] = useState<boolean>(false)
+  const [fields, setFields] = useState<Field[]>([])
+  const [editingLabel, setEditingLabel] = useState<string | null>(null)
+  const [isAddingField, setIsAddingField] = useState(false)
+  const [newFieldType, setNewFieldType] = useState<'numeric' | 'informative' | null>(null)
 
   const cargarOpciones = async () => {
     try {
@@ -385,7 +375,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         modalidad: modalidad,
         documentoSoporte: documentoSoporte,
         tipoContrato: tipoContrato,
-        informacion: informacion,
+        informacion: fields,
         actividadPrincipal: actividadPrincipal,
         fechaInicio: fechaInicio,
         fechaTerminacion: fechaTerminacion,
@@ -468,15 +458,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     setValorFinalAfectado(0)
     setAnioTerminacion(new Date().getFullYear())
     setFiles([])
-    setInformacion([])
-    setInformacion1('')
-    setInformacion2('')
-    setInformacion3('')
-    setInformacion4('')
-    setInformacion5('')
-    setAreaIntervenida('')
-    setAreaBajoCubierta('')
-    setLongitudIntervenida('')
+    setFields([])
     setErrors({})
 
     onClose() // Llama a la función pasada como prop para cerrar el modal
@@ -515,11 +497,9 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         setTipoContrato((prevTipos) => [...prevTipos, value as { id: string; nombre: string }])
         break
       case 'informacion':
-        setInformacion((prevInformacion) => [...prevInformacion, value as unknown as { campo: string; valor: string }])
+        setFields((prevInformacion) => [...prevInformacion, value as unknown as { id: string; label: string; value: string; type: 'numeric' | 'informative'; unit?: string; calculatedValue?: string }])
         break
-      case 'longitudIntervenida':
-        setLongitudIntervenida(value as string)
-        break
+
       case 'actividadPrincipal':
         setActividadPrincipal((prevActividades) => [...prevActividades, value as { id: string; nombre: string }])
         break
@@ -628,19 +608,58 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     setIsModalOpenActividad(false)
   }
 
-  const handleField = (campo: string, valor: string) => {
-    setInformacion((prev) => {
-      const nuevaInformacion = [...prev]
-      const indexCampo = nuevaInformacion.findIndex((item) => item.campo === campo)
-
-      if (indexCampo >= 0) {
-        nuevaInformacion[indexCampo].valor = valor
-      } else {
-        nuevaInformacion.push({ campo, valor })
+  const addField = () => {
+    if (newFieldType) {
+      const newField: Field = {
+        id: Date.now().toString(),
+        label: `Campo ${fields.length + 1}`,
+        value: '',
+        type: newFieldType,
+        unit: newFieldType === 'numeric' ? 'unidad' : undefined,
+        calculatedValue: '0'
       }
 
-      return nuevaInformacion
-    })
+      setFields([...fields, newField])
+      setNewFieldType(null)
+      setIsAddingField(false)
+    }
+  }
+
+  const removeField = (id: string) => {
+    setFields(fields.filter((field) => field.id !== id))
+  }
+
+  const updateFieldValue = (id: string, value: string) => {
+    setFields(
+      fields.map((field) => {
+        if (field.id === id) {
+          const updatedField = { ...field, value }
+
+          if (field.type === 'numeric') {
+            const numericValue = parseFloat(value) || 0
+            const calculo = ((numericValue * partPorcentaje) / 100).toFixed(2)
+
+            updatedField.calculatedValue = calculo
+          }
+
+          return updatedField
+        }
+
+        return field
+      })
+    )
+  }
+
+  const updateFieldLabel = (id: string, label: string) => {
+    setFields(fields.map((field) => (field.id === id ? { ...field, label } : field)))
+  }
+
+  const updateFieldUnit = (id: string, unit: string) => {
+    setFields(fields.map((field) => (field.id === id ? { ...field, unit } : field)))
+  }
+
+  const finishEditingLabel = () => {
+    setEditingLabel(null)
   }
 
   if (!isOpen) return null
@@ -950,13 +969,6 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
                 </label>
                 <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
               </div>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-semibold">Atributos importantes</h2>
-            <hr className="my-4 border-gray-300" />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="block text-sm font-medium" htmlFor="tipoContrato">
                   Tipo Contrato
@@ -986,618 +998,6 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
                 {errors.tipoContrato ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
               </div>
 
-              {tipoContrato.some((contrato) => contrato.nombre === 'Vías') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion1">
-                      Información 1
-                    </label>
-                    <Select
-                      value={informacion1}
-                      onValueChange={(value) => {
-                        setInformacion1(value)
-                        handleField('informacion1', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion1">
-                        <SelectValue placeholder="Selecciona un tipo de vía" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                        <SelectItem value="Primaria">Primaria</SelectItem>
-                        <SelectItem value="Terciaria">Terciaria</SelectItem>
-                        <SelectItem value="Pavimento rígido">Pavimento rígido</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion2">
-                      Información 2
-                    </label>
-                    <Select
-                      value={informacion2}
-                      onValueChange={(value) => {
-                        setInformacion2(value)
-                        handleField('informacion2', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="areaIntervenida">
-                        <SelectValue placeholder="Selecciona el tipo de área" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                        <SelectItem value="Primaria">Primaria</SelectItem>
-                        <SelectItem value="Terciaria">Terciaria</SelectItem>
-                        <SelectItem value="Pavimento rígido">Pavimento rígido</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="longitudIntervenida">
-                      Longitud intervenida
-                    </label>
-                    <Input
-                      id="longitudIntervenida"
-                      type="number"
-                      value={longitudIntervenida}
-                      onChange={(e) => {
-                        setLongitudIntervenida(e.target.value)
-                        handleField('longitudIntervenida', e.target.value)
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {tipoContrato.some((contrato) => contrato.nombre === 'Edificación') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion1">
-                      Información 1
-                    </label>
-                    <Select
-                      value={informacion1}
-                      onValueChange={(value) => {
-                        setInformacion1(value)
-                        handleField('informacion1', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion1">
-                        <SelectValue placeholder="Selecciona el tipo de edificación" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
-                        <SelectItem value="Institucional cultural">Institucional cultural</SelectItem>
-                        <SelectItem value="Institucional salud">Institucional salud</SelectItem>
-                        <SelectItem value="Institucional salud">Institucional salud</SelectItem>
-                        <SelectItem value="Institucional recreación">Institucional recreación</SelectItem>
-                        <SelectItem value="Institucional policía o ejercito">Institucional policía o ejercito</SelectItem>
-                        <SelectItem value="Vivienda/habitacional">Vivienda/habitacional</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                      Area intervenida
-                    </label>
-                    <Input
-                      id="areaIntervenida"
-                      type="number"
-                      value={areaIntervenida}
-                      onChange={(e) => {
-                        setAreaIntervenida(e.target.value)
-                        handleField('areaIntervenida', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="areaBajoCubierta">
-                      Area bajo cubierta
-                    </label>
-                    <Input
-                      id="areaBajoCubierta"
-                      type="number"
-                      value={areaBajoCubierta}
-                      onChange={(e) => {
-                        setAreaBajoCubierta(e.target.value)
-                        handleField('areaBajoCubierta', e.target.value)
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {tipoContrato.some((contrato) => contrato.nombre === 'Acueducto') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion1">
-                      Información 1
-                    </label>
-                    <Select
-                      value={informacion1}
-                      onValueChange={(value) => {
-                        setInformacion1(value)
-                        handleField('informacion1', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion1">
-                        <SelectValue placeholder="Selecciona el tipo de edificación" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
-                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
-                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
-                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
-                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
-                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
-                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion2">
-                      Información 2
-                    </label>
-                    <Select
-                      value={informacion2}
-                      onValueChange={(value) => {
-                        setInformacion2(value)
-                        handleField('informacion2', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion2">
-                        <SelectValue placeholder="Selecciona el tipo de edificación" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
-                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
-                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
-                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
-                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
-                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
-                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion3">
-                      Información 3
-                    </label>
-                    <Select
-                      value={informacion3}
-                      onValueChange={(value) => {
-                        setInformacion3(value)
-                        handleField('informacion3', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion3">
-                        <SelectValue placeholder="Selecciona el tipo de edificación" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
-                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
-                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
-                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
-                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
-                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
-                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="diametro">
-                      Diametro
-                    </label>
-                    <Input
-                      id="diametro"
-                      type="number"
-                      value={diametro}
-                      onChange={(e) => {
-                        setDiametro(e.target.value)
-                        handleField('diametro', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="materialRed">
-                      Material de Red
-                    </label>
-                    <Input
-                      id="materialRed"
-                      type="number"
-                      value={materialRed}
-                      onChange={(e) => {
-                        setMaterialRed(e.target.value)
-                        handleField('materialRed', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="longitudRed">
-                      Longitud de Red
-                    </label>
-                    <Input
-                      id="longitudRed"
-                      type="number"
-                      value={longitudRed}
-                      onChange={(e) => {
-                        setLongitudRed(e.target.value)
-                        handleField('longitudRed', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="caudal">
-                      Caudal
-                    </label>
-                    <Input
-                      id="caudal"
-                      type="number"
-                      value={caudal}
-                      onChange={(e) => {
-                        setCaudal(e.target.value)
-                        handleField('caudal', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="profundidad">
-                      Profundidad
-                    </label>
-                    <Input
-                      id="profundidad"
-                      type="number"
-                      value={profundidad}
-                      onChange={(e) => {
-                        setProfundidad(e.target.value)
-                        handleField('profundidad', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="volumenTanque">
-                      Volumen Tanque
-                    </label>
-                    <Input
-                      id="volumenTanque"
-                      type="number"
-                      value={volumenTanque}
-                      onChange={(e) => {
-                        setVolumenTanque(e.target.value)
-                        handleField('volumenTanque', e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="numConexiones">
-                      Numero Conexiones
-                    </label>
-                    <Input
-                      id="numConexiones"
-                      type="number"
-                      value={numConexiones}
-                      onChange={(e) => {
-                        setNumConexiones(e.target.value)
-                        handleField('numConexiones', e.target.value)
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-
-              {tipoContrato.some((contrato) => contrato.nombre === 'Obras de Urbanismos') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium" htmlFor="informacion1">
-                      Tipo de Obra
-                    </label>
-                    <Select
-                      value={informacion1}
-                      onValueChange={(value) => {
-                        setInformacion1(value)
-                        handleField('informacion1', value)
-                      }}
-                    >
-                      <SelectTrigger className="w-full" id="informacion1">
-                        <SelectValue placeholder="Selecciona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Parques">Parques</SelectItem>
-                        <SelectItem value="Espacio Publico">Espacio Publico</SelectItem>
-                        <SelectItem value="Escenario Deportivo">Escenario Deportivo</SelectItem>
-                        <SelectItem value="Plaza">Plaza</SelectItem>
-                        <SelectItem value="Cubierta polideportiva">Cubierta polideportiva</SelectItem>
-                        <SelectItem value="Cancha">Cancha</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {informacion1 === 'Parques' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 1
-                        </label>
-                        <Select
-                          value={informacion2}
-                          onValueChange={(value) => {
-                            setInformacion2(value)
-                            handleField('informacion2', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion2">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
-                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 2
-                        </label>
-                        <Select
-                          value={informacion3}
-                          onValueChange={(value) => {
-                            setInformacion3(value)
-                            handleField('informacion3', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion3">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
-                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion4">
-                          información 3
-                        </label>
-                        <Select
-                          value={informacion4}
-                          onValueChange={(value) => {
-                            setInformacion4(value)
-                            handleField('informacion4', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion4">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
-                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion5">
-                          información 4
-                        </label>
-                        <Select
-                          value={informacion5}
-                          onValueChange={(value) => {
-                            setInformacion5(value)
-                            handleField('informacion5', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion5">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
-                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                          Area Intervenida
-                        </label>
-                        <Input
-                          id="areaIntervenida"
-                          type="number"
-                          value={areaIntervenida}
-                          onChange={(e) => {
-                            setAreaIntervenida(e.target.value)
-                            handleField('areaIntervenida', e.target.value)
-                          }}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {informacion1 === 'Espacio Publico' && (
-                    <div>
-                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                        Area Intervenida
-                      </label>
-                      <Input
-                        id="areaIntervenida"
-                        type="number"
-                        value={areaIntervenida}
-                        onChange={(e) => {
-                          setAreaIntervenida(e.target.value)
-                          handleField('areaIntervenida', e.target.value)
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {informacion1 === 'Escenario Deportivo' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 1
-                        </label>
-                        <Select
-                          value={informacion2}
-                          onValueChange={(value) => {
-                            setInformacion2(value)
-                            handleField('informacion2', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion2">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 2
-                        </label>
-                        <Select
-                          value={informacion3}
-                          onValueChange={(value) => {
-                            setInformacion3(value)
-                            handleField('informacion3', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion3">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                          Area Intervenida
-                        </label>
-                        <Input
-                          id="areaIntervenida"
-                          type="number"
-                          value={areaIntervenida}
-                          onChange={(e) => {
-                            setAreaIntervenida(e.target.value)
-                            handleField('areaIntervenida', e.target.value)
-                          }}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {informacion1 === 'Plaza' && (
-                    <div>
-                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                        Area Intervenida
-                      </label>
-                      <Input
-                        id="areaIntervenida"
-                        type="number"
-                        value={areaIntervenida}
-                        onChange={(e) => {
-                          setAreaIntervenida(e.target.value)
-                          handleField('areaIntervenida', e.target.value)
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {informacion1 === 'Cubierta poliderportiva' && (
-                    <div>
-                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                        Area Intervenida
-                      </label>
-                      <Input
-                        id="areaIntervenida"
-                        type="number"
-                        value={areaIntervenida}
-                        onChange={(e) => {
-                          setAreaIntervenida(e.target.value)
-                          handleField('areaIntervenida', e.target.value)
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {informacion1 === 'Cancha' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 1
-                        </label>
-                        <Select
-                          value={informacion2}
-                          onValueChange={(value) => {
-                            setInformacion2(value)
-                            handleField('informacion2', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion2">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="informacion2">
-                          información 2
-                        </label>
-                        <Select
-                          value={informacion3}
-                          onValueChange={(value) => {
-                            setInformacion3(value)
-                            handleField('informacion3', value)
-                          }}
-                        >
-                          <SelectTrigger className="w-full" id="informacion3">
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
-                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
-                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
-                          Area Intervenida
-                        </label>
-                        <Input
-                          id="areaIntervenida"
-                          type="number"
-                          value={areaIntervenida}
-                          onChange={(e) => {
-                            setAreaIntervenida(e.target.value)
-                            handleField('areaIntervenida', e.target.value)
-                          }}
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-
               <div>
                 <label className="block text-sm font-medium" htmlFor="actividadPrincipal">
                   Actividad Principal
@@ -1626,6 +1026,144 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
                 </div>
                 {errors.actividadPrincipal ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
               </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">Atributos importantes</h2>
+            <div className="w-48">
+              <Dialog open={isAddingField} onOpenChange={setIsAddingField}>
+                <DialogTrigger asChild>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setIsAddingField(true)
+                    }}
+                  >
+                    <Plus /> Añadir Campo
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Seleccionar tipo de campo</DialogTitle>
+                  </DialogHeader>
+                  <Select
+                    value={newFieldType || ''}
+                    onValueChange={(value: 'numeric' | 'informative') => {
+                      setNewFieldType(value)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione el tipo de campo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="numeric">Numérico</SelectItem>
+                      <SelectItem value="informative">Informativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button className="mt-4 w-full" disabled={!newFieldType} onClick={addField}>
+                    Añadir
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {fields.map((field) => (
+                <div key={field.id}>
+                  <div className="flex items-center justify-between">
+                    {editingLabel === field.id ? (
+                      <Input
+                        className="mr-2 w-full"
+                        value={field.label}
+                        onBlur={finishEditingLabel}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          updateFieldLabel(field.id, e.target.value)
+                        }}
+                      />
+                    ) : (
+                      <Label
+                        className="cursor-pointer text-sm font-medium transition-colors hover:text-blue-600"
+                        htmlFor={field.id}
+                        onClick={() => {
+                          setEditingLabel(field.id)
+                        }}
+                      >
+                        {field.label}
+                      </Label>
+                    )}
+                    <div className="flex space-x-2">
+                      <Button
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditingLabel(field.id)
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          removeField(field.id)
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex space-x-2">
+                      <Input
+                        className="w-full"
+                        id={field.id}
+                        placeholder={field.type === 'numeric' ? 'Ingrese un número' : 'Ingrese información'}
+                        type={field.type === 'numeric' ? 'number' : 'text'}
+                        value={field.value}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          updateFieldValue(field.id, e.target.value)
+                        }}
+                      />
+                      {field.type === 'numeric' && (
+                        <Select
+                          onValueChange={(value: string) => {
+                            updateFieldUnit(field.id, value)
+                          }}
+                        >
+                          <SelectTrigger className="w-24">
+                            <SelectValue placeholder="Unidad" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="kg">kg</SelectItem>
+                              <SelectItem value="m">m</SelectItem>
+                              <SelectItem value="L">L</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                    {field.type === 'numeric' && (
+                      <>
+                        <div className="flex items-center space-x-2">
+                          <Label className="w-1/2">Part Porcentaje:</Label>
+                          <span className="w-1/2 text-sm">{partPorcentaje}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Label className="w-1/2" htmlFor={`calculated-${field.id}`}>
+                            Valor calculado:
+                          </Label>
+                          <Input readOnly className="w-1/2 bg-gray-100" id={`calculated-${field.id}`} value={field.calculatedValue} />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm text-gray-500">Tipo: {field.type === 'numeric' ? 'Numérico' : 'Informativo'}</p>
+                </div>
+              ))}
             </div>
           </div>
 

@@ -14,6 +14,7 @@ import { CustomTooltip } from '@/components/commons/tooltip'
 import ThemeToggle from '@/components/commons/theme-toggle'
 import { ROUTES } from '@/consts/routes'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+
 import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
