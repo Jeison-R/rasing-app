@@ -33,6 +33,7 @@ import { obtenerExperiences } from '../../services/experiencia/experienciaServic
 import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
 import { obtenerActividades } from '../../services/actividad/actividadService'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
+import { useToast } from '../../../../src/hooks/use-toast'
 
 import FloatingBox from './floatingBox'
 import { ActionsMenu } from './ActionsMenu'
@@ -41,15 +42,6 @@ import { deleteExperience } from './deleteExperience'
 export const columns: ColumnDef<Experiencia>[] = [
   {
     id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        aria-label="Seleccionar todo"
-        checked={table.getIsAllRowsSelected()}
-        onCheckedChange={(checked: CheckedState) => {
-          table.toggleAllRowsSelected(!!checked)
-        }}
-      />
-    ),
     cell: ({ row }) => (
       <Checkbox
         aria-label="Seleccionar fila"
@@ -274,7 +266,6 @@ export function CustomTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(getColumnVisibilityFromLocalStorage)
   const [filterEmpresa, setFilterEmpresa] = useState<string>('')
   const [filterObjeto, setFilterObjeto] = useState<string>('')
-
   const [tipoContratoOptions, setTipoContratoOptions] = useState<OptionTipoContrato[]>([])
   const [selectedTiposContrato, setSelectedTiposContrato] = useState<string[]>([])
   const [actividadOptions, setActividadOptions] = useState<OptionActividad[]>([])
@@ -283,8 +274,16 @@ export function CustomTable() {
   const [isAtBottom, setIsAtBottom] = useState(false)
   const tableEndRef = useRef<HTMLDivElement | null>(null)
   const navRef = useRef(null)
-  const [selectedInfo, setSelectedInfo] = useState<{ totalSum: string; rupNumbers: string[] } | null>(null)
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 })
+  const { toast } = useToast()
+  const [selectedInfo, setSelectedInfo] = useState<{
+    totalSum: string
+    rupNumbers: string[]
+    areaIntervenida: number
+    areaBajoCubierta: number
+    tipoContrato: string
+    longitudIntervenida: number
+  } | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -431,25 +430,86 @@ export function CustomTable() {
 
   useEffect(() => {
     const selectedRows = table.getFilteredSelectedRowModel().rows
-    const sum = selectedRows.reduce((acc, row) => acc + row.original.valorSmmlvPart2, 0)
+
+    // Determinar el tipo de contrato inicial (si ya hay filas seleccionadas)
+    const initialTipoContrato = selectedRows.length ? selectedRows[0].original.tipoContrato?.[0]?.nombre || null : null
+
+    const { totalSum, areaIntervenida, areaBajoCubierta, longitudIntervenida, isValid } = selectedRows.reduce(
+      (acc, row) => {
+        const contratos = row.original.tipoContrato || []
+        const tipoActual = contratos.length > 0 ? contratos[0].nombre : null
+
+        // Validar que el tipo actual coincide con el inicial
+        if (initialTipoContrato && tipoActual !== initialTipoContrato) {
+          acc.isValid = false
+
+          return acc // No acumular si hay un tipo de contrato diferente
+        }
+
+        // Operaciones específicas según el tipo de contrato
+        if (tipoActual === 'Edificación') {
+          const areaIntervenidaObj = row.original.informacion?.find((item) => item.campo === 'areaIntervenida')
+          const areaBajoCubiertaObj = row.original.informacion?.find((item) => item.campo === 'areaBajoCubierta')
+
+          const areaIntervenidaInfo = areaIntervenidaObj?.valor !== undefined ? parseFloat(areaIntervenidaObj.valor) : 0
+          const areaBajoCubiertaInfo = areaBajoCubiertaObj?.valor !== undefined ? parseFloat(areaBajoCubiertaObj.valor) : 0
+
+          acc.areaIntervenida += areaIntervenidaInfo
+          acc.areaBajoCubierta += areaBajoCubiertaInfo
+        } else if (tipoActual === 'Vías') {
+          const longitudIntervenidaObj = row.original.informacion?.find((item) => item.campo === 'longitudIntervenida')
+
+          const longitudIntervenidaInfo = longitudIntervenidaObj?.valor !== undefined ? parseFloat(longitudIntervenidaObj.valor) : 0
+
+          acc.longitudIntervenida += longitudIntervenidaInfo // Aquí puedes usar una lógica específica
+        } else if (tipoActual === 'Acueducto') {
+          const longitudRedObj = row.original.informacion?.find((item) => item.campo === 'longitudRed')
+
+          const longitudRedInfo = longitudRedObj?.valor !== undefined ? parseFloat(longitudRedObj.valor) : 0
+
+          acc.areaIntervenida += longitudRedInfo // Aquí puedes usar una lógica específica
+        }
+
+        acc.totalSum += row.original.valorSmmlvPart2
+
+        return acc
+      },
+      { totalSum: 0, areaIntervenida: 0, areaBajoCubierta: 0, longitudIntervenida: 0, isValid: true }
+    )
+
+    if (!isValid) {
+      toast({
+        variant: 'destructive',
+        title: 'Error de selección',
+        description: 'No se pueden seleccionar filas con diferentes tipos de contrato.',
+        duration: 2000
+      })
+      table.resetRowSelection()
+      setSelectedInfo(null)
+
+      return
+    }
 
     if (selectedRows.length > 0) {
-      const formatted = new Intl.NumberFormat('es-CO', {
+      const formattedSum = new Intl.NumberFormat('es-CO', {
         style: 'currency',
         currency: 'COP'
-      }).format(sum)
+      }).format(totalSum)
 
-      // Extraer los números de RUP de las filas seleccionadas
       const rupNumbers = selectedRows.map((row) => row.original.rup)
 
       setSelectedInfo({
-        totalSum: formatted,
-        rupNumbers
+        totalSum: formattedSum,
+        areaIntervenida,
+        areaBajoCubierta,
+        longitudIntervenida,
+        rupNumbers,
+        tipoContrato: initialTipoContrato || ''
       })
     } else {
       setSelectedInfo(null)
     }
-  }, [rowSelection, table])
+  }, [rowSelection, table, toast])
 
   const handleDeleteRow = async (id: string) => {
     const deleted = await deleteExperience(id)
@@ -548,7 +608,16 @@ export function CustomTable() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between py-4">
-        {selectedInfo ? <FloatingBox rupNumbers={selectedInfo.rupNumbers} totalSum={selectedInfo.totalSum} /> : null}
+        {selectedInfo ? (
+          <FloatingBox
+            areaBajoCubierta={selectedInfo.areaBajoCubierta}
+            areaIntervenida={selectedInfo.areaIntervenida}
+            longitudIntervenida={selectedInfo.longitudIntervenida}
+            rupNumbers={selectedInfo.rupNumbers}
+            tipoContrato={selectedInfo.tipoContrato}
+            totalSum={selectedInfo.totalSum}
+          />
+        ) : null}
         <div className="relative mr-2 w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

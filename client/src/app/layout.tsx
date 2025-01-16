@@ -14,6 +14,7 @@ import { CustomTooltip } from '@/components/commons/tooltip'
 import ThemeToggle from '@/components/commons/theme-toggle'
 import { ROUTES } from '@/consts/routes'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </header>
         <main className="mx-auto flex min-h-[calc(100vh-4rem-1px)] w-full max-w-[auto] px-4 pt-2">
           <Suspense fallback={<LoadingSpinner />}>{children}</Suspense>
+          <Toaster />
         </main>
       </body>
     </html>

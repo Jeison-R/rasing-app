@@ -7,6 +7,11 @@ export interface Adicion {
   value: number // Valor de la adición
 }
 
+export interface Informacion {
+  campo: string
+  valor: string
+}
+
 export interface Experiencia {
   Empresa: string
   id?: string
@@ -18,6 +23,7 @@ export interface Experiencia {
   modalidad: string
   objeto: string
   tipoContrato?: Contrato[]
+  informacion?: Informacion[]
   actividadPrincipal?: Actividad[]
   fechaInicio: string
   fechaTerminacion: string

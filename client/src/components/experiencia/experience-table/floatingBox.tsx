@@ -3,9 +3,13 @@ import React, { useState } from 'react'
 interface FloatingBoxProps {
   totalSum: string
   rupNumbers: string[] // Arreglo de números de RUP seleccionados
+  areaIntervenida: number // Área intervenida
+  areaBajoCubierta: number
+  longitudIntervenida: number
+  tipoContrato: string
 }
 
-function FloatingBox({ totalSum, rupNumbers }: FloatingBoxProps) {
+function FloatingBox({ totalSum, rupNumbers, areaIntervenida, areaBajoCubierta, longitudIntervenida, tipoContrato }: FloatingBoxProps) {
   const [isMinimized, setIsMinimized] = useState(false)
 
   const toggleMinimize = () => {
@@ -23,8 +27,23 @@ function FloatingBox({ totalSum, rupNumbers }: FloatingBoxProps) {
       {!isMinimized && (
         <div style={styles.content}>
           <p style={styles.text}>
-            <strong>Suma total:</strong> {totalSum}
+            <strong>Suma total del Valor SMMlV part:</strong> {totalSum}
           </p>
+          {tipoContrato === 'Edificación' && (
+            <>
+              <p style={styles.text}>
+                <strong>Área intervenida:</strong> {areaIntervenida}
+              </p>
+              <p style={styles.text}>
+                <strong>Área bajo cubierta:</strong> {areaBajoCubierta}
+              </p>
+            </>
+          )}
+          {tipoContrato === 'Vías' && (
+            <p style={styles.text}>
+              <strong>Longitud Intervenida:</strong> {longitudIntervenida}
+            </p>
+          )}
           <p style={styles.text}>
             <strong>RUP seleccionado{rupNumbers.length > 1 ? 's' : ''}:</strong> {rupNumbers.length > 0 ? rupNumbers.join(', ') : 'Ninguno'}
           </p>

@@ -47,6 +47,10 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
   const [empresa, setEmpresa] = useState<string>('')
   const [documentoSoporte, setDocumentoSoporte] = useState<Documento[]>([])
   const [tipoContrato, setTipoContrato] = useState<Contrato[]>([])
+  const [tipoVia, setTipoVia] = useState<string>('')
+  const [areaIntervenida, setAreaIntervenida] = useState<number>(0)
+  const [areaBajoCubierta, setAreaBajoCubierta] = useState<number>(0)
+  const [tipoEdificacion, setTipoEdificacion] = useState<string>('')
   const [actividadPrincipal, setActividadPrincipal] = useState<Actividad[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
@@ -80,6 +84,10 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
       setModalidad(payment.modalidad)
       setObjeto(payment.objeto)
       setTipoContrato(payment.tipoContrato ?? [])
+      setTipoVia(payment.tipoVia)
+      setAreaIntervenida(payment.areaIntervenida)
+      setAreaBajoCubierta(payment.areaBajoCubierta)
+      setTipoEdificacion(payment.tipoEdificacion)
       setActividadPrincipal(payment.actividadPrincipal ?? [])
       setDocumentoSoporte(payment.documentoSoporte ?? [])
       setFiles(
@@ -253,6 +261,10 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
         modalidad: modalidad,
         objeto: objeto,
         tipoContrato: tipoContrato,
+        tipoVia: tipoVia,
+        areaIntervenida: areaIntervenida,
+        areaBajoCubierta: areaBajoCubierta,
+        tipoEdificacion: tipoEdificacion,
         actividadPrincipal: actividadPrincipal,
         documentoSoporte: documentoSoporte,
         documentoCargado: [
@@ -662,6 +674,86 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
               </button>
             </div>
           </div>
+
+          {tipoContrato.some((contrato) => contrato.nombre === 'Vías') && (
+            <>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="tipoVias">
+                  Tipo de Vía
+                </label>
+                <Input
+                  id="tipoVias"
+                  name="tipoVias"
+                  type="text"
+                  value={tipoVia}
+                  onChange={(e) => {
+                    setTipoVia(e.target.value)
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                  Área intervenida
+                </label>
+                <Input
+                  id="areaIntervenida"
+                  name="areaIntervenida"
+                  type="number"
+                  value={areaIntervenida}
+                  onChange={(e) => {
+                    setAreaIntervenida(Number(e.target.value))
+                  }}
+                />
+              </div>
+            </>
+          )}
+
+          {tipoContrato.some((contrato) => contrato.nombre === 'Edificación') && (
+            <>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="tipoEdificacion">
+                  Tipo de Edificación
+                </label>
+                <Input
+                  id="tipoEdificacion"
+                  name="tipoEdificacion"
+                  type="text"
+                  value={tipoEdificacion}
+                  onChange={(e) => {
+                    setTipoEdificacion(e.target.value)
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                  Área intervenida
+                </label>
+                <Input
+                  id="areaIntervenida"
+                  name="areaIntervenida"
+                  type="number"
+                  value={areaIntervenida}
+                  onChange={(e) => {
+                    setAreaIntervenida(Number(e.target.value))
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="areaBajoCubierta">
+                  Área bajo cubierta
+                </label>
+                <Input
+                  id="areaBajoCubierta"
+                  name="areaBajoCubierta"
+                  type="number"
+                  value={areaBajoCubierta}
+                  onChange={(e) => {
+                    setAreaBajoCubierta(Number(e.target.value))
+                  }}
+                />
+              </div>
+            </>
+          )}
 
           <div>
             <label className="mb-1 block text-sm font-medium" htmlFor="actividad-principal">

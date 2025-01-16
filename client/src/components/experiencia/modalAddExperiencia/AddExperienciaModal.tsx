@@ -1,5 +1,5 @@
 import type { MultiValue } from 'react-select'
-import type { Experiencia } from '../experience-table/interface'
+import type { Experiencia, Informacion } from '../experience-table/interface'
 import type { Salario } from '../../services/salario/salarioService'
 import type { Actividad } from '../../actividad/actividadTable/actividad-table'
 import type { Documento } from '../../documentoSoporte/documentoTable/documento-table'
@@ -10,8 +10,9 @@ import { X } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import Swal from 'sweetalert2'
-import Select from 'react-select'
+import SelectR from 'react-select'
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -68,7 +69,6 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
   const [fechaTerminacion, setFechaTerminacion] = useState<string>('')
   const [anioTerminacion, setAnioTerminacion] = useState<number>(new Date().getFullYear())
   const [rup, setRup] = useState<string>('')
-
   const [empresa, setEmpresa] = useState<string>('')
   const [entidadContratante, setEntidadContratante] = useState<string>('')
   const [contratoNo, setContratoNo] = useState<string>('')
@@ -78,6 +78,22 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
   const [modalidad, setModalidad] = useState<string>('')
   const [documentoSoporte, setDocumentoSoporte] = useState<Documento[]>([])
   const [tipoContrato, setTipoContrato] = useState<Contrato[]>([])
+  const [informacion, setInformacion] = useState<Informacion[]>([])
+  const [informacion1, setInformacion1] = useState<string>('')
+  const [informacion2, setInformacion2] = useState<string>('')
+  const [informacion3, setInformacion3] = useState<string>('')
+  const [informacion4, setInformacion4] = useState<string>('')
+  const [informacion5, setInformacion5] = useState<string>('')
+  const [areaIntervenida, setAreaIntervenida] = useState<string>('')
+  const [areaBajoCubierta, setAreaBajoCubierta] = useState<string>('')
+  const [longitudIntervenida, setLongitudIntervenida] = useState<string>('')
+  const [diametro, setDiametro] = useState<string>('')
+  const [materialRed, setMaterialRed] = useState<string>('')
+  const [longitudRed, setLongitudRed] = useState<string>('')
+  const [caudal, setCaudal] = useState<string>('')
+  const [profundidad, setProfundidad] = useState<string>('')
+  const [volumenTanque, setVolumenTanque] = useState<string>('')
+  const [numConexiones, setNumConexiones] = useState<string>('')
   const [actividadPrincipal, setActividadPrincipal] = useState<Actividad[]>([])
   const [fechaInicio, setFechaInicio] = useState<string>('')
   const [valorSmmlv, setValorSmmlv] = useState<number>(0)
@@ -369,6 +385,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         modalidad: modalidad,
         documentoSoporte: documentoSoporte,
         tipoContrato: tipoContrato,
+        informacion: informacion,
         actividadPrincipal: actividadPrincipal,
         fechaInicio: fechaInicio,
         fechaTerminacion: fechaTerminacion,
@@ -451,6 +468,15 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     setValorFinalAfectado(0)
     setAnioTerminacion(new Date().getFullYear())
     setFiles([])
+    setInformacion([])
+    setInformacion1('')
+    setInformacion2('')
+    setInformacion3('')
+    setInformacion4('')
+    setInformacion5('')
+    setAreaIntervenida('')
+    setAreaBajoCubierta('')
+    setLongitudIntervenida('')
     setErrors({})
 
     onClose() // Llama a la función pasada como prop para cerrar el modal
@@ -487,6 +513,12 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
         break
       case 'tipoContrato':
         setTipoContrato((prevTipos) => [...prevTipos, value as { id: string; nombre: string }])
+        break
+      case 'informacion':
+        setInformacion((prevInformacion) => [...prevInformacion, value as unknown as { campo: string; valor: string }])
+        break
+      case 'longitudIntervenida':
+        setLongitudIntervenida(value as string)
         break
       case 'actividadPrincipal':
         setActividadPrincipal((prevActividades) => [...prevActividades, value as { id: string; nombre: string }])
@@ -596,6 +628,21 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
     setIsModalOpenActividad(false)
   }
 
+  const handleField = (campo: string, valor: string) => {
+    setInformacion((prev) => {
+      const nuevaInformacion = [...prev]
+      const indexCampo = nuevaInformacion.findIndex((item) => item.campo === campo)
+
+      if (indexCampo >= 0) {
+        nuevaInformacion[indexCampo].valor = valor
+      } else {
+        nuevaInformacion.push({ campo, valor })
+      }
+
+      return nuevaInformacion
+    })
+  }
+
   if (!isOpen) return null
 
   return (
@@ -612,404 +659,1048 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
             <LoadingSpinner />
           </div>
         ) : null}
-        <form className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" onSubmit={handleFormSubmit}>
+        <form className="space-y-8" onSubmit={handleFormSubmit}>
           <div>
-            <label className="block text-sm font-medium" htmlFor="empresa">
-              Empresa
-            </label>
-            <Input
-              className={errors.empresa ? 'border-red-500' : ''}
-              id="empresa"
-              name="empresa"
-              placeholder="Nombre empresa"
-              value={empresa}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('empresa', e.target.value)
-              }}
-            />
-            {errors.empresa ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-          <div>
-            <label className="block text-sm font-medium" htmlFor="rup">
-              Nº RUP
-            </label>
-            <Input
-              className={errors.rup ? 'border-red-500' : ''}
-              id="rup"
-              name="rup"
-              placeholder="Nº RUP"
-              value={rup}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('rup', e.target.value)
-              }}
-            />
-            {errors.rup ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="entidadContratante">
-              Entidad Contratante
-            </label>
-            <Input
-              className={errors.entidadContratante ? 'border-red-500' : ''}
-              id="entidadContratante"
-              name="entidadContratante"
-              placeholder="Entidad Contratante"
-              value={entidadContratante}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('entidadContratante', e.target.value)
-              }}
-            />
-            {errors.entidadContratante ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="contratoNo">
-              Contrato No.
-            </label>
-            <Input
-              className={errors.contratoNo ? 'border-red-500' : ''}
-              id="contratoNo"
-              name="contratoNo"
-              placeholder="Contrato No."
-              value={contratoNo}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('contratoNo', e.target.value)
-              }}
-            />
-            {errors.contratoNo ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="socio">
-              Socio Aportante / Propio
-            </label>
-            <Input
-              className={errors.socio ? 'border-red-500' : ''}
-              id="socio"
-              name="socio"
-              placeholder="Socio Aportante / Propio"
-              value={socio}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('socio', e.target.value)
-              }}
-            />
-            {errors.socio ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="contratista">
-              Contratista
-            </label>
-            <Input
-              className={errors.contratista ? 'border-red-500' : ''}
-              id="contratista"
-              name="contratista"
-              placeholder="Contratista"
-              value={contratista}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('contratista', e.target.value)
-              }}
-            />
-            {errors.contratista ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="tipoContrato">
-              Documentos de soporte
-            </label>
-            <Select
-              isMulti
-              className="basic-multi-select"
-              classNamePrefix="select"
-              options={opcionesDocumentoSoporte} // Aquí se usan las opciones dinámicas obtenidas del API
-              styles={getCustomSelectStyles}
-              value={opcionesDocumentoSoporte.filter((option) => documentoSoporte.some((documento) => documento.id === option.value))}
-              onChange={handleSelectDocument}
-            />
-            {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="modalidad">
-              Modalidad
-            </label>
-            <select
-              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.modalidad ? 'border-red-500' : ''}`}
-              id="modalidad"
-              name="modalidad"
-              value={modalidad}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                handleFieldChange('modalidad', e.target.value)
-              }}
-            >
-              {opcionesModalidad.map((opcion) => (
-                <option key={opcion.value} value={opcion.value}>
-                  {opcion.label}
-                </option>
-              ))}
-            </select>
-            {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div className="col-span-1 md:col-span-2 lg:col-span-4">
-            <label className="block text-sm font-medium" htmlFor="objeto">
-              Objeto
-            </label>
-            <textarea
-              className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.objeto ? 'border-red-500' : ''}`}
-              id="objeto"
-              name="objeto"
-              placeholder="Descripción del Objeto"
-              value={objeto}
-              onChange={(e) => {
-                handleFieldChange('objeto', e.target.value)
-              }}
-            />
-            {errors.objeto ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="tipoContrato">
-              Tipo Contrato
-            </label>
-            <div className="flex items-center space-x-2">
-              <Select
-                isMulti
-                className="basic-multi-select flex-1"
-                classNamePrefix="select"
-                options={opcionesTipoContrato} // Opciones dinámicas obtenidas del API
-                styles={getCustomSelectStyles}
-                value={opcionesTipoContrato.filter((option) => tipoContrato.some((contrato) => contrato.id === option.value))}
-                onChange={handleSelectTipoContrato}
-              />
-              <button
-                aria-label="Añadir nuevo tipo de contrato"
-                className="rounded-full p-2 text-white focus:outline-none"
-                style={{ backgroundColor: '#EE9820' }}
-                type="button"
-                onClick={handleAddTipoContrato}
-              >
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-            {errors.tipoContrato ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="actividadPrincipal">
-              Actividad Principal
-            </label>
-            <div className="flex items-center space-x-2">
-              <Select
-                isMulti
-                className="basic-multi-select flex-1"
-                classNamePrefix="select"
-                options={opcionesActividadPrincipal}
-                styles={getCustomSelectStyles}
-                value={opcionesActividadPrincipal.filter((option) => actividadPrincipal.some((actividad) => actividad.id === option.value))}
-                onChange={handleSelectActivity}
-              />
-              <button aria-label="Añadir nueva actividad" className="rounded-full p-2 text-white focus:outline-none" style={{ backgroundColor: '#EE9820' }} type="button" onClick={handleAddActividad}>
-                <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-            {errors.actividadPrincipal ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="fechaInicio">
-              Fecha de Inicio
-            </label>
-            <Input
-              className={errors.fechaInicio ? 'border-red-500' : ''}
-              id="fechaInicio"
-              name="fechaInicio"
-              type="date"
-              value={fechaInicio}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('fechaInicio', e.target.value)
-              }}
-            />
-            {errors.fechaInicio ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="fechaTerminacion">
-              Fecha de Terminación
-            </label>
-            <Input
-              className={errors.fechaTerminacion ? 'border-red-500' : ''}
-              id="fechaTerminacion"
-              name="fechaTerminacion"
-              type="date"
-              value={fechaTerminacion}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('fechaTerminacion', e.target.value)
-              }}
-            />
-            {errors.fechaTerminacion ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="anioTerminacion">
-              Año de Terminación
-            </label>
-            <Input disabled id="anioTerminacion" name="anioTerminacion" type="number" value={anioTerminacion || ''} />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="partPorcentaje">
-              Part. %
-            </label>
-            <Input
-              className={errors.partPorcentaje ? 'border-red-500' : ''}
-              id="partPorcentaje"
-              name="partPorcentaje"
-              placeholder="Part. %"
-              type="number"
-              value={partPorcentaje}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFieldChange('partPorcentaje', Number(e.target.value))
-              }}
-            />
-            {errors.partPorcentaje ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium" htmlFor="valorInicial">
-              Valor Inicial
-            </label>
-            <Input
-              id="valorInicial"
-              name="valorInicial"
-              placeholder="Valor Inicial"
-              type="text"
-              value={formatNumber(valorInicial)} // Formatea el valor con separadores de miles
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleValorInicialChange(e.target.value)
-              }}
-            />
-            {errors.valorInicial ? <span className="text-red-500">Campo requerido</span> : null}
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorFinalAfectado">
-              Valor Final Afectado (%) de Part.
-            </label>
-            <Input
-              disabled
-              id="valorFinalAfectado"
-              name="valorFinalAfectado"
-              placeholder="Valor Final Afectado"
-              type="text"
-              value={formatNumber(valorFinalAfectado)} // Mostrar con separadores de miles
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleValorFinalAfectadoChange(e.target.value)
-              }} // Manejar el cambio del input
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlv">
-              Valor en SMMLV
-            </label>
-            <Input disabled id="valorSmmlv" name="valorSmmlv" placeholder="Valor en SMMLV" type="text" value={formatNumber(valorSmmlv)} />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlvPart2">
-              Valor en SMMLV % PART2
-            </label>
-            <Input
-              disabled
-              id="valorSmmlvPart2"
-              name="valorSmmlvPart2"
-              placeholder="Valor en SMMLV % PART2"
-              type="text"
-              value={formatNumber(valorSmmlvPart2)} // Formatea el valor con separadores de miles
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
-              Valor Actual
-            </label>
-            <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
-          </div>
-
-          <br />
-
-          <div>
-            <h4 className="mb-1">Adiciones</h4>
-            {adiciones.map((adicion, index) => (
-              <div key={adicion.id} className="mb-2 flex flex-col items-center lg:flex-row">
+            <h2 className="text-lg font-semibold">Información General</h2>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium" htmlFor="empresa">
+                  Empresa
+                </label>
                 <Input
-                  className={errors[`adicion_${index}`] ? 'border-red-500' : ''}
-                  placeholder={`Adición ${index + 1}`}
-                  type="text"
-                  value={formatNumber(adicion.value)}
+                  className={errors.empresa ? 'border-red-500' : ''}
+                  id="empresa"
+                  name="empresa"
+                  placeholder="Nombre empresa"
+                  value={empresa}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    updateAdicion(adicion.id, parseFloat(e.target.value.replace(/\./g, '')) || 0)
+                    handleFieldChange('empresa', e.target.value)
                   }}
                 />
-                <Button
-                  className="ml-0 mt-2 lg:ml-2 lg:mt-0"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => {
-                    removeAdicion(adicion.id)
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-                {errors[`adicion_${index}`] ? <span className="ml-2 text-red-500">Valor requerido</span> : null}
+                {errors.empresa ? <span className="text-red-500">Campo requerido</span> : null}
               </div>
-            ))}
-            <Button className="mt-2" type="button" variant="default" onClick={addAdicion}>
-              + Agregar Adición
-            </Button>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="rup">
+                  Nº RUP
+                </label>
+                <Input
+                  className={errors.rup ? 'border-red-500' : ''}
+                  id="rup"
+                  name="rup"
+                  placeholder="Nº RUP"
+                  value={rup}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('rup', e.target.value)
+                  }}
+                />
+                {errors.rup ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="entidadContratante">
+                  Entidad Contratante
+                </label>
+                <Input
+                  className={errors.entidadContratante ? 'border-red-500' : ''}
+                  id="entidadContratante"
+                  name="entidadContratante"
+                  placeholder="Entidad Contratante"
+                  value={entidadContratante}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('entidadContratante', e.target.value)
+                  }}
+                />
+                {errors.entidadContratante ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="contratoNo">
+                  Contrato No.
+                </label>
+                <Input
+                  className={errors.contratoNo ? 'border-red-500' : ''}
+                  id="contratoNo"
+                  name="contratoNo"
+                  placeholder="Contrato No."
+                  value={contratoNo}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('contratoNo', e.target.value)
+                  }}
+                />
+                {errors.contratoNo ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="fechaInicio">
+                  Fecha de Inicio
+                </label>
+                <Input
+                  className={errors.fechaInicio ? 'border-red-500' : ''}
+                  id="fechaInicio"
+                  name="fechaInicio"
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('fechaInicio', e.target.value)
+                  }}
+                />
+                {errors.fechaInicio ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="fechaTerminacion">
+                  Fecha de Terminación
+                </label>
+                <Input
+                  className={errors.fechaTerminacion ? 'border-red-500' : ''}
+                  id="fechaTerminacion"
+                  name="fechaTerminacion"
+                  type="date"
+                  value={fechaTerminacion}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('fechaTerminacion', e.target.value)
+                  }}
+                />
+                {errors.fechaTerminacion ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="anioTerminacion">
+                  Año de Terminación
+                </label>
+                <Input disabled id="anioTerminacion" name="anioTerminacion" type="number" value={anioTerminacion || ''} />
+              </div>
+            </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
-              Cargar Documentos Soporte (PDF)
-            </label>
+            <h2 className="text-lg font-semibold">Información del Contrato</h2>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium" htmlFor="socio">
+                  Socio Aportante / Propio
+                </label>
+                <Input
+                  className={errors.socio ? 'border-red-500' : ''}
+                  id="socio"
+                  name="socio"
+                  placeholder="Socio Aportante / Propio"
+                  value={socio}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('socio', e.target.value)
+                  }}
+                />
+                {errors.socio ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
 
-            <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
-              <input
-                multiple
-                accept="application/pdf"
-                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                id="documentosCargados"
-                name="documentosCargados"
-                type="file"
-                onChange={handleFileChange}
-              />
-              <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
-            </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="contratista">
+                  Contratista
+                </label>
+                <Input
+                  className={errors.contratista ? 'border-red-500' : ''}
+                  id="contratista"
+                  name="contratista"
+                  placeholder="Contratista"
+                  value={contratista}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('contratista', e.target.value)
+                  }}
+                />
+                {errors.contratista ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
 
-            {files.map((file) => (
-              <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
-                <span className="truncate">{file.name}</span>
-                <button
-                  className="ml-2 text-red-500 hover:text-red-700"
-                  type="button"
-                  onClick={() => {
-                    removeFile(files.indexOf(file))
+              <div>
+                <label className="block text-sm font-medium" htmlFor="tipoContrato">
+                  Documentos de soporte
+                </label>
+                <SelectR
+                  isMulti
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  options={opcionesDocumentoSoporte} // Aquí se usan las opciones dinámicas obtenidas del API
+                  styles={getCustomSelectStyles}
+                  value={opcionesDocumentoSoporte.filter((option) => documentoSoporte.some((documento) => documento.id === option.value))}
+                  onChange={handleSelectDocument}
+                />
+                {errors.documentoSoporte ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="modalidad">
+                  Modalidad
+                </label>
+                <select
+                  className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.modalidad ? 'border-red-500' : ''}`}
+                  id="modalidad"
+                  name="modalidad"
+                  value={modalidad}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    handleFieldChange('modalidad', e.target.value)
                   }}
                 >
-                  <X className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
+                  {opcionesModalidad.map((opcion) => (
+                    <option key={opcion.value} value={opcion.value}>
+                      {opcion.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.modalidad ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
 
-            {/* Mensaje de error si es necesario */}
-            {errors.files ? <span className="text-red-500">Debes cargar al menos un documento</span> : null}
+              <div className="col-span-1 md:col-span-2 lg:col-span-4">
+                <label className="block text-sm font-medium" htmlFor="objeto">
+                  Objeto
+                </label>
+                <textarea
+                  className={`w-full rounded-lg border p-2 dark:bg-[hsl(20,14.3%,4.1%)] ${errors.objeto ? 'border-red-500' : ''}`}
+                  id="objeto"
+                  name="objeto"
+                  placeholder="Descripción del Objeto"
+                  value={objeto}
+                  onChange={(e) => {
+                    handleFieldChange('objeto', e.target.value)
+                  }}
+                />
+                {errors.objeto ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">Valor y ganancias</h2>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium" htmlFor="valorInicial">
+                  Valor Inicial
+                </label>
+                <Input
+                  id="valorInicial"
+                  name="valorInicial"
+                  placeholder="Valor Inicial"
+                  type="text"
+                  value={formatNumber(valorInicial)} // Formatea el valor con separadores de miles
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleValorInicialChange(e.target.value)
+                  }}
+                />
+                {errors.valorInicial ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+              <div>
+                <label className="block text-sm font-medium" htmlFor="partPorcentaje">
+                  Part. %
+                </label>
+                <Input
+                  className={errors.partPorcentaje ? 'border-red-500' : ''}
+                  id="partPorcentaje"
+                  name="partPorcentaje"
+                  placeholder="Part. %"
+                  type="number"
+                  value={partPorcentaje}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleFieldChange('partPorcentaje', Number(e.target.value))
+                  }}
+                />
+                {errors.partPorcentaje ? <span className="text-red-500">Campo requerido</span> : null}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium" htmlFor="valorFinalAfectado">
+                  Valor Final Afectado (%) de Part.
+                </label>
+                <Input
+                  disabled
+                  id="valorFinalAfectado"
+                  name="valorFinalAfectado"
+                  placeholder="Valor Final Afectado"
+                  type="text"
+                  value={formatNumber(valorFinalAfectado)} // Mostrar con separadores de miles
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleValorFinalAfectadoChange(e.target.value)
+                  }} // Manejar el cambio del input
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlv">
+                  Valor en SMMLV
+                </label>
+                <Input disabled id="valorSmmlv" name="valorSmmlv" placeholder="Valor en SMMLV" type="text" value={formatNumber(valorSmmlv)} />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium" htmlFor="valorSmmlvPart2">
+                  Valor en SMMLV % PART2
+                </label>
+                <Input
+                  disabled
+                  id="valorSmmlvPart2"
+                  name="valorSmmlvPart2"
+                  placeholder="Valor en SMMLV % PART2"
+                  type="text"
+                  value={formatNumber(valorSmmlvPart2)} // Formatea el valor con separadores de miles
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium" htmlFor="valorActual">
+                  Valor Actual
+                </label>
+                <Input disabled id="valorActual" name="valorActual" placeholder="Valor Actual" type="text" value={formatNumber(valorActual)} />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">Atributos importantes</h2>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium" htmlFor="tipoContrato">
+                  Tipo Contrato
+                </label>
+                <div className="flex items-center space-x-2">
+                  <SelectR
+                    isMulti
+                    className="basic-multi-select flex-1"
+                    classNamePrefix="select"
+                    options={opcionesTipoContrato} // Opciones dinámicas obtenidas del API
+                    styles={getCustomSelectStyles}
+                    value={opcionesTipoContrato.filter((option) => tipoContrato.some((contrato) => contrato.id === option.value))}
+                    onChange={handleSelectTipoContrato}
+                  />
+                  <button
+                    aria-label="Añadir nuevo tipo de contrato"
+                    className="rounded-full p-2 text-white focus:outline-none"
+                    style={{ backgroundColor: '#EE9820' }}
+                    type="button"
+                    onClick={handleAddTipoContrato}
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+                {errors.tipoContrato ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
+              </div>
+
+              {tipoContrato.some((contrato) => contrato.nombre === 'Vías') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion1">
+                      Información 1
+                    </label>
+                    <Select
+                      value={informacion1}
+                      onValueChange={(value) => {
+                        setInformacion1(value)
+                        handleField('informacion1', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion1">
+                        <SelectValue placeholder="Selecciona un tipo de vía" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                        <SelectItem value="Primaria">Primaria</SelectItem>
+                        <SelectItem value="Terciaria">Terciaria</SelectItem>
+                        <SelectItem value="Pavimento rígido">Pavimento rígido</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion2">
+                      Información 2
+                    </label>
+                    <Select
+                      value={informacion2}
+                      onValueChange={(value) => {
+                        setInformacion2(value)
+                        handleField('informacion2', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="areaIntervenida">
+                        <SelectValue placeholder="Selecciona el tipo de área" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                        <SelectItem value="Primaria">Primaria</SelectItem>
+                        <SelectItem value="Terciaria">Terciaria</SelectItem>
+                        <SelectItem value="Pavimento rígido">Pavimento rígido</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="longitudIntervenida">
+                      Longitud intervenida
+                    </label>
+                    <Input
+                      id="longitudIntervenida"
+                      type="number"
+                      value={longitudIntervenida}
+                      onChange={(e) => {
+                        setLongitudIntervenida(e.target.value)
+                        handleField('longitudIntervenida', e.target.value)
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {tipoContrato.some((contrato) => contrato.nombre === 'Edificación') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion1">
+                      Información 1
+                    </label>
+                    <Select
+                      value={informacion1}
+                      onValueChange={(value) => {
+                        setInformacion1(value)
+                        handleField('informacion1', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion1">
+                        <SelectValue placeholder="Selecciona el tipo de edificación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
+                        <SelectItem value="Institucional cultural">Institucional cultural</SelectItem>
+                        <SelectItem value="Institucional salud">Institucional salud</SelectItem>
+                        <SelectItem value="Institucional salud">Institucional salud</SelectItem>
+                        <SelectItem value="Institucional recreación">Institucional recreación</SelectItem>
+                        <SelectItem value="Institucional policía o ejercito">Institucional policía o ejercito</SelectItem>
+                        <SelectItem value="Vivienda/habitacional">Vivienda/habitacional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                      Area intervenida
+                    </label>
+                    <Input
+                      id="areaIntervenida"
+                      type="number"
+                      value={areaIntervenida}
+                      onChange={(e) => {
+                        setAreaIntervenida(e.target.value)
+                        handleField('areaIntervenida', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="areaBajoCubierta">
+                      Area bajo cubierta
+                    </label>
+                    <Input
+                      id="areaBajoCubierta"
+                      type="number"
+                      value={areaBajoCubierta}
+                      onChange={(e) => {
+                        setAreaBajoCubierta(e.target.value)
+                        handleField('areaBajoCubierta', e.target.value)
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {tipoContrato.some((contrato) => contrato.nombre === 'Acueducto') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion1">
+                      Información 1
+                    </label>
+                    <Select
+                      value={informacion1}
+                      onValueChange={(value) => {
+                        setInformacion1(value)
+                        handleField('informacion1', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion1">
+                        <SelectValue placeholder="Selecciona el tipo de edificación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
+                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
+                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
+                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
+                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
+                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
+                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion2">
+                      Información 2
+                    </label>
+                    <Select
+                      value={informacion2}
+                      onValueChange={(value) => {
+                        setInformacion2(value)
+                        handleField('informacion2', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion2">
+                        <SelectValue placeholder="Selecciona el tipo de edificación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
+                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
+                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
+                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
+                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
+                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
+                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion3">
+                      Información 3
+                    </label>
+                    <Select
+                      value={informacion3}
+                      onValueChange={(value) => {
+                        setInformacion3(value)
+                        handleField('informacion3', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion3">
+                        <SelectValue placeholder="Selecciona el tipo de edificación" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Otra opción">Sin especificar</SelectItem>
+                        <SelectItem value="Primaria">Institucional cultura</SelectItem>
+                        <SelectItem value="Terciaria">Institucional salud</SelectItem>
+                        <SelectItem value="Pavimento rígido">Institucional salud</SelectItem>
+                        <SelectItem value="Primaria">Institucional recreación</SelectItem>
+                        <SelectItem value="Terciaria">Institucional policía o ejercito</SelectItem>
+                        <SelectItem value="Pavimento rígido">Vivienda/habitacional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="diametro">
+                      Diametro
+                    </label>
+                    <Input
+                      id="diametro"
+                      type="number"
+                      value={diametro}
+                      onChange={(e) => {
+                        setDiametro(e.target.value)
+                        handleField('diametro', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="materialRed">
+                      Material de Red
+                    </label>
+                    <Input
+                      id="materialRed"
+                      type="number"
+                      value={materialRed}
+                      onChange={(e) => {
+                        setMaterialRed(e.target.value)
+                        handleField('materialRed', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="longitudRed">
+                      Longitud de Red
+                    </label>
+                    <Input
+                      id="longitudRed"
+                      type="number"
+                      value={longitudRed}
+                      onChange={(e) => {
+                        setLongitudRed(e.target.value)
+                        handleField('longitudRed', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="caudal">
+                      Caudal
+                    </label>
+                    <Input
+                      id="caudal"
+                      type="number"
+                      value={caudal}
+                      onChange={(e) => {
+                        setCaudal(e.target.value)
+                        handleField('caudal', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="profundidad">
+                      Profundidad
+                    </label>
+                    <Input
+                      id="profundidad"
+                      type="number"
+                      value={profundidad}
+                      onChange={(e) => {
+                        setProfundidad(e.target.value)
+                        handleField('profundidad', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="volumenTanque">
+                      Volumen Tanque
+                    </label>
+                    <Input
+                      id="volumenTanque"
+                      type="number"
+                      value={volumenTanque}
+                      onChange={(e) => {
+                        setVolumenTanque(e.target.value)
+                        handleField('volumenTanque', e.target.value)
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="numConexiones">
+                      Numero Conexiones
+                    </label>
+                    <Input
+                      id="numConexiones"
+                      type="number"
+                      value={numConexiones}
+                      onChange={(e) => {
+                        setNumConexiones(e.target.value)
+                        handleField('numConexiones', e.target.value)
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {tipoContrato.some((contrato) => contrato.nombre === 'Obras de Urbanismos') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium" htmlFor="informacion1">
+                      Tipo de Obra
+                    </label>
+                    <Select
+                      value={informacion1}
+                      onValueChange={(value) => {
+                        setInformacion1(value)
+                        handleField('informacion1', value)
+                      }}
+                    >
+                      <SelectTrigger className="w-full" id="informacion1">
+                        <SelectValue placeholder="Selecciona" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Parques">Parques</SelectItem>
+                        <SelectItem value="Espacio Publico">Espacio Publico</SelectItem>
+                        <SelectItem value="Escenario Deportivo">Escenario Deportivo</SelectItem>
+                        <SelectItem value="Plaza">Plaza</SelectItem>
+                        <SelectItem value="Cubierta polideportiva">Cubierta polideportiva</SelectItem>
+                        <SelectItem value="Cancha">Cancha</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {informacion1 === 'Parques' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 1
+                        </label>
+                        <Select
+                          value={informacion2}
+                          onValueChange={(value) => {
+                            setInformacion2(value)
+                            handleField('informacion2', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion2">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
+                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 2
+                        </label>
+                        <Select
+                          value={informacion3}
+                          onValueChange={(value) => {
+                            setInformacion3(value)
+                            handleField('informacion3', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion3">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
+                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion4">
+                          información 3
+                        </label>
+                        <Select
+                          value={informacion4}
+                          onValueChange={(value) => {
+                            setInformacion4(value)
+                            handleField('informacion4', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion4">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
+                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion5">
+                          información 4
+                        </label>
+                        <Select
+                          value={informacion5}
+                          onValueChange={(value) => {
+                            setInformacion5(value)
+                            handleField('informacion5', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion5">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Espacio publico">Espacio publico</SelectItem>
+                            <SelectItem value="Escenarios deportivos">Escenarios deportivos</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                          Area Intervenida
+                        </label>
+                        <Input
+                          id="areaIntervenida"
+                          type="number"
+                          value={areaIntervenida}
+                          onChange={(e) => {
+                            setAreaIntervenida(e.target.value)
+                            handleField('areaIntervenida', e.target.value)
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {informacion1 === 'Espacio Publico' && (
+                    <div>
+                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                        Area Intervenida
+                      </label>
+                      <Input
+                        id="areaIntervenida"
+                        type="number"
+                        value={areaIntervenida}
+                        onChange={(e) => {
+                          setAreaIntervenida(e.target.value)
+                          handleField('areaIntervenida', e.target.value)
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {informacion1 === 'Escenario Deportivo' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 1
+                        </label>
+                        <Select
+                          value={informacion2}
+                          onValueChange={(value) => {
+                            setInformacion2(value)
+                            handleField('informacion2', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion2">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 2
+                        </label>
+                        <Select
+                          value={informacion3}
+                          onValueChange={(value) => {
+                            setInformacion3(value)
+                            handleField('informacion3', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion3">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                          Area Intervenida
+                        </label>
+                        <Input
+                          id="areaIntervenida"
+                          type="number"
+                          value={areaIntervenida}
+                          onChange={(e) => {
+                            setAreaIntervenida(e.target.value)
+                            handleField('areaIntervenida', e.target.value)
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {informacion1 === 'Plaza' && (
+                    <div>
+                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                        Area Intervenida
+                      </label>
+                      <Input
+                        id="areaIntervenida"
+                        type="number"
+                        value={areaIntervenida}
+                        onChange={(e) => {
+                          setAreaIntervenida(e.target.value)
+                          handleField('areaIntervenida', e.target.value)
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {informacion1 === 'Cubierta poliderportiva' && (
+                    <div>
+                      <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                        Area Intervenida
+                      </label>
+                      <Input
+                        id="areaIntervenida"
+                        type="number"
+                        value={areaIntervenida}
+                        onChange={(e) => {
+                          setAreaIntervenida(e.target.value)
+                          handleField('areaIntervenida', e.target.value)
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {informacion1 === 'Cancha' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 1
+                        </label>
+                        <Select
+                          value={informacion2}
+                          onValueChange={(value) => {
+                            setInformacion2(value)
+                            handleField('informacion2', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion2">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="informacion2">
+                          información 2
+                        </label>
+                        <Select
+                          value={informacion3}
+                          onValueChange={(value) => {
+                            setInformacion3(value)
+                            handleField('informacion3', value)
+                          }}
+                        >
+                          <SelectTrigger className="w-full" id="informacion3">
+                            <SelectValue placeholder="Selecciona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Sin especificar">Sin especificar</SelectItem>
+                            <SelectItem value="Cancha sintética">Cancha sintética</SelectItem>
+                            <SelectItem value="Cancha deportiva">Cancha deportiva</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor="areaIntervenida">
+                          Area Intervenida
+                        </label>
+                        <Input
+                          id="areaIntervenida"
+                          type="number"
+                          value={areaIntervenida}
+                          onChange={(e) => {
+                            setAreaIntervenida(e.target.value)
+                            handleField('areaIntervenida', e.target.value)
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium" htmlFor="actividadPrincipal">
+                  Actividad Principal
+                </label>
+                <div className="flex items-center space-x-2">
+                  <SelectR
+                    isMulti
+                    className="basic-multi-select flex-1"
+                    classNamePrefix="select"
+                    options={opcionesActividadPrincipal}
+                    styles={getCustomSelectStyles}
+                    value={opcionesActividadPrincipal.filter((option) => actividadPrincipal.some((actividad) => actividad.id === option.value))}
+                    onChange={handleSelectActivity}
+                  />
+                  <button
+                    aria-label="Añadir nueva actividad"
+                    className="rounded-full p-2 text-white focus:outline-none"
+                    style={{ backgroundColor: '#EE9820' }}
+                    type="button"
+                    onClick={handleAddActividad}
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={5} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+                {errors.actividadPrincipal ? <span className="mt-1 text-sm text-red-500">Campo requerido</span> : null}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold">Adiciones y Documentos PDF</h2>
+            <hr className="my-4 border-gray-300" />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <h4 className="mb-1">Adiciones</h4>
+                {adiciones.map((adicion, index) => (
+                  <div key={adicion.id} className="mb-2 flex flex-col items-center lg:flex-row">
+                    <Input
+                      className={errors[`adicion_${index}`] ? 'border-red-500' : ''}
+                      placeholder={`Adición ${index + 1}`}
+                      type="text"
+                      value={formatNumber(adicion.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        updateAdicion(adicion.id, parseFloat(e.target.value.replace(/\./g, '')) || 0)
+                      }}
+                    />
+                    <Button
+                      className="ml-0 mt-2 lg:ml-2 lg:mt-0"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        removeAdicion(adicion.id)
+                      }}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                    {errors[`adicion_${index}`] ? <span className="ml-2 text-red-500">Valor requerido</span> : null}
+                  </div>
+                ))}
+                <Button className="mt-2" type="button" variant="default" onClick={addAdicion}>
+                  + Agregar Adición
+                </Button>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium" htmlFor="documentosCargados">
+                  Cargar Documentos Soporte (PDF)
+                </label>
+
+                <div className="relative flex w-full cursor-pointer items-center justify-center rounded-lg border border-dashed border-gray-400 p-4 transition-colors hover:border-gray-500">
+                  <input
+                    multiple
+                    accept="application/pdf"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    id="documentosCargados"
+                    name="documentosCargados"
+                    type="file"
+                    onChange={handleFileChange}
+                  />
+                  <span className="text-xs text-gray-600">{files.length > 0 ? `${files.length} documentos seleccionados` : 'Haz clic aquí para cargar documentos PDF'}</span>
+                </div>
+
+                {files.map((file) => (
+                  <li key={file.name} className="flex items-center justify-between text-sm text-gray-600">
+                    <span className="truncate">{file.name}</span>
+                    <button
+                      className="ml-2 text-red-500 hover:text-red-700"
+                      type="button"
+                      onClick={() => {
+                        removeFile(files.indexOf(file))
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </li>
+                ))}
+
+                {/* Mensaje de error si es necesario */}
+                {errors.files ? <span className="text-red-500">Debes cargar al menos un documento</span> : null}
+              </div>
+            </div>
           </div>
 
           <div className="col-span-1 flex justify-end md:col-span-2 lg:col-span-4">
