@@ -971,6 +971,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
                       />
                       {field.type === 'numeric' && (
                         <Select
+                          value={field.unit}
                           onValueChange={(value: string) => {
                             updateFieldUnit(field.id, value)
                           }}
@@ -980,9 +981,10 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectItem value="kg">kg</SelectItem>
                               <SelectItem value="m">m</SelectItem>
-                              <SelectItem value="L">L</SelectItem>
+                              <SelectItem value="m2">m²</SelectItem>
+                              <SelectItem value="m3">m³</SelectItem>
+                              <SelectItem value="L/s">L/s</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>

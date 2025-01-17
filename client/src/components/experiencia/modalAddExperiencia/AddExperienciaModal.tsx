@@ -1138,9 +1138,10 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
-                              <SelectItem value="kg">kg</SelectItem>
                               <SelectItem value="m">m</SelectItem>
-                              <SelectItem value="L">L</SelectItem>
+                              <SelectItem value="m2">m²</SelectItem>
+                              <SelectItem value="m3">m³</SelectItem>
+                              <SelectItem value="L/s">L/s</SelectItem>
                             </SelectGroup>
                           </SelectContent>
                         </Select>
