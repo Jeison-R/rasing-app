@@ -444,7 +444,24 @@ export function CustomTable() {
           return acc // No acumular si hay un tipo de contrato diferente
         }
 
-        // Operaciones específicas según el tipo de contrato
+        //   if (tipoActual === 'Edificación') {
+        // const areaIntervenidaObj = row.original.informacion?.find((item) => item.label === 'Longitud intervenida')
+        // const areaBajoCubiertaObj = row.original.informacion?.find((item) => item.campo === 'areaBajoCubierta')
+        // const areaIntervenidaInfo = areaIntervenidaObj?.valor !== undefined ? parseFloat(areaIntervenidaObj.valor) : 0
+        // const areaBajoCubiertaInfo = areaBajoCubiertaObj?.valor !== undefined ? parseFloat(areaBajoCubiertaObj.valor) : 0
+        // acc.areaIntervenida += areaIntervenidaInfo
+        // acc.areaBajoCubierta += areaBajoCubiertaInfo
+        if (tipoActual === 'Vías') {
+          const longitudIntervenidaObj = row.original.informacion?.find((item) => item.label === 'Longitud intervenida')
+          const longitudIntervenidaInfo = longitudIntervenidaObj?.calculatedValue !== undefined ? parseFloat(longitudIntervenidaObj.calculatedValue) : 0
+
+          acc.longitudIntervenida += longitudIntervenidaInfo // Aquí puedes usar una lógica específica
+          // } else if (tipoActual === 'Acueducto') {
+          //   const longitudRedObj = row.original.informacion?.find((item) => item.campo === 'longitudRed')
+          //   const longitudRedInfo = longitudRedObj?.valor !== undefined ? parseFloat(longitudRedObj.valor) : 0
+          //   acc.areaIntervenida += longitudRedInfo // Aquí puedes usar una lógica específica
+          // }
+        }
 
         acc.totalSum += row.original.valorSmmlvPart2
 
