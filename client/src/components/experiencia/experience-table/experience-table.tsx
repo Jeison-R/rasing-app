@@ -1,12 +1,11 @@
 'use client'
 
-import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
+import type { ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
 import type { Experiencia } from './interface'
 import type { Contrato } from '@/components/tipoContrato/tipoContratoTable/tipoContrato-table'
 import type { Actividad } from '@/components/actividad/actividadTable/actividad-table'
-import type { CheckedState } from '@radix-ui/react-checkbox'
+import type { OptionTipoContrato, OptionActividad } from './interface'
 
-import { CaretSortIcon } from '@radix-ui/react-icons'
 import { ChevronLeft, ChevronRight, CirclePlus, MoreHorizontal, Search, SlidersHorizontal } from 'lucide-react'
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { useEffect, useState, useRef } from 'react'
@@ -22,7 +21,6 @@ import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { CustomTooltip } from '../../commons/tooltip'
@@ -34,213 +32,10 @@ import { obtenerTiposContrato } from '../../services/tipoContrato/contratoServic
 import { obtenerActividades } from '../../services/actividad/actividadService'
 import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 
+import { columns } from './columnas'
 import FloatingBox from './floatingBox'
 import { ActionsMenu } from './ActionsMenu'
 import { deleteExperience } from './deleteExperience'
-
-export const columns: ColumnDef<Experiencia>[] = [
-  {
-    id: 'select',
-    cell: ({ row }) => (
-      <Checkbox
-        aria-label="Seleccionar fila"
-        checked={row.getIsSelected()}
-        onCheckedChange={(checked: CheckedState) => {
-          row.toggleSelected(!!checked)
-        }}
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false
-  },
-  {
-    accessorKey: 'Empresa',
-    header: 'Empresa',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('Empresa')}</div>
-  },
-  {
-    accessorKey: 'rup',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }}
-        >
-          Rup
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="text-center lowercase">{row.getValue('rup')}</div>
-  },
-  {
-    accessorKey: 'entidad',
-    header: 'Entidad',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('entidad')}</div>
-  },
-  {
-    accessorKey: 'contrato',
-    header: 'Contrato',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('contrato')}</div>
-  },
-  {
-    accessorKey: 'socio',
-    header: 'Socio',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('socio')}</div>
-  },
-  {
-    accessorKey: 'contratista',
-    header: 'Contratista',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('contratista')}</div>
-  },
-  {
-    accessorKey: 'modalidad',
-    header: 'Modalidad',
-    cell: ({ row }) => <div className="capitalize">{row.getValue('modalidad')}</div>
-  },
-  {
-    accessorKey: 'tipoContrato',
-    header: 'Tipo de Contrato',
-    cell: ({ row }) => {
-      const tiposContrato: Contrato[] = row.getValue('tipoContrato')
-
-      return (
-        <div>
-          {tiposContrato.map((tipo, index) => (
-            <span key={tipo.id} className="mr-2">
-              {tipo.nombre}
-              {index < tiposContrato.length - 1 && ', '}
-            </span>
-          ))}
-        </div>
-      )
-    },
-    filterFn: (row, id, filterValue: string[]) => {
-      const tiposContrato: Contrato[] = row.getValue(id)
-
-      return filterValue.length === 0 || filterValue.some((filter: string) => tiposContrato.some((tipo: Contrato) => tipo.nombre === filter))
-    }
-  },
-  {
-    accessorKey: 'actividadPrincipal',
-    header: 'Actividad Principal',
-    cell: ({ row }) => {
-      const actividad: Actividad[] = row.getValue('actividadPrincipal')
-
-      return (
-        <div>
-          {actividad.map((tipo, index) => (
-            <span key={tipo.id} className="mr-2">
-              {tipo.nombre}
-              {index < actividad.length - 1 && ', '}
-            </span>
-          ))}
-        </div>
-      )
-    },
-    filterFn: (row, id, filterValue: string[]) => {
-      const actividad: Actividad[] = row.getValue(id)
-
-      return filterValue.length === 0 || filterValue.some((filter: string) => actividad.some((tipo: Actividad) => tipo.nombre === filter))
-    }
-  },
-  {
-    accessorKey: 'valorSmmlvPart2',
-    header: 'Valor en SMMLV*%PART2',
-    cell: ({ row }) => {
-      const value = row.getValue('valorSmmlvPart2')
-      const formatted = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP'
-      }).format(typeof value === 'number' ? value : parseFloat(value as string))
-      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
-
-      return <div className="capitalize">{formattedWithoutSymbol}</div>
-    }
-  },
-  {
-    accessorKey: 'valorSmmlv',
-    header: 'Valor en SMMLV',
-    cell: ({ row }) => {
-      const value = row.getValue('valorSmmlv')
-      const formatted = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency: 'COP'
-      }).format(typeof value === 'number' ? value : parseFloat(value as string))
-      const formattedWithoutSymbol = formatted.replace(/[^0-9.,]/g, '')
-
-      return <div className="capitalize">{formattedWithoutSymbol}</div>
-    }
-  },
-  {
-    accessorKey: 'objeto',
-    header: 'Objeto',
-    cell: ({ row }) => {
-      const value = row.getValue('objeto')
-      const formattedValue = typeof value === 'string' ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : value
-
-      return <div>{formattedValue as string}</div>
-    }
-  },
-  {
-    accessorKey: 'fechaInicio',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }}
-        >
-          Fecha Inicio
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const fecha = row.getValue('fechaInicio')
-      const [year, month, day] = (fecha as string).split('-') // Dividimos la fecha en partes
-      const fechaFormateada = `${day}/${month}/${year}`
-
-      return <div>{fechaFormateada}</div>
-    }
-  },
-  {
-    accessorKey: 'fechaTerminacion',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => {
-            column.toggleSorting(column.getIsSorted() === 'asc')
-          }}
-        >
-          Fecha Fin
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const fecha = row.getValue('fechaTerminacion')
-      const [year, month, day] = (fecha as string).split('-') // Dividimos la fecha en partes
-      const fechaFormateada = `${day}/${month}/${year}`
-
-      return <div>{fechaFormateada}</div>
-    }
-  }
-]
-
-export interface OptionTipoContrato {
-  value: string
-  label: string
-}
-
-export interface OptionActividad {
-  value: string
-  label: string
-}
 
 const getColumnVisibilityFromLocalStorage = () => {
   if (typeof window !== 'undefined') {
@@ -278,7 +73,6 @@ export function CustomTable() {
     totalSum: string
     rupNumbers: string[]
     areaIntervenida: number
-    areaBajoCubierta: number
     tipoContrato: string
     longitudIntervenida: number
   } | null>(null)
@@ -334,16 +128,21 @@ export function CustomTable() {
 
   const fetchExperiences = async () => {
     try {
-      // Capturar la página actual
       const currentPage = table.getState().pagination.pageIndex
+
       // Obtener los datos
       const experienciaData = await obtenerExperiences()
 
-      setData(experienciaData)
-      // Aplicar un timeout para asegurar que React procese los datos antes de restaurar la página
+      // Ordenar los datos por 'rup' de menor a mayor
+      const sortedData = experienciaData.sort((a, b) => Number(a.rup) - Number(b.rup))
+
+      setData(sortedData)
+
+      // Aplicar un timeout para restaurar la página actual después de que los datos se actualicen
       setTimeout(() => {
         table.setPageIndex(currentPage)
       }, 0)
+
       setIsLoading(false)
     } catch (error) {
       if (error instanceof Error) {
@@ -432,7 +231,7 @@ export function CustomTable() {
     // Determinar el tipo de contrato inicial (si ya hay filas seleccionadas)
     const initialTipoContrato = selectedRows.length ? selectedRows[0].original.tipoContrato?.[0]?.nombre || null : null
 
-    const { totalSum, areaIntervenida, areaBajoCubierta, longitudIntervenida, isValid } = selectedRows.reduce(
+    const { totalSum, areaIntervenida, longitudIntervenida, isValid } = selectedRows.reduce(
       (acc, row) => {
         const contratos = row.original.tipoContrato || []
         const tipoActual = contratos.length > 0 ? contratos[0].nombre : null
@@ -444,8 +243,13 @@ export function CustomTable() {
           return acc // No acumular si hay un tipo de contrato diferente
         }
 
-        //   if (tipoActual === 'Edificación') {
-        // const areaIntervenidaObj = row.original.informacion?.find((item) => item.label === 'Longitud intervenida')
+        if (tipoActual === 'Edificación') {
+          const areaIntervenidaObj = row.original.informacion?.find((item) => item.label === 'Area intervenida')
+          const areaIntervenidaInfo = areaIntervenidaObj?.calculatedValue !== undefined ? parseFloat(areaIntervenidaObj.calculatedValue) : 0
+
+          acc.areaIntervenida += areaIntervenidaInfo
+        }
+
         // const areaBajoCubiertaObj = row.original.informacion?.find((item) => item.campo === 'areaBajoCubierta')
         // const areaIntervenidaInfo = areaIntervenidaObj?.valor !== undefined ? parseFloat(areaIntervenidaObj.valor) : 0
         // const areaBajoCubiertaInfo = areaBajoCubiertaObj?.valor !== undefined ? parseFloat(areaBajoCubiertaObj.valor) : 0
@@ -467,7 +271,7 @@ export function CustomTable() {
 
         return acc
       },
-      { totalSum: 0, areaIntervenida: 0, areaBajoCubierta: 0, longitudIntervenida: 0, isValid: true }
+      { totalSum: 0, areaIntervenida: 0, longitudIntervenida: 0, isValid: true }
     )
 
     if (!isValid) {
@@ -489,7 +293,6 @@ export function CustomTable() {
       setSelectedInfo({
         totalSum: formattedSum,
         areaIntervenida,
-        areaBajoCubierta,
         longitudIntervenida,
         rupNumbers,
         tipoContrato: initialTipoContrato || ''
@@ -598,7 +401,6 @@ export function CustomTable() {
       <div className="flex flex-wrap items-center justify-between py-4">
         {selectedInfo ? (
           <FloatingBox
-            areaBajoCubierta={selectedInfo.areaBajoCubierta}
             areaIntervenida={selectedInfo.areaIntervenida}
             longitudIntervenida={selectedInfo.longitudIntervenida}
             rupNumbers={selectedInfo.rupNumbers}

@@ -42,3 +42,13 @@ export interface Experiencia {
   adiciones?: Adicion[] // Array opcional de adiciones
   documentoCargado: { name: string; url: string }[]
 }
+
+export interface OptionTipoContrato {
+  value: string
+  label: string
+}
+
+export interface OptionActividad {
+  value: string
+  label: string
+}

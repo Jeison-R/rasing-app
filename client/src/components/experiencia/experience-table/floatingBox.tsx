@@ -4,12 +4,11 @@ interface FloatingBoxProps {
   totalSum: string
   rupNumbers: string[] // Arreglo de números de RUP seleccionados
   areaIntervenida: number // Área intervenida
-  areaBajoCubierta: number
   longitudIntervenida: number
   tipoContrato: string
 }
 
-function FloatingBox({ totalSum, rupNumbers, areaIntervenida, areaBajoCubierta, longitudIntervenida, tipoContrato }: FloatingBoxProps) {
+function FloatingBox({ totalSum, rupNumbers, areaIntervenida, longitudIntervenida, tipoContrato }: FloatingBoxProps) {
   const [isMinimized, setIsMinimized] = useState(false)
 
   const toggleMinimize = () => {
@@ -30,14 +29,9 @@ function FloatingBox({ totalSum, rupNumbers, areaIntervenida, areaBajoCubierta, 
             <strong>Suma total del Valor SMMlV part:</strong> {totalSum}
           </p>
           {tipoContrato === 'Edificación' && (
-            <>
-              <p style={styles.text}>
-                <strong>Área intervenida:</strong> {areaIntervenida}
-              </p>
-              <p style={styles.text}>
-                <strong>Área bajo cubierta:</strong> {areaBajoCubierta}
-              </p>
-            </>
+            <p style={styles.text}>
+              <strong>Área intervenida:</strong> {areaIntervenida}
+            </p>
           )}
           {tipoContrato === 'Vías' && (
             <p style={styles.text}>
