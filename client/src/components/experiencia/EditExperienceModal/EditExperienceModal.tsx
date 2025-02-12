@@ -238,7 +238,7 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
           documentosSubidos.push({ name: file.name, url: existingUrl })
         } else {
           // Si no existe, subimos el archivo y obtenemos su URL
-          const storageRef = ref(storage, `documentos/${file.name}-${uuidv4()}`)
+          const storageRef = ref(storage, `documentos/${file.name}`)
 
           await uploadBytes(storageRef, file)
 

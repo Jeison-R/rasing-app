@@ -350,7 +350,7 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
           return { name: file.name, url: existingUrl }
         } else {
           // Subir el archivo si no existe
-          const storageRef = ref(storage, `documentos/${file.name}-${uuidv4()}`)
+          const storageRef = ref(storage, `documentos/${file.name}`)
 
           await uploadBytes(storageRef, file)
 
