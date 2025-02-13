@@ -105,7 +105,6 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Part. %:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{payment.partPorcentaje}</p>
           </div>
-
           <div>
             <h4 className="text-sm font-medium">Valor Final Afectado:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorFinalAfectado)}</p>
@@ -114,12 +113,27 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             <h4 className="text-sm font-medium">Valor en SMMLV:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorSmmlv)}</p>
           </div>
+
+          {/* Sección independiente para las adiciones */}
+          {payment.adiciones && payment.adiciones.length > 0 ? (
+            <div className="col-span-1 md:col-span-2 lg:col-span-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                {payment.adiciones.map((adicion, index) => (
+                  <div key={adicion.id}>
+                    <h4 className="text-xs font-medium">Adición {index + 1}:</h4> {/* Nombre separado del valor */}
+                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(adicion.value)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <div>
             <h4 className="text-sm font-medium">Valor en SMMLV % PART2:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorSmmlvPart2)}</p>
           </div>
           <div>
-            <h4 className="text-sm font-medium">Valor Actual</h4>
+            <h4 className="text-sm font-medium">Valor Actual:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(payment.valorActual)}</p>
           </div>
           <div>
@@ -128,7 +142,6 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
               {Array.isArray(payment.tipoContrato) ? payment.tipoContrato.map((contrato) => contrato.nombre).join(', ') || 'No especificado' : 'No especificado'}
             </p>
           </div>
-
           <div>
             <h4 className="text-sm font-medium">Actividad Principal:</h4>
             <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">
@@ -136,6 +149,7 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
             </p>
           </div>
         </div>
+
         <hr className="my-4 border-gray-300" />
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {payment.informacion && payment.informacion.length > 0 ? (
@@ -169,7 +183,12 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
               {payment.documentoCargado.length > 0 ? (
                 payment.documentoCargado.map((doc) => (
                   <div key={doc.name} className="flex items-center space-x-2">
-                    <span className="max-w-[6rem] truncate text-sm text-gray-600">{doc.name}</span>
+                    <span
+                      className="max-w-[6rem] truncate text-sm text-gray-600"
+                      title={doc.name} // Mostrar nombre completo al pasar el cursor
+                    >
+                      {doc.name}
+                    </span>
                     <a
                       className="text-blue-600 hover:underline"
                       href={doc.url} // Enlaza al archivo PDF
@@ -184,18 +203,6 @@ export function ViewExperienceModal({ isOpen, onClose, payment }: ViewExperience
                 <p className="text-sm text-gray-500">No hay documentos cargados.</p>
               )}
             </div>
-          </div>
-          <div className="mb-2 flex flex-col items-start lg:flex-col">
-            {payment.adiciones && payment.adiciones.length > 0 ? (
-              <div className="space-y-2">
-                {payment.adiciones.map((adicion, index) => (
-                  <div key={adicion.id}>
-                    <span className="font-medium">Adición {index + 1}: </span>
-                    <p className="rounded-lg border bg-gray-100 p-2 dark:bg-gray-800">{formatNumber(adicion.value)}</p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
           </div>
         </div>
         <div className="mt-6 flex justify-end">
