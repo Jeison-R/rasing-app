@@ -42,6 +42,9 @@ export function MainNav() {
         <Link className={cn('transition-colors hover:text-foreground/80', pathname.startsWith(ROUTES.EXPERIENCES) ? 'text-foreground' : 'text-foreground/60')} href={ROUTES.EXPERIENCES}>
           Experiencias
         </Link>
+        <Link className={cn('transition-colors hover:text-foreground/80', pathname.startsWith(ROUTES.DOCREGULADRES) ? 'text-foreground' : 'text-foreground/60')} href={ROUTES.DOCREGULADRES}>
+          Documentos Regulares
+        </Link>
         <Link className={cn('transition-colors hover:text-foreground/80', pathname.startsWith(ROUTES.MINIMUIM_WAGE) ? 'text-foreground' : 'text-foreground/60')} href={ROUTES.MINIMUIM_WAGE}>
           Salarios mínimos
         </Link>

@@ -48,6 +48,15 @@ export function NavMobile() {
               </Link>
               <Link
                 className="text-black dark:text-white"
+                href={ROUTES.DOCREGULADRES}
+                onClick={() => {
+                  setIsOpen(false)
+                }}
+              >
+                Documento Regulares
+              </Link>
+              <Link
+                className="text-black dark:text-white"
                 href={ROUTES.MINIMUIM_WAGE}
                 onClick={() => {
                   setIsOpen(false)
