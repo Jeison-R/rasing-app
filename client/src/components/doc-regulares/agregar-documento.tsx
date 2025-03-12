@@ -228,7 +228,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
                 className="col-span-3"
                 id="nombre"
                 value={nombre}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleFieldChange('nombre', e.target.value)
                 }}
               />
@@ -240,7 +240,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
               </Label>
               <Select
                 value={tipo}
-                onValueChange={(value) => {
+                onValueChange={(value: 'Periódico' | 'Permanente') => {
                   handleFieldChange('tipo', value)
                 }}
               >
@@ -260,7 +260,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
               </Label>
               <Select
                 value={categoria}
-                onValueChange={(value) => {
+                onValueChange={(value: 'Legal' | 'Seguridad' | 'Operativo' | 'Técnico' | 'Administrativo') => {
                   handleFieldChange('categoria', value)
                 }}
               >
@@ -288,7 +288,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
                     id="ultimaActualizacion"
                     type="date"
                     value={ultimaActualizacion}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleFieldChange('ultimaActualizacion', e.target.value)
                     }}
                   />
@@ -303,7 +303,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
                     id="proximaActualizacion"
                     type="date"
                     value={proximaActualizacion}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleFieldChange('proximaActualizacion', e.target.value)
                     }}
                   />

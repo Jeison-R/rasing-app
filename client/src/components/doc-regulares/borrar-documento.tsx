@@ -16,8 +16,6 @@ export const deleteDocument = async (id: string, filePath: string) => {
   })
 
   if (result.isConfirmed) {
-    console.log(id, filePath)
-
     try {
       // Eliminar el documento de la base de datos
       const response = await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${id}`, {

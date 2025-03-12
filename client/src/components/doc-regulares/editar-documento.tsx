@@ -404,7 +404,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
                 className="col-span-3"
                 id="nombre"
                 value={nombre}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleFieldChange('nombre', e.target.value)
                 }}
               />
@@ -416,7 +416,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
               </Label>
               <Select
                 value={tipo}
-                onValueChange={(value) => {
+                onValueChange={(value: 'periodico' | 'permanente') => {
                   handleFieldChange('tipo', value)
                 }}
               >
@@ -436,7 +436,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
               </Label>
               <Select
                 value={categoria}
-                onValueChange={(value) => {
+                onValueChange={(value: 'Legal' | 'Seguridad' | 'Operativo' | 'Técnico' | 'Administrativo') => {
                   handleFieldChange('categoria', value)
                 }}
               >
@@ -464,7 +464,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
                     id="ultimaActualizacion"
                     type="date"
                     value={ultimaActualizacion}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleFieldChange('ultimaActualizacion', e.target.value)
                     }}
                   />
@@ -479,7 +479,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
                     id="proximaActualizacion"
                     type="date"
                     value={proximaActualizacion}
-                    onChange={(e) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       handleFieldChange('proximaActualizacion', e.target.value)
                     }}
                   />

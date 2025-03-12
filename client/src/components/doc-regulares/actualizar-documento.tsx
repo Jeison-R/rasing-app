@@ -379,7 +379,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento }: ActualizarDo
                 id="proximaActualizacion"
                 type="date"
                 value={proximaActualizacion}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setProximaActualizacion(e.target.value)
                 }}
               />

@@ -169,7 +169,7 @@ export default function DocumentosRegulares() {
             placeholder="Buscar documentos por nombre, categoría o descripción..."
             type="search"
             value={searchQuery}
-            onChange={(e) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setSearchQuery(e.target.value)
             }}
           />
