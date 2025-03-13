@@ -21,9 +21,10 @@ interface ActualizarDocumentoProps {
   onClose: () => void
   isOpen: boolean
   documento: Documento | null
+  onDocumentoAct: () => void
 }
 
-export function ActualizarDocumento({ onClose, isOpen, documento }: ActualizarDocumentoProps) {
+export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct }: ActualizarDocumentoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const [animationState, setAnimationState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed')
@@ -289,6 +290,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento }: ActualizarDo
         timerProgressBar: true,
         showConfirmButton: false
       })
+      onDocumentoAct()
       onClose()
     } catch (error) {
       await Swal.fire({

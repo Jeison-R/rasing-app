@@ -159,6 +159,24 @@ export default function DocumentosRegulares() {
     setIsModalOpenView(false)
   }
 
+  const handleDocumentoAdded = () => {
+    void obtenerDocumentos().then(() => {
+      setTimeout(() => 0)
+    })
+  }
+
+  const handleDocumentoEdit = () => {
+    void obtenerDocumentos().then(() => {
+      setTimeout(() => 0)
+    })
+  }
+
+  const handleDocumentoAct = () => {
+    void obtenerDocumentos().then(() => {
+      setTimeout(() => 0)
+    })
+  }
+
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6 flex items-center justify-between">
@@ -444,8 +462,15 @@ export default function DocumentosRegulares() {
                 .filter((doc) => doc.tipo === 'periodico')
                 .map((doc) => (
                   <Card key={doc.id} className="overflow-hidden transition-shadow hover:shadow-md">
-                    <div className="relative flex h-40 items-center justify-center bg-muted">
-                      {getFileIcon(doc.archivo[0].tipo)}
+                    <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-lg bg-muted">
+                      {doc.archivo[0].tipo.startsWith('image/') ? (
+                        <img alt="Vista previa" className="h-full w-full object-cover object-top" src={doc.archivo[0].url} />
+                      ) : doc.archivo[0].tipo === 'application/pdf' ? (
+                        <iframe className="h-full w-full translate-y-[-20%] scale-150" src={doc.archivo[0].url} style={{ pointerEvents: 'none' }} title="Vista previa del documento" />
+                      ) : (
+                        getFileIcon(doc.archivo[0].tipo)
+                      )}
+
                       <div className="absolute right-2 top-2">{getEstadoBadge(determinarEstadoDocumento(doc))}</div>
                     </div>
                     <CardHeader className="p-4 pb-0">
@@ -652,8 +677,15 @@ export default function DocumentosRegulares() {
                 .filter((doc) => doc.tipo === 'permanente')
                 .map((doc) => (
                   <Card key={doc.id} className="overflow-hidden transition-shadow hover:shadow-md">
-                    <div className="relative flex h-40 items-center justify-center bg-muted">
-                      {getFileIcon(doc.archivo[0].tipo)}
+                    <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-lg bg-muted">
+                      {doc.archivo[0].tipo.startsWith('image/') ? (
+                        <img alt="Vista previa" className="h-full w-full object-cover object-top" src={doc.archivo[0].url} />
+                      ) : doc.archivo[0].tipo === 'application/pdf' ? (
+                        <iframe className="h-full w-full translate-y-[-20%] scale-150" src={doc.archivo[0].url} style={{ pointerEvents: 'none' }} title="Vista previa del documento" />
+                      ) : (
+                        getFileIcon(doc.archivo[0].tipo)
+                      )}
+
                       <div className="absolute right-2 top-2">{getEstadoBadge(determinarEstadoDocumento(doc))}</div>
                     </div>
                     <CardHeader className="p-4 pb-0">
@@ -667,9 +699,9 @@ export default function DocumentosRegulares() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="p-4 pt-2">
-                      <div className="flex items-center gap-1">
+                      <div className="mt-2 flex items-center gap-1">
                         <FileText className="h-3 w-3" />
-                        <span>Documento permanente</span>
+                        <span className="text-xs text-muted-foreground">Documento permanente</span>
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-between p-4 pt-0">
@@ -838,8 +870,15 @@ export default function DocumentosRegulares() {
                 .filter((doc) => determinarEstadoDocumento(doc) === 'Por actualizar')
                 .map((doc) => (
                   <Card key={doc.id} className="overflow-hidden border-red-200 transition-shadow hover:shadow-md">
-                    <div className="relative flex h-40 items-center justify-center bg-red-50">
-                      {getFileIcon(doc.archivo[0].tipo)}
+                    <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-lg bg-muted">
+                      {doc.archivo[0].tipo.startsWith('image/') ? (
+                        <img alt="Vista previa" className="h-full w-full object-cover object-top" src={doc.archivo[0].url} />
+                      ) : doc.archivo[0].tipo === 'application/pdf' ? (
+                        <iframe className="h-full w-full translate-y-[-20%] scale-150" src={doc.archivo[0].url} style={{ pointerEvents: 'none' }} title="Vista previa del documento" />
+                      ) : (
+                        getFileIcon(doc.archivo[0].tipo)
+                      )}
+
                       <div className="absolute right-2 top-2">{getEstadoBadge(determinarEstadoDocumento(doc))}</div>
                     </div>
                     <CardHeader className="p-4 pb-0">
@@ -928,12 +967,12 @@ export default function DocumentosRegulares() {
         </TabsContent>
       </Tabs>
 
-      <AgregarDocumento isOpen={isModalOpen} onClose={handleCloseModal} />
+      <AgregarDocumento isOpen={isModalOpen} onClose={handleCloseModal} onDocumentoAdded={handleDocumentoAdded} />
 
       <VisualizarDocumento documento={selectedPayment} isOpen={isModalOpenView} onClose={handleCloseModalView} />
 
-      <ActualizarDocumento documento={selectedPayment} isOpen={isModalOpenAct} onClose={handleCloseModalAct} />
-      <EditarDocumento documento={selectedPayment} isOpen={isModalOpenEdit} onClose={handleCloseModalEdit} />
+      <ActualizarDocumento documento={selectedPayment} isOpen={isModalOpenAct} onClose={handleCloseModalAct} onDocumentoAct={handleDocumentoAct} />
+      <EditarDocumento documento={selectedPayment} isOpen={isModalOpenEdit} onClose={handleCloseModalEdit} onDocumentoEdit={handleDocumentoEdit} />
     </div>
   )
 }

@@ -21,9 +21,10 @@ import { getFileIcon } from './interface'
 interface AgregarDocumentoProps {
   onClose: () => void
   isOpen: boolean
+  onDocumentoAdded: () => void
 }
 
-export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
+export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded }: AgregarDocumentoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<Archivo[]>([])
   const [nombre, setNombre] = useState<string>('')
@@ -106,6 +107,7 @@ export function AgregarDocumento({ onClose, isOpen }: AgregarDocumentoProps) {
         timerProgressBar: true,
         showConfirmButton: false
       })
+      onDocumentoAdded()
       handleClose()
     } catch (error) {
       global.console.error('Error al agregar el documento:', error)

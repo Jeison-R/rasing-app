@@ -22,9 +22,10 @@ interface EditarDocumentoProps {
   onClose: () => void
   isOpen: boolean
   documento: Documento | null
+  onDocumentoEdit: () => void
 }
 
-export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoProps) {
+export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }: EditarDocumentoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const [animationState, setAnimationState] = useState<'closed' | 'opening' | 'open' | 'closing'>('closed')
@@ -269,6 +270,7 @@ export function EditarDocumento({ onClose, isOpen, documento }: EditarDocumentoP
         timerProgressBar: true,
         showConfirmButton: false
       })
+      onDocumentoEdit()
       onClose()
     } catch (error) {
       await Swal.fire({
