@@ -106,7 +106,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
       if (selectedFolderId) {
         try {
           // Obtener la carpeta actual para extraer los documentos existentes
-          const folderResponse = await fetch(`http://localhost:3000/carpetas/obtenerCarpetaPorId/${selectedFolderId}`, {
+          const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${selectedFolderId}`, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
@@ -125,7 +125,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
           const documentosActualizados = [...documentosActuales, documentoId]
 
           // Enviar la actualización con el array completo
-          const updateFolderResponse = await fetch(`http://localhost:3000/carpetas/editarCarpeta/${selectedFolderId}`, {
+          const updateFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/editarCarpeta/${selectedFolderId}`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },

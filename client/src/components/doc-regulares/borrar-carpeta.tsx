@@ -20,7 +20,7 @@ export const deleteFolder = async (folderId: string) => {
       const storage = getStorage()
 
       // 1️⃣ Obtener la carpeta y sus documentos
-      const folderResponse = await fetch(`http://localhost:3000/carpetas/obtenerCarpetaPorId/${folderId}`, {
+      const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${folderId}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -35,7 +35,7 @@ export const deleteFolder = async (folderId: string) => {
       // 2️⃣ Recorrer documentos y eliminarlos por nombre en Firebase Storage
       for (const documento of folderData.documentos) {
         // Obtener el documento por su ID para encontrar su nombre
-        const docResponse = await fetch(`http://localhost:3000/documentos/obtenerDocumentoPorId/${documento}`, {
+        const docResponse = await fetch(`https://servidor-rasing.onrender.com/documentos/obtenerDocumentoPorId/${documento}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -55,7 +55,7 @@ export const deleteFolder = async (folderId: string) => {
         }
 
         // 3️⃣ Eliminar el documento en la colección "documentos"
-        const deleteDocResponse = await fetch(`http://localhost:3000/documentos/EliminarDocumento/${documento}`, {
+        const deleteDocResponse = await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${documento}`, {
           method: 'DELETE',
           credentials: 'include'
         })
@@ -65,7 +65,7 @@ export const deleteFolder = async (folderId: string) => {
       }
 
       // 4️⃣ Eliminar la carpeta de la colección "carpetas"
-      const deleteFolderResponse = await fetch(`http://localhost:3000/carpetas/EliminarCarpeta/${folderId}`, {
+      const deleteFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/EliminarCarpeta/${folderId}`, {
         method: 'DELETE',
         credentials: 'include'
       })

@@ -39,7 +39,7 @@ export function AgregarCarpeta({ isOpen, onClose, onFolderAdded }: AgregarCarpet
         createdAt: new Date().toISOString()
       }
 
-      const response = await fetch('http://localhost:3000/carpetas/agregarCarpeta', {
+      const response = await fetch('https://servidor-rasing.onrender.com/carpetas/agregarCarpeta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

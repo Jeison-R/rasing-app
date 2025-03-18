@@ -39,7 +39,7 @@ export const deleteDocument = async (id: string, filePath: string, folderId: str
 
       // 3️⃣ Obtener la carpeta actualizada y eliminar el ID del documento
       if (folderId) {
-        const folderResponse = await fetch(`http://localhost:3000/carpetas/obtenerCarpetaPorId/${folderId}`, {
+        const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${folderId}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -55,7 +55,7 @@ export const deleteDocument = async (id: string, filePath: string, folderId: str
         const documentosActualizados = folderData.documentos.filter((docId: string) => docId !== id)
 
         // 4️⃣ Actualizar la carpeta con la nueva lista de documentos
-        const updateFolderResponse = await fetch(`http://localhost:3000/carpetas/editarCarpeta/${folderId}`, {
+        const updateFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/editarCarpeta/${folderId}`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
