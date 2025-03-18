@@ -18,6 +18,15 @@ export interface Documento {
   estado: string
 }
 
+export interface Folder {
+  id: string
+  nombre: string
+  descripcion?: string
+  documentos: string[] // IDs de documentos
+  color?: string
+  createdAt: string
+}
+
 export const getFileIcon = (fileType: string) => {
   switch (fileType) {
     case 'application/pdf':

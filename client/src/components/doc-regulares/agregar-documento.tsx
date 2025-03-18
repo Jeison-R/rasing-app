@@ -1,12 +1,14 @@
 'use client'
 
-import type { Documento, Archivo } from './interface'
+import type { Documento, Archivo, Folder } from './interface'
 
+import React from 'react'
 import { useState, useRef, type ChangeEvent } from 'react'
 import { Upload, X } from 'lucide-react'
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
 import Swal from 'sweetalert2'
 import { v4 as uuidv4 } from 'uuid'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,9 +24,10 @@ interface AgregarDocumentoProps {
   onClose: () => void
   isOpen: boolean
   onDocumentoAdded: () => void
+  selectedFolderId?: string | null
 }
 
-export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded }: AgregarDocumentoProps) {
+export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFolderId }: AgregarDocumentoProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<Archivo[]>([])
   const [nombre, setNombre] = useState<string>('')
@@ -75,9 +78,10 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded }: AgregarD
       const fechaActual = tipo === 'permanente' ? '-' : ultimaActualizacion
       const proxActual = tipo === 'permanente' ? '-' : proximaActualizacion
 
+      const documentoId = uuidv4()
       // 3️⃣ Construir el objeto con los datos y archivos subidos
       const documentoToAdd: Documento = {
-        id: uuidv4(),
+        id: documentoId,
         nombre,
         tipo,
         categoria,
@@ -99,14 +103,44 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded }: AgregarD
         throw new Error('Error al agregar el documento')
       }
 
-      await Swal.fire({
-        title: 'Guardado',
-        text: 'El documento se ha agregado correctamente',
-        icon: 'success',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      if (selectedFolderId) {
+        try {
+          // Obtener la carpeta actual para extraer los documentos existentes
+          const folderResponse = await fetch(`http://localhost:3000/carpetas/obtenerCarpetaPorId/${selectedFolderId}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          })
+
+          if (!folderResponse.ok) {
+            throw new Error('Error al obtener la carpeta')
+          }
+
+          const folderData = (await folderResponse.json()) as Folder
+
+          // Asegurar que "documentos" sea un array
+          const documentosActuales = Array.isArray(folderData.documentos) ? folderData.documentos : []
+
+          // Agregar el nuevo documento
+          const documentosActualizados = [...documentosActuales, documentoId]
+
+          // Enviar la actualización con el array completo
+          const updateFolderResponse = await fetch(`http://localhost:3000/carpetas/editarCarpeta/${selectedFolderId}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              documentos: documentosActualizados
+            })
+          })
+
+          if (!updateFolderResponse.ok) {
+            throw new Error('Error al actualizar la carpeta con el nuevo documento')
+          }
+        } catch (error) {}
+      }
+
+      toast.success('Documento guardado', { description: 'El documento se ha guardado correctamente', position: 'bottom-right' })
       onDocumentoAdded()
       handleClose()
     } catch (error) {
