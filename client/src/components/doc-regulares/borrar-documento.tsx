@@ -54,8 +54,6 @@ export const deleteDocument = async (id: string, filePath: string, folderId: str
         // Filtrar el documento eliminado
         const documentosActualizados = folderData.documentos.filter((docId: string) => docId !== id)
 
-        console.log(documentosActualizados)
-
         // 4️⃣ Actualizar la carpeta con la nueva lista de documentos
         const updateFolderResponse = await fetch(`http://localhost:3000/carpetas/editarCarpeta/${folderId}`, {
           method: 'PUT',

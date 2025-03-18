@@ -473,7 +473,7 @@ export default function DocumentosRegulares() {
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         asChild
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                           e.stopPropagation()
                         }}
                       >
