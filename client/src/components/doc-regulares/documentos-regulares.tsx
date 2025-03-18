@@ -61,7 +61,7 @@ export default function DocumentosRegulares() {
 
   const obtenerDocumentos = async () => {
     try {
-      const response = await fetch('http://localhost:3000/documentos/ConsultarDocumentos', {
+      const response = await fetch('https://servidor-rasing.onrender.com/documentos/ConsultarDocumentos', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -81,7 +81,7 @@ export default function DocumentosRegulares() {
 
   const obtenerCarpetas = async () => {
     try {
-      const response = await fetch('http://localhost:3000/carpetas/obtenerCarpetas', {
+      const response = await fetch('https://servidor-rasing.onrender.com/carpetas/obtenerCarpetas', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
