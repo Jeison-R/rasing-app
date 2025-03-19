@@ -31,11 +31,12 @@ export const getFileIcon = (fileType: string) => {
   switch (fileType) {
     case 'application/pdf':
       return <FileIcon className="h-10 w-10 text-red-500" />
-    case 'doc':
-    case 'docx':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
       return <FileText className="h-10 w-10 text-blue-500" />
-    case 'xls':
-    case 'xlsx':
+    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+    case 'application/vnd.ms-excel.sheet.macroEnabled.12':
       return <FileSpreadsheet className="h-10 w-10 text-green-500" />
     case 'jpg':
     case 'jpeg':

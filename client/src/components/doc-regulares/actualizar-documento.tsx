@@ -6,7 +6,7 @@ import React, { type ChangeEvent } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { Upload, X, RefreshCw } from 'lucide-react'
 import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'firebase/storage'
-import Swal from 'sweetalert2'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -282,25 +282,11 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
         throw new Error('Error al actualizar el documento')
       }
 
-      await Swal.fire({
-        title: 'Actualizado',
-        text: 'El documento se ha actualizado correctamente',
-        icon: 'success',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.success('Documento actualizado', { description: 'El documento se ha actualizado correctamente', position: 'bottom-right' })
       onDocumentoAct()
       onClose()
     } catch (error) {
-      await Swal.fire({
-        title: 'Error',
-        text: 'Hubo un problema al actualizar el documento',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.error('Error al actualizar documento', { description: 'problemas de conexion', position: 'bottom-right' })
     } finally {
       setIsLoading(false)
     }

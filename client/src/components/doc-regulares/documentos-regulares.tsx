@@ -21,8 +21,8 @@ import { ActualizarDocumento } from './actualizar-documento'
 import { EditarDocumento } from './editar-documento'
 import { AgregarCarpeta } from './AgregarCarpeta'
 import { getFileIcon } from './interface'
-import { deleteDocument } from './borrar-documento'
-import { deleteFolder } from './borrar-carpeta'
+import { DeleteDocumentModal } from './borrar-documento'
+import { DeleteFolderModal } from './borrar-carpeta'
 import { SonnerProvider } from './sonner-provider'
 import { EditarCarpeta } from './EditarCarpeta'
 
@@ -58,6 +58,15 @@ export default function DocumentosRegulares() {
   const [editingFolder, setEditingFolder] = useState<Folder | null>(null)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({})
+  const [isModalOpenDeleteFolder, setIsModalOpenDeleteFolder] = useState(false)
+  const [selectedFolder, setSelectedFolder] = useState('')
+  const [isModalOpenDeleteDocument, setIsModalOpenDeleteDocument] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState<{ documentId: string; fullPath: string; folderId: string }>({
+    documentId: '',
+    fullPath: '',
+    folderId: ''
+  })
+  const [isLoading, setIsLoading] = useState(true)
 
   const obtenerDocumentos = async () => {
     try {
@@ -80,6 +89,8 @@ export default function DocumentosRegulares() {
   }
 
   const obtenerCarpetas = async () => {
+    setIsLoading(true)
+
     try {
       const response = await fetch('https://servidor-rasing.onrender.com/carpetas/obtenerCarpetas', {
         method: 'GET',
@@ -96,6 +107,8 @@ export default function DocumentosRegulares() {
       setCarpetas(data)
     } catch (error) {
       setCarpetas([])
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -141,23 +154,12 @@ export default function DocumentosRegulares() {
     return documentos.filter((doc) => folder.documentos.includes(doc.id) && determinarEstadoDocumento(doc) === 'Por actualizar').length
   }
 
-  const handleEliminarDocumento = async (id: string, filePath: string, folderId: string) => {
+  const handleEliminarDocumento = (documentId: string, filePath: string, folderId: string) => {
     // Asegurar que filePath tenga la ruta completa
     const fullPath = `documentos/${filePath}`
 
-    const eliminado = await deleteDocument(id, fullPath, folderId)
-
-    if (eliminado) {
-      setDocumentos((prevDocumentos) => prevDocumentos.filter((doc) => doc.id !== id))
-
-      // También eliminamos el documento de cualquier carpeta que lo contenga
-      setCarpetas((prevCarpetas) =>
-        prevCarpetas.map((carpeta) => ({
-          ...carpeta,
-          documentos: carpeta.documentos.filter((docId) => docId !== id)
-        }))
-      )
-    }
+    setSelectedDocument({ documentId, fullPath, folderId })
+    setIsModalOpenDeleteDocument(true)
   }
 
   const handleOpenModal = (folderId: string) => {
@@ -221,6 +223,18 @@ export default function DocumentosRegulares() {
     })
   }
 
+  const handleDeleteFolderSuccess = () => {
+    void Promise.all([obtenerCarpetas(), obtenerDocumentos()]).then(() => {
+      setTimeout(() => 0)
+    })
+  }
+
+  const handleDeleteDocumentSuccess = () => {
+    void Promise.all([obtenerCarpetas(), obtenerDocumentos()]).then(() => {
+      setTimeout(() => 0)
+    })
+  }
+
   const handleOpenFolderModal = () => {
     setEditingFolder(null)
     setIsFolderModalOpen(true)
@@ -249,13 +263,17 @@ export default function DocumentosRegulares() {
     }
   }
 
-  const handleDeleteFolder = async (folderId: string) => {
-    const eliminado = await deleteFolder(folderId)
+  const handleCloseFolderModalDelete = () => {
+    setIsModalOpenDeleteFolder(false)
+  }
 
-    if (eliminado) {
-      // Eliminar la carpeta del estado
-      setCarpetas((prevCarpetas) => prevCarpetas.filter((carpeta) => carpeta.id !== folderId))
-    }
+  const handleCloseDocumentModalDelete = () => {
+    setIsModalOpenDeleteDocument(false)
+  }
+
+  const handleDeleteFolder = (folderId: string) => {
+    setSelectedFolder(folderId)
+    setIsModalOpenDeleteFolder(true)
   }
 
   const toggleFolderExpand = (folderId: string) => {
@@ -271,7 +289,7 @@ export default function DocumentosRegulares() {
 
     if (!folder) return null
 
-    const folderDocuments = documentos.filter((doc) => folder.documentos.includes(doc.id))
+    const folderDocuments = documentos.filter((doc) => folder.documentos.includes(doc.id)).sort((a, b) => a.nombre.localeCompare(b.nombre)) // Ordena alfabéticamente
 
     return (
       <div className="space-y-4">
@@ -370,7 +388,7 @@ export default function DocumentosRegulares() {
                 <DropdownMenuItem
                   className="text-destructive"
                   onClick={() => {
-                    void handleEliminarDocumento(doc.id, doc.archivo[0].nombre, folderId || '')
+                    handleEliminarDocumento(doc.id, doc.archivo[0].nombre, folderId || '')
                   }}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -409,7 +427,7 @@ export default function DocumentosRegulares() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               className="pl-8"
-              placeholder="Buscar documentos por nombre, categoría o descripción..."
+              placeholder="Buscar por nombre de carpeta..."
               type="search"
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -428,7 +446,25 @@ export default function DocumentosRegulares() {
         </div>
 
         <div className="space-y-4">
-          {carpetas.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="rounded-lg border p-4">
+                  <div className="flex items-center">
+                    <div className="mr-3 h-10 w-10 animate-pulse rounded-lg bg-muted" />
+                    <div className="flex-1">
+                      <div className="mb-2 h-5 w-1/3 animate-pulse rounded bg-muted" />
+                      <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-16 animate-pulse rounded bg-muted" />
+                      <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : carpetas.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
               <FolderIcon className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="mb-2 text-lg font-medium">No hay carpetas</h3>
@@ -439,26 +475,28 @@ export default function DocumentosRegulares() {
               </Button>
             </div>
           ) : (
-            carpetas.map((carpeta) => (
-              <Collapsible
-                key={carpeta.id}
-                className="rounded-lg border"
-                open={expandedFolders[carpeta.id]}
-                onOpenChange={() => {
-                  toggleFolderExpand(carpeta.id)
-                }}
-              >
-                <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
-                  <div className="flex items-center">
-                    <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg ${carpeta.color}`}>
-                      <FolderIcon className="h-5 w-5" />
+            carpetas
+              .filter((carpeta) => carpeta.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
+              .sort((a, b) => a.nombre.localeCompare(b.nombre))
+              .map((carpeta) => (
+                <Collapsible
+                  key={carpeta.id}
+                  className="rounded-lg border"
+                  open={expandedFolders[carpeta.id]}
+                  onOpenChange={() => {
+                    toggleFolderExpand(carpeta.id)
+                  }}
+                >
+                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
+                    <div className="flex items-center">
+                      <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg ${carpeta.color}`}>
+                        <FolderIcon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium">{carpeta.nombre}</h3>
+                        {carpeta.descripcion ? <p className="text-sm text-muted-foreground">{carpeta.descripcion}</p> : null}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-medium">{carpeta.nombre}</h3>
-                      {carpeta.descripcion ? <p className="text-sm text-muted-foreground">{carpeta.descripcion}</p> : null}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
                         {carpeta.documentos.length} documento{carpeta.documentos.length !== 1 ? 's' : ''}
@@ -469,52 +507,51 @@ export default function DocumentosRegulares() {
                           {contarDocumentosPorActualizar(carpeta.id)} por actualizar
                         </Badge>
                       )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(e) => {
+                            e.stopPropagation()
+                          }}
+                        >
+                          <Button size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleOpenModal(carpeta.id)
+                            }}
+                          >
+                            <CirclePlus className="mr-2 h-4 w-4" />
+                            Añadir documento
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              handleEditFolder(carpeta)
+                            }}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              handleDeleteFolder(carpeta.id)
+                            }}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      {expandedFolders[carpeta.id] ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        asChild
-                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                          e.stopPropagation()
-                        }}
-                      >
-                        <Button size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            handleOpenModal(carpeta.id)
-                          }}
-                        >
-                          <CirclePlus className="mr-2 h-4 w-4" />
-                          Añadir documento
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            handleEditFolder(carpeta)
-                          }}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => {
-                            void handleDeleteFolder(carpeta.id)
-                          }}
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {expandedFolders[carpeta.id] ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="border-t p-4">{renderFolderDocuments(carpeta.id)}</CollapsibleContent>
-              </Collapsible>
-            ))
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="border-t p-4">{renderFolderDocuments(carpeta.id)}</CollapsibleContent>
+                </Collapsible>
+              ))
           )}
         </div>
 
@@ -524,6 +561,15 @@ export default function DocumentosRegulares() {
         <EditarDocumento documento={selectedPayment} isOpen={isModalOpenEdit} onClose={handleCloseModalEdit} onDocumentoEdit={handleDocumentoEdit} />
         <AgregarCarpeta isOpen={isFolderModalOpen} onClose={handleCloseFolderModal} onFolderAdded={handleFolderAdded} />
         <EditarCarpeta folder={editingFolder} isOpen={isFolderModalEdit} onClose={handleCloseFolderModalEdit} onFolderUpdated={handleCarpetaEdit} />
+        <DeleteFolderModal folderId={selectedFolder} isOpen={isModalOpenDeleteFolder} onClose={handleCloseFolderModalDelete} onDeleteSuccess={handleDeleteFolderSuccess} />
+        <DeleteDocumentModal
+          documentId={selectedDocument.documentId}
+          filePath={selectedDocument.fullPath}
+          folderId={selectedDocument.folderId}
+          isOpen={isModalOpenDeleteDocument}
+          onClose={handleCloseDocumentModalDelete}
+          onDeleteSuccess={handleDeleteDocumentSuccess}
+        />
       </div>
     </>
   )

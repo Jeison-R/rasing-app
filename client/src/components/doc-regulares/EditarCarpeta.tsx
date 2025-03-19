@@ -5,7 +5,6 @@ import type { Folder } from './interface'
 import React from 'react'
 import { useRef, useEffect, useState } from 'react'
 import { X, RefreshCw } from 'lucide-react'
-import Swal from 'sweetalert2'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -162,14 +161,7 @@ export function EditarCarpeta({ isOpen, onClose, onFolderUpdated, folder }: Edit
       onFolderUpdated()
       onClose()
     } catch (error) {
-      await Swal.fire({
-        title: 'Error',
-        text: 'Ha ocurrido un error al actualizar la carpeta',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.success('Error', { description: 'Ha ocurrido un error al actualizar la carpeta', position: 'bottom-right' })
     } finally {
       setIsLoading(false)
     }

@@ -6,7 +6,7 @@ import React from 'react'
 import { useState, useRef, type ChangeEvent, useEffect } from 'react'
 import { Upload, X } from 'lucide-react'
 import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'firebase/storage'
-import Swal from 'sweetalert2'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,17 +39,17 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [documentoId, setDocumentoId] = useState<string>('')
 
-  useEffect(() => {
-    if (documento) {
-      // Poblar los campos con los datos actuales de 'payment'
-      setNombre(documento.nombre)
-      setCategoria(documento.categoria)
-      setUltimaActualizacion(documento.fechaActualizacion)
-      setTipo(documento.tipo)
-      setProximaActualizacion(documento.proximaActualizacion)
-      setFiles(documento.archivo)
-    }
-  }, [documento])
+  // useEffect(() => {
+  //   if (documento) {
+  //     // Poblar los campos con los datos actuales de 'payment'
+  //     setNombre(documento.nombre)
+  //     setCategoria(documento.categoria)
+  //     setUltimaActualizacion(documento.fechaActualizacion)
+  //     setTipo(documento.tipo)
+  //     setProximaActualizacion(documento.proximaActualizacion)
+  //     setFiles(documento.archivo)
+  //   }
+  // }, [documento])
 
   // Controlar la animación cuando cambia el estado de apertura
   useEffect(() => {
@@ -75,23 +75,6 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
       }
     }
   }, [isOpen])
-
-  // Manejar clic fuera del diálogo para cerrarlo
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dialogRef.current && !dialogRef.current.contains(event.target as Node) && isOpen) {
-        onClose()
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen, onClose])
 
   // Prevenir scroll del body cuando el diálogo está abierto
   useEffect(() => {
@@ -262,25 +245,11 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
         throw new Error('Error al actualizar el documento')
       }
 
-      await Swal.fire({
-        title: 'Actualizado',
-        text: 'El documento se ha actualizado correctamente',
-        icon: 'success',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.success('Editado', { description: 'El documento se ha editado correctamente', position: 'bottom-right' })
       onDocumentoEdit()
       onClose()
     } catch (error) {
-      await Swal.fire({
-        title: 'Error',
-        text: 'Hubo un problema al actualizar el documento',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.error('Error', { description: 'Hubo un problema al editar el documento', position: 'bottom-right' })
     } finally {
       setIsLoading(false)
     }

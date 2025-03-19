@@ -6,7 +6,6 @@ import React from 'react'
 import { useState, useRef, type ChangeEvent } from 'react'
 import { Upload, X } from 'lucide-react'
 import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
-import Swal from 'sweetalert2'
 import { v4 as uuidv4 } from 'uuid'
 import { toast } from 'sonner'
 
@@ -145,14 +144,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
       handleClose()
     } catch (error) {
       global.console.error('Error al agregar el documento:', error)
-      await Swal.fire({
-        title: 'Error',
-        text: 'Hubo un problema al agregar el documento',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.error('Error', { description: 'Hubo un problema al agregar el documento', position: 'bottom-right' })
     } finally {
       setIsLoading(false)
     }

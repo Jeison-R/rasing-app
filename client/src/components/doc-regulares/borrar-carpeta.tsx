@@ -1,25 +1,31 @@
-import type { Folder, Documento } from './interface'
+import type { Documento, Folder } from './interface'
 
-import Swal from 'sweetalert2'
+import { useState } from 'react'
+import { X } from 'lucide-react'
 import { getStorage, ref, deleteObject } from 'firebase/storage'
+import { toast } from 'sonner'
 
-export const deleteFolder = async (folderId: string) => {
-  const result = await Swal.fire({
-    title: '¿Estás seguro?',
-    text: 'Esta acción eliminará la carpeta y todos sus documentos.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Eliminar',
-    cancelButtonText: 'Cancelar'
-  })
+import { Button } from '@/components/ui/button'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-  if (result.isConfirmed) {
+interface DeleteFolderModalProps {
+  isOpen: boolean
+  onClose: () => void
+  folderId: string
+  onDeleteSuccess: () => void
+}
+
+export function DeleteFolderModal({ isOpen, onClose, folderId, onDeleteSuccess }: DeleteFolderModalProps) {
+  const [isLoading, setIsLoading] = useState(false)
+
+  if (!isOpen) return null
+
+  const handleDelete = async () => {
+    setIsLoading(true)
+
     try {
       const storage = getStorage()
 
-      // 1️⃣ Obtener la carpeta y sus documentos
       const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${folderId}`, {
         method: 'GET',
         credentials: 'include',
@@ -32,9 +38,7 @@ export const deleteFolder = async (folderId: string) => {
 
       const folderData = (await folderResponse.json()) as Folder
 
-      // 2️⃣ Recorrer documentos y eliminarlos por nombre en Firebase Storage
       for (const documento of folderData.documentos) {
-        // Obtener el documento por su ID para encontrar su nombre
         const docResponse = await fetch(`https://servidor-rasing.onrender.com/documentos/obtenerDocumentoPorId/${documento}`, {
           method: 'GET',
           credentials: 'include',
@@ -46,7 +50,7 @@ export const deleteFolder = async (folderId: string) => {
         }
 
         const docData = (await docResponse.json()) as Documento
-        const fileName = docData.archivo[0].nombre // Nombre del archivo en Storage
+        const fileName = docData.archivo[0]?.nombre
 
         if (fileName) {
           const fileRef = ref(storage, `documentos/${fileName}`)
@@ -54,45 +58,56 @@ export const deleteFolder = async (folderId: string) => {
           await deleteObject(fileRef)
         }
 
-        // 3️⃣ Eliminar el documento en la colección "documentos"
-        const deleteDocResponse = await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${documento}`, {
+        await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${documento}`, {
           method: 'DELETE',
           credentials: 'include'
         })
-
-        if (!deleteDocResponse.ok) {
-        }
       }
 
-      // 4️⃣ Eliminar la carpeta de la colección "carpetas"
       const deleteFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/EliminarCarpeta/${folderId}`, {
         method: 'DELETE',
         credentials: 'include'
       })
 
       if (!deleteFolderResponse.ok) {
-        throw new Error('No se pudo eliminar la carpeta de la base de datos.')
+        throw new Error('No se pudo eliminar la carpeta.')
       }
 
-      await Swal.fire({
-        title: 'Eliminado',
-        text: 'La carpeta, sus documentos y archivos han sido eliminados.',
-        icon: 'success',
-        timer: 3000,
-        showConfirmButton: false
-      })
+      toast.success('Eliminado', { description: 'La carpeta y sus documentos han sido eliminados.', position: 'bottom-right' })
 
-      return true // Confirmar eliminación exitosa
+      onDeleteSuccess()
+      onClose()
     } catch (error) {
-      await Swal.fire({
-        title: 'Error',
-        text: 'No se pudo eliminar la carpeta. Inténtalo de nuevo.',
-        icon: 'error'
-      })
-
-      return false
+      toast.warning('Error', { description: 'No se pudo eliminar la carpeta.', position: 'bottom-right' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  return false
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-xl dark:bg-gray-900">
+        {isLoading ? (
+          <div className="z-60 absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <LoadingSpinner />
+          </div>
+        ) : null}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Eliminar Carpeta</h2>
+          <button className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" type="button" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+        <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">¿Estás seguro de que deseas eliminar esta carpeta? Esta acción no se puede deshacer.</p>
+        <div className="flex justify-end space-x-2">
+          <Button disabled={isLoading} variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button disabled={isLoading} variant="destructive" onClick={() => void handleDelete()}>
+            Eliminar
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
 }
