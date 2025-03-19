@@ -351,7 +351,31 @@ export default function DocumentosRegulares() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                      if (doc.archivo[0].url) {
+                        const url = doc.archivo[0].url
+                        const nombreArchivo = doc.archivo[0].nombre
+
+                        // Si es PDF, abrir en una nueva pestaña
+                        if (nombreArchivo.toLowerCase().endsWith('.pdf')) {
+                          window.open(url, '_blank')
+                        } else {
+                          // Si es otro tipo de archivo, descargarlo
+                          const link = document.createElement('a')
+
+                          link.href = url
+                          link.download = nombreArchivo
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                        }
+                      } else {
+                      }
+                    }}
+                  >
                     <Download className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
@@ -510,7 +534,7 @@ export default function DocumentosRegulares() {
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           asChild
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.stopPropagation()
                           }}
                         >
