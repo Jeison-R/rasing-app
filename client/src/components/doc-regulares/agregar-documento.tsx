@@ -375,7 +375,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
             <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
-            <Button disabled={!nombre || !categoria || (tipo === 'periodico' && !proximaActualizacion) || !files} type="submit" variant="default">
+            <Button disabled={!nombre || !categoria || (tipo === 'periodico' && !proximaActualizacion) || !files.length} type="submit" variant="default">
               Guardar
             </Button>
           </div>

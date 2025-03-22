@@ -498,7 +498,7 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button disabled={!nombre || !categoria || (tipo === 'periodico' && !proximaActualizacion) || files.length === 0} type="submit" onClick={handleFormSubmit}>
+          <Button disabled={!nombre || !categoria || (tipo === 'periodico' && !proximaActualizacion) || !files.length} type="submit" onClick={handleFormSubmit}>
             Guardar Cambios
           </Button>
         </div>

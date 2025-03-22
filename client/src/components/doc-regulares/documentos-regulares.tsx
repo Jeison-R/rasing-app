@@ -5,6 +5,7 @@ import type { Documento, Folder } from './interface'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Search, MoreHorizontal, FileText, RefreshCw, Clock, Download, Eye, Edit, Trash2, CheckCircle, AlertCircle, CirclePlus, FolderPlus, FolderIcon, ChevronRight, ChevronDown } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,7 +27,7 @@ import { DeleteFolderModal } from './borrar-carpeta'
 import { SonnerProvider } from './sonner-provider'
 import { EditarCarpeta } from './EditarCarpeta'
 
-// Función para determinar el estado del documento comparando fechas
+// Modify the determinarEstadoDocumento function to add a new state for documents about to expire
 const determinarEstadoDocumento = (documento: Documento) => {
   if (documento.tipo === 'permanente') {
     return 'Permanente'
@@ -41,10 +42,84 @@ const determinarEstadoDocumento = (documento: Documento) => {
     return 'Por actualizar'
   }
 
+  // Calcular la diferencia en días
+  const diferenciaDias = Math.ceil((proximaActualizacion.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+
+  // Si está a 10 días o menos de vencer
+  if (diferenciaDias <= 10) {
+    return 'Próximo a vencer'
+  }
+
   return 'Vigente'
 }
 
+// Update the getEstadoBadge function to include the new state
+const getEstadoBadge = (estado: string) => {
+  switch (estado) {
+    case 'Vigente':
+      return (
+        <Badge className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100" variant="outline">
+          <CheckCircle className="h-3 w-3" />
+          Vigente
+        </Badge>
+      )
+    case 'Por actualizar':
+      return (
+        <Badge className="flex items-center gap-1 bg-red-100 text-red-800 hover:bg-red-100" variant="outline">
+          <AlertCircle className="h-3 w-3" />
+          Por actualizar
+        </Badge>
+      )
+    case 'Próximo a vencer':
+      return (
+        <Badge className="flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100" variant="outline">
+          <Clock className="h-3 w-3" />
+          Próximo a vencer
+        </Badge>
+      )
+    case 'Permanente':
+      return (
+        <Badge className="flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-100" variant="outline">
+          <FileText className="h-3 w-3" />
+          Permanente
+        </Badge>
+      )
+    default:
+      return <Badge variant="outline">{estado}</Badge>
+  }
+}
+
+// Modify the contarDocumentosPorActualizar function to only count documents that are specifically "Por actualizar"
+const contarDocumentosPorActualizar = (folderId: string, documentos: Documento[], carpetas: Folder[]) => {
+  const folder = carpetas.find((c) => c.id === folderId)
+
+  if (!folder) return 0
+
+  return documentos.filter((doc) => folder.documentos.includes(doc.id) && determinarEstadoDocumento(doc) === 'Por actualizar').length
+}
+
+// Add a new function to count only documents about to expire
+const contarDocumentosProximosAVencer = (folderId: string, documentos: Documento[], carpetas: Folder[]) => {
+  const folder = carpetas.find((c) => c.id === folderId)
+
+  if (!folder) return 0
+
+  return documentos.filter((doc) => folder.documentos.includes(doc.id) && determinarEstadoDocumento(doc) === 'Próximo a vencer').length
+}
+
+// Helper function to find folder ID by document ID
+const findFolderIdByDocumentId = (documentId: string, carpetas: Folder[]): string | null => {
+  for (const carpeta of carpetas) {
+    if (carpeta.documentos.includes(documentId)) {
+      return carpeta.id
+    }
+  }
+
+  return null
+}
+
 export default function DocumentosRegulares() {
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isModalOpenEdit, setIsModalOpenEdit] = useState(false)
@@ -83,8 +158,12 @@ export default function DocumentosRegulares() {
       const data = (await response.json()) as Documento[]
 
       setDocumentos(data)
+
+      return data
     } catch (error) {
       setDocumentos([])
+
+      return []
     }
   }
 
@@ -105,54 +184,57 @@ export default function DocumentosRegulares() {
       const data = (await response.json()) as Folder[]
 
       setCarpetas(data)
+
+      return data
     } catch (error) {
       setCarpetas([])
+
+      return []
     } finally {
       setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    void obtenerDocumentos()
-    void obtenerCarpetas()
-  }, [])
+    const fetchDataAndProcessParams = async () => {
+      // Fetch data first
+      const [docs, folders] = await Promise.all([obtenerDocumentos(), obtenerCarpetas()])
 
-  const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case 'Vigente':
-        return (
-          <Badge className="flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-100" variant="outline">
-            <CheckCircle className="h-3 w-3" />
-            Vigente
-          </Badge>
-        )
-      case 'Por actualizar':
-        return (
-          <Badge className="flex items-center gap-1 bg-red-100 text-red-800 hover:bg-red-100" variant="outline">
-            <AlertCircle className="h-3 w-3" />
-            Por actualizar
-          </Badge>
-        )
-      case 'Permanente':
-        return (
-          <Badge className="flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-100" variant="outline">
-            <FileText className="h-3 w-3" />
-            Permanente
-          </Badge>
-        )
-      default:
-        return <Badge variant="outline">{estado}</Badge>
+      // Check for URL parameters
+      const documentId = searchParams.get('documentId')
+      const action = searchParams.get('action')
+
+      if (documentId) {
+        // Find the document
+        const document = docs.find((doc) => doc.id === documentId)
+
+        if (document) {
+          setSelectedPayment(document)
+
+          // Find the folder that contains this document and expand it
+          const folderId = findFolderIdByDocumentId(documentId, folders)
+
+          if (folderId) {
+            setExpandedFolders((prev) => ({
+              ...prev,
+              [folderId]: true
+            }))
+          }
+
+          // Open the appropriate modal based on action
+          if (action === 'actualizar' && document.tipo === 'periodico') {
+            setIsModalOpenAct(true)
+          } else if (action === 'ver') {
+            setIsModalOpenView(true)
+          }
+        }
+      }
     }
-  }
+
+    void fetchDataAndProcessParams()
+  }, [searchParams])
 
   // Función para contar documentos por actualizar en una carpeta
-  const contarDocumentosPorActualizar = (folderId: string) => {
-    const folder = carpetas.find((c) => c.id === folderId)
-
-    if (!folder) return 0
-
-    return documentos.filter((doc) => folder.documentos.includes(doc.id) && determinarEstadoDocumento(doc) === 'Por actualizar').length
-  }
 
   const handleEliminarDocumento = (documentId: string, filePath: string, folderId: string) => {
     // Asegurar que filePath tenga la ruta completa
@@ -521,14 +603,21 @@ export default function DocumentosRegulares() {
                         {carpeta.descripcion ? <p className="text-sm text-muted-foreground">{carpeta.descripcion}</p> : null}
                       </div>
                     </div>
+                    {/* Update the folder badge display in the CollapsibleTrigger to show documents about to expire */}
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
                         {carpeta.documentos.length} documento{carpeta.documentos.length !== 1 ? 's' : ''}
                       </Badge>
-                      {contarDocumentosPorActualizar(carpeta.id) > 0 && (
+                      {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas) > 0 && (
                         <Badge className="bg-red-50 text-red-700" variant="outline">
                           <AlertCircle className="mr-1 h-3 w-3" />
-                          {contarDocumentosPorActualizar(carpeta.id)} por actualizar
+                          {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas)} por actualizar
+                        </Badge>
+                      )}
+                      {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas) > 0 && (
+                        <Badge className="bg-amber-50 text-amber-700" variant="outline">
+                          <Clock className="mr-1 h-3 w-3" />
+                          {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas)} próximos a vencer
                         </Badge>
                       )}
                       <DropdownMenu>

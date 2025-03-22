@@ -425,7 +425,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
             <Button variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button disabled={!proximaActualizacion} onClick={handleFormSubmit}>
+            <Button disabled={!proximaActualizacion || !archivoNuevo.length} onClick={handleFormSubmit}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Actualizar Documento
             </Button>
