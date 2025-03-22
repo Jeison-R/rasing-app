@@ -178,7 +178,7 @@ export function NotificationsPanel({ documentos, carpetas }: NotificationsPanelP
                           className="-mr-1 -mt-1 h-5 w-5 rounded-full p-0"
                           size="icon"
                           variant="ghost"
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                             e.stopPropagation() // Prevent the parent onClick from firing
                             markAsRead(notification.id)
                           }}
