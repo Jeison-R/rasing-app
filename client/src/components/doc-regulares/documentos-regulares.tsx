@@ -4,7 +4,26 @@ import type { Documento, Folder } from './interface'
 
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { Search, MoreHorizontal, FileText, RefreshCw, Clock, Download, Eye, Edit, Trash2, CheckCircle, AlertCircle, CirclePlus, FolderPlus, FolderIcon, ChevronRight, ChevronDown } from 'lucide-react'
+import {
+  Search,
+  MoreHorizontal,
+  FileText,
+  RefreshCw,
+  Clock,
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  CirclePlus,
+  FolderPlus,
+  FolderIcon,
+  ChevronRight,
+  ChevronDown,
+  ListIcon,
+  LayoutGrid
+} from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
@@ -13,8 +32,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-
-import { CustomTooltip } from '../commons/tooltip'
 
 import { AgregarDocumento } from './agregar-documento'
 import { VisualizarDocumento } from './visualizar-documento'
@@ -142,6 +159,17 @@ export default function DocumentosRegulares() {
     folderId: ''
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    // Recuperar preferencia del localStorage o usar "list" como valor predeterminado
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('documentosRegularesViewMode')
+
+      return savedViewMode === 'grid' || savedViewMode === 'list' ? savedViewMode : 'list'
+    }
+
+    return 'list'
+  })
+  const [selectedFolderForView, setSelectedFolderForView] = useState<string | null>(null)
 
   const obtenerDocumentos = async () => {
     try {
@@ -365,6 +393,10 @@ export default function DocumentosRegulares() {
     }))
   }
 
+  const handleViewFolder = (folderId: string) => {
+    setSelectedFolderForView(folderId)
+  }
+
   // Renderiza los documentos de una carpeta específica
   const renderFolderDocuments = (folderId: string) => {
     const folder = carpetas.find((c) => c.id === folderId)
@@ -380,10 +412,9 @@ export default function DocumentosRegulares() {
         ) : (
           folderDocuments.map((doc) => renderDocumentListItem(doc, folderId))
         )}
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center pt-4">
           <Button
-            className="flex items-center gap-2"
-            variant="outline"
+            className="flex items-center gap-2 rounded-full px-4 shadow-sm transition-all duration-200 hover:shadow-md"
             onClick={() => {
               handleOpenModal(folderId)
             }}
@@ -398,14 +429,14 @@ export default function DocumentosRegulares() {
 
   // Renderiza un elemento de lista de documento con opciones de carpeta
   const renderDocumentListItem = (doc: Documento, folderId?: string) => (
-    <div key={doc.id} className="flex overflow-hidden rounded-lg border transition-shadow hover:shadow-md">
-      <div className="flex w-16 items-center justify-center bg-muted sm:w-20">{getFileIcon(doc.archivo[0].tipo)}</div>
+    <div key={doc.id} className="flex overflow-hidden rounded-lg border transition-all duration-200 hover:border-primary/20 hover:shadow-md">
+      <div className="flex w-16 items-center justify-center bg-muted/50 sm:w-20">{getFileIcon(doc.archivo[0].tipo)}</div>
       <div className="flex-1 p-4">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
-            <h3 className="font-medium">{doc.nombre}</h3>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge className="font-normal" variant="outline">
+            <h3 className="font-medium text-primary-foreground">{doc.nombre}</h3>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <Badge className="font-normal shadow-sm" variant="outline">
                 {doc.categoria}
               </Badge>
               {getEstadoBadge(determinarEstadoDocumento(doc))}
@@ -416,6 +447,7 @@ export default function DocumentosRegulares() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    className="rounded-full hover:bg-primary/10"
                     size="icon"
                     variant="ghost"
                     onClick={() => {
@@ -434,6 +466,7 @@ export default function DocumentosRegulares() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    className="rounded-full hover:bg-primary/10"
                     size="icon"
                     variant="ghost"
                     onClick={() => {
@@ -468,7 +501,7 @@ export default function DocumentosRegulares() {
             </TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost">
+                <Button className="rounded-full hover:bg-primary/10" size="icon" variant="ghost">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -524,149 +557,323 @@ export default function DocumentosRegulares() {
     </div>
   )
 
+  const changeViewMode = (mode: 'list' | 'grid') => {
+    setViewMode(mode)
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('documentosRegularesViewMode', mode)
+    }
+  }
+
   return (
     <>
       <SonnerProvider />
       <div className="container mx-auto py-6">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="relative mr-2 flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-8"
-              placeholder="Buscar por nombre de carpeta..."
-              type="search"
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setSearchQuery(e.target.value)
-              }}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <CustomTooltip content="Añadir carpeta">
-              <Button className="flex items-center gap-2 px-4" type="button" variant="outline" onClick={handleOpenFolderModal}>
-                <FolderPlus className="h-5 w-5" />
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold">Documentos Regulares</h1>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="rounded-md border-muted-foreground/20 pl-9 pr-4"
+                placeholder="Buscar por nombre de carpeta..."
+                type="search"
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setSearchQuery(e.target.value)
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  className="px-4"
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  onClick={() => {
+                    changeViewMode('list')
+                  }}
+                >
+                  <ListIcon className="mr-2 h-4 w-4" />
+                  Lista
+                </Button>
+                <Button
+                  className="px-4"
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  onClick={() => {
+                    changeViewMode('grid')
+                  }}
+                >
+                  <LayoutGrid className="mr-2 h-4 w-4" />
+                  Cuadrícula
+                </Button>
+              </div>
+              <Button className="flex items-center gap-2 px-4" onClick={handleOpenFolderModal}>
+                <FolderPlus className="h-4 w-4" />
                 <span>Nueva carpeta</span>
               </Button>
-            </CustomTooltip>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="flex items-center">
-                    <div className="mr-3 h-10 w-10 animate-pulse rounded-lg bg-muted" />
-                    <div className="flex-1">
-                      <div className="mb-2 h-5 w-1/3 animate-pulse rounded bg-muted" />
-                      <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-6 w-16 animate-pulse rounded bg-muted" />
-                      <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-                    </div>
+        {isLoading ? (
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'space-y-4'}>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="flex h-32 flex-col justify-between rounded-lg border p-4">
+                <div className="flex items-center">
+                  <div className="mr-3 h-10 w-10 animate-pulse rounded-lg bg-muted" />
+                  <div className="flex-1">
+                    <div className="mb-2 h-5 w-2/3 animate-pulse rounded bg-muted" />
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : carpetas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-              <FolderIcon className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-medium">No hay carpetas</h3>
-              <p className="mb-4 text-sm text-muted-foreground">Crea una carpeta para organizar tus documentos</p>
-              <Button onClick={handleOpenFolderModal}>
-                <FolderPlus className="mr-2 h-4 w-4" />
-                Nueva carpeta
-              </Button>
-            </div>
-          ) : (
-            carpetas
-              .filter((carpeta) => carpeta.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
-              .sort((a, b) => a.nombre.localeCompare(b.nombre))
-              .map((carpeta) => (
-                <Collapsible
-                  key={carpeta.id}
-                  className="rounded-lg border"
-                  open={expandedFolders[carpeta.id]}
-                  onOpenChange={() => {
-                    toggleFolderExpand(carpeta.id)
-                  }}
-                >
-                  <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
-                    <div className="flex items-center">
-                      <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg ${carpeta.color}`}>
-                        <FolderIcon className="h-5 w-5" />
+                <div className="mt-auto">
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : carpetas.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
+            <FolderIcon className="mb-4 h-12 w-12 text-muted-foreground" />
+            <h3 className="mb-2 text-lg font-medium">No hay carpetas</h3>
+            <p className="mb-4 text-sm text-muted-foreground">Crea una carpeta para organizar tus documentos</p>
+            <Button onClick={handleOpenFolderModal}>
+              <FolderPlus className="mr-2 h-4 w-4" />
+              Nueva carpeta
+            </Button>
+          </div>
+        ) : (
+          <>
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {carpetas
+                  .filter((carpeta) => carpeta.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                  .map((carpeta) => {
+                    const porActualizar = contarDocumentosPorActualizar(carpeta.id, documentos, carpetas)
+                    const proximosVencer = contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas)
+
+                    return (
+                      <div
+                        key={carpeta.id}
+                        className="relative cursor-pointer rounded-lg border p-4 transition-all duration-200 hover:shadow-sm"
+                        onClick={() => {
+                          if (selectedFolderForView === carpeta.id) {
+                            setSelectedFolderForView(null)
+                          } else {
+                            handleViewFolder(carpeta.id)
+                          }
+                        }}
+                      >
+                        <div className="mb-2 flex items-start">
+                          <div className={`mr-3 flex h-12 w-12 items-center justify-center rounded-lg ${carpeta.color || 'bg-amber-100'}`}>
+                            <FolderIcon className="h-6 w-6" />
+                          </div>
+                          <div className="flex-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <h3 className="max-w-[calc(100%-30px)] cursor-default truncate text-sm font-medium">{carpeta.nombre}</h3>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{carpeta.nombre}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <div className="mt-1 flex items-center gap-1">
+                              <Badge className="text-xs" variant="outline">
+                                {carpeta.documentos.length} documento{carpeta.documentos.length !== 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              asChild
+                              onClick={(e) => {
+                                e.stopPropagation()
+                              }}
+                            >
+                              <Button className="absolute right-2 top-2 h-8 w-8" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleOpenModal(carpeta.id)
+                                }}
+                              >
+                                <CirclePlus className="mr-2 h-4 w-4" />
+                                Añadir documento
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditFolder(carpeta)
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteFolder(carpeta.id)
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {porActualizar > 0 && (
+                          <div className="mt-2 flex items-center">
+                            <Badge className="bg-red-50 text-xs text-red-700" variant="outline">
+                              <AlertCircle className="mr-1 h-3 w-3" />
+                              {porActualizar} por actualizar
+                            </Badge>
+                          </div>
+                        )}
+
+                        {proximosVencer > 0 && (
+                          <div className="mt-2 flex items-center">
+                            <Badge className="bg-amber-50 text-xs text-amber-700" variant="outline">
+                              <Clock className="mr-1 h-3 w-3" />
+                              {proximosVencer} próximos a vencer
+                            </Badge>
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <h3 className="text-lg font-medium">{carpeta.nombre}</h3>
-                        {carpeta.descripcion ? <p className="text-sm text-muted-foreground">{carpeta.descripcion}</p> : null}
-                      </div>
-                    </div>
-                    {/* Update the folder badge display in the CollapsibleTrigger to show documents about to expire */}
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">
-                        {carpeta.documentos.length} documento{carpeta.documentos.length !== 1 ? 's' : ''}
-                      </Badge>
-                      {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas) > 0 && (
-                        <Badge className="bg-red-50 text-red-700" variant="outline">
-                          <AlertCircle className="mr-1 h-3 w-3" />
-                          {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas)} por actualizar
-                        </Badge>
-                      )}
-                      {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas) > 0 && (
-                        <Badge className="bg-amber-50 text-amber-700" variant="outline">
-                          <Clock className="mr-1 h-3 w-3" />
-                          {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas)} próximos a vencer
-                        </Badge>
-                      )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                            e.stopPropagation()
-                          }}
-                        >
-                          <Button size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              handleOpenModal(carpeta.id)
-                            }}
-                          >
-                            <CirclePlus className="mr-2 h-4 w-4" />
-                            Añadir documento
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              handleEditFolder(carpeta)
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => {
-                              handleDeleteFolder(carpeta.id)
-                            }}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                      {expandedFolders[carpeta.id] ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="border-t p-4">{renderFolderDocuments(carpeta.id)}</CollapsibleContent>
-                </Collapsible>
-              ))
-          )}
-        </div>
+                    )
+                  })}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {carpetas
+                  .filter((carpeta) => carpeta.nombre.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                  .map((carpeta) => (
+                    <Collapsible
+                      key={carpeta.id}
+                      className="rounded-lg border"
+                      open={expandedFolders[carpeta.id]}
+                      onOpenChange={() => {
+                        toggleFolderExpand(carpeta.id)
+                      }}
+                    >
+                      <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
+                        <div className="flex items-center">
+                          <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg ${carpeta.color || 'bg-amber-100'}`}>
+                            <FolderIcon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium">{carpeta.nombre}</h3>
+                            {carpeta.descripcion ? <p className="text-sm text-muted-foreground">{carpeta.descripcion}</p> : null}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">
+                            {carpeta.documentos.length} documento{carpeta.documentos.length !== 1 ? 's' : ''}
+                          </Badge>
+                          {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas) > 0 && (
+                            <Badge className="bg-red-50 text-red-700" variant="outline">
+                              <AlertCircle className="mr-1 h-3 w-3" />
+                              {contarDocumentosPorActualizar(carpeta.id, documentos, carpetas)} por actualizar
+                            </Badge>
+                          )}
+                          {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas) > 0 && (
+                            <Badge className="bg-amber-50 text-amber-700" variant="outline">
+                              <Clock className="mr-1 h-3 w-3" />
+                              {contarDocumentosProximosAVencer(carpeta.id, documentos, carpetas)} próximos a vencer
+                            </Badge>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              asChild
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                                e.stopPropagation()
+                              }}
+                            >
+                              <Button size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  handleOpenModal(carpeta.id)
+                                }}
+                              >
+                                <CirclePlus className="mr-2 h-4 w-4" />
+                                Añadir documento
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  handleEditFolder(carpeta)
+                                }}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => {
+                                  handleDeleteFolder(carpeta.id)
+                                }}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          {expandedFolders[carpeta.id] ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="border-t p-4">{renderFolderDocuments(carpeta.id)}</CollapsibleContent>
+                    </Collapsible>
+                  ))}
+              </div>
+            )}
+
+            {/* Vista de documentos cuando se selecciona una carpeta en modo cuadrícula */}
+            {viewMode === 'grid' && selectedFolderForView ? (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <div className="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white">
+                  <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
+                    <h2 className="text-xl font-semibold">{carpetas.find((c) => c.id === selectedFolderForView)?.nombre || 'Documentos'}</h2>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedFolderForView(null)
+                      }}
+                    >
+                      <svg
+                        className="lucide lucide-x"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                      </svg>
+                    </Button>
+                  </div>
+                  <div className="p-6">{renderFolderDocuments(selectedFolderForView)}</div>
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
 
         <AgregarDocumento isOpen={isModalOpen} selectedFolderId={selectedFolderId} onClose={handleCloseModal} onDocumentoAdded={handleDocumentoAdded} />
         <VisualizarDocumento documento={selectedPayment} isOpen={isModalOpenView} onClose={handleCloseModalView} />
