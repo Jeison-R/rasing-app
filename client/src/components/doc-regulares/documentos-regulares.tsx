@@ -688,7 +688,7 @@ export default function DocumentosRegulares() {
                           <DropdownMenu>
                             <DropdownMenuTrigger
                               asChild
-                              onClick={(e) => {
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                                 e.stopPropagation()
                               }}
                             >
@@ -698,8 +698,7 @@ export default function DocumentosRegulares() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
+                                onClick={() => {
                                   handleOpenModal(carpeta.id)
                                 }}
                               >
@@ -707,8 +706,7 @@ export default function DocumentosRegulares() {
                                 Añadir documento
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.stopPropagation()
+                                onClick={() => {
                                   handleEditFolder(carpeta)
                                 }}
                               >
@@ -717,8 +715,7 @@ export default function DocumentosRegulares() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation()
+                                onClick={() => {
                                   handleDeleteFolder(carpeta.id)
                                 }}
                               >
