@@ -434,7 +434,7 @@ export default function DocumentosRegulares() {
       <div className="flex-1 p-4">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <div>
-            <h3 className="font-medium text-primary-foreground">{doc.nombre}</h3>
+            <h3 className="font-medium">{doc.nombre}</h3>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <Badge className="font-normal shadow-sm" variant="outline">
                 {doc.categoria}
@@ -633,7 +633,7 @@ export default function DocumentosRegulares() {
           </div>
         ) : carpetas.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-            <FolderIcon className="mb-4 h-12 w-12 text-muted-foreground" />
+            <FolderIcon className="mb-4 h-12 w-12 text-muted-foreground dark:text-black" />
             <h3 className="mb-2 text-lg font-medium">No hay carpetas</h3>
             <p className="mb-4 text-sm text-muted-foreground">Crea una carpeta para organizar tus documentos</p>
             <Button onClick={handleOpenFolderModal}>
@@ -666,7 +666,7 @@ export default function DocumentosRegulares() {
                       >
                         <div className="mb-2 flex items-start">
                           <div className={`mr-3 flex h-12 w-12 items-center justify-center rounded-lg ${carpeta.color || 'bg-amber-100'}`}>
-                            <FolderIcon className="h-6 w-6" />
+                            <FolderIcon className="h-6 w-6 dark:text-black" />
                           </div>
                           <div className="flex-1">
                             <TooltipProvider>
@@ -764,7 +764,7 @@ export default function DocumentosRegulares() {
                       <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
                         <div className="flex items-center">
                           <div className={`mr-3 flex h-10 w-10 items-center justify-center rounded-lg ${carpeta.color || 'bg-amber-100'}`}>
-                            <FolderIcon className="h-5 w-5" />
+                            <FolderIcon className="h-5 w-5 dark:text-black" />
                           </div>
                           <div>
                             <h3 className="text-lg font-medium">{carpeta.nombre}</h3>
@@ -838,8 +838,8 @@ export default function DocumentosRegulares() {
             {/* Vista de documentos cuando se selecciona una carpeta en modo cuadrícula */}
             {viewMode === 'grid' && selectedFolderForView ? (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                <div className="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white">
-                  <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
+                <div className="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-lg bg-white dark:bg-[hsl(20,14.3%,4.1%)]">
+                  <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4 dark:bg-[hsl(20,14.3%,4.1%)]">
                     <h2 className="text-xl font-semibold">{carpetas.find((c) => c.id === selectedFolderForView)?.nombre || 'Documentos'}</h2>
                     <Button
                       size="icon"
