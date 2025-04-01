@@ -44,7 +44,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
 
     try {
       // 1️⃣ Subimos los archivos a Firebase Storage
-      const storageDirRef = ref(storage, 'documentos')
+      const storageDirRef = ref(storage, 'Doc Regulares')
       const existingFiles = await listAll(storageDirRef)
 
       const uploadPromises = files.map(async (file) => {
@@ -60,7 +60,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
           const blob = await response.blob()
           const fileData = new File([blob], file.nombre, { type: file.tipo })
 
-          const storageRef = ref(storage, `documentos/${file.nombre}`)
+          const storageRef = ref(storage, `Doc Regulares/${file.nombre}`)
 
           await uploadBytes(storageRef, fileData)
 

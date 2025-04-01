@@ -64,6 +64,14 @@ export function AgregarCarpeta({ isOpen, onClose, onFolderAdded }: AgregarCarpet
     }
   }
 
+  const handleClose = () => {
+    setNombre('')
+    setDescripcion('')
+    setSelectedColor('')
+
+    onClose()
+  }
+
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     void handleSubmit(e) // Usar void para ignorar el valor devuelto
@@ -119,7 +127,7 @@ export function AgregarCarpeta({ isOpen, onClose, onFolderAdded }: AgregarCarpet
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button disabled={isLoading} type="submit">

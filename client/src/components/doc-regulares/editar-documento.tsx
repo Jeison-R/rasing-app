@@ -148,67 +148,57 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
 
   const handleUpdateDocumento = async (event: React.FormEvent) => {
     event.preventDefault()
-
     setIsLoading(true)
 
     try {
-      let documentosSubidos: Archivo[] = []
+      let documentosSubidos: Archivo[] = documento?.archivo || []
+      const storageDirRef = ref(storage, 'Doc Regulares')
 
-      // Obtener referencia al directorio de documentos
-      const storageDirRef = ref(storage, 'documentos')
+      // Comparar si hay cambios en los archivos
+      const archivosCambiaron = JSON.stringify(files) !== JSON.stringify(documento?.archivo)
 
-      // Si el documento original tiene archivos, buscarlos para eliminarlos
-      if (documento?.archivo && documento.archivo.length > 0) {
+      if (archivosCambiaron) {
         const existingFiles = await listAll(storageDirRef)
 
-        // Buscar y eliminar los archivos antiguos asociados con este documento
-        for (const oldFile of documento.archivo) {
-          const fileRef = existingFiles.items.find((item) => item.name === oldFile.nombre || item.name.startsWith(oldFile.nombre))
+        // 🔴 **Eliminar archivos solo si han sido reemplazados**
+        for (const oldFile of documento?.archivo || []) {
+          if (!files.some((newFile) => newFile.nombre === oldFile.nombre)) {
+            const fileRef = existingFiles.items.find((item) => item.name === oldFile.nombre)
 
-          if (fileRef) {
-            try {
-              // Crear una referencia directa al archivo para eliminarlo
-              const fileToDelete = ref(storage, `documentos/${fileRef.name}`)
-
-              await deleteObject(fileToDelete)
-            } catch (deleteError) {}
+            if (fileRef) {
+              try {
+                await deleteObject(ref(storage, `Doc Regulares/${fileRef.name}`))
+              } catch (deleteError) {}
+            }
           }
         }
-      }
 
-      // Subir los nuevos archivos
-      if (files.length > 0) {
+        // 🔵 **Subir archivos nuevos si no están en Firebase**
         const uploadPromises = files.map(async (file) => {
-          // Si es un archivo local (blob URL), necesitamos subirlo
+          // Si el archivo es temporal (URL blob), convertirlo en un `File`
           if (file.url.startsWith('blob:')) {
-            // Convertir un `Archivo` a `Blob`
             const response = await fetch(file.url)
             const blob = await response.blob()
             const fileData = new File([blob], file.nombre, { type: file.tipo })
 
-            // Crear referencia para el nuevo archivo
-            const storageRef = ref(storage, `documentos/${file.nombre}`)
+            const storageRef = ref(storage, `Doc Regulares/${file.nombre}`)
 
-            // Subir el archivo
             await uploadBytes(storageRef, fileData)
 
-            // Obtener la URL del archivo subido
+            // Obtener URL permanente desde Firebase Storage
             const url = await getDownloadURL(storageRef)
 
             return { nombre: file.nombre, tipo: file.tipo, url, tamaño: file.tamaño }
           } else {
-            // Si no es un blob URL, podría ser un archivo que ya está en Firebase
-            // pero lo trataremos como nuevo para asegurar consistencia
-            const existingFiles = await listAll(storageDirRef)
-            const duplicateFile = existingFiles.items.find((item) => item.name === file.nombre)
+            // Si el archivo ya existe en Firebase, obtener su URL
+            const existingFile = existingFiles.items.find((item) => item.name === file.nombre)
 
-            if (duplicateFile) {
-              const url = await getDownloadURL(duplicateFile)
+            if (existingFile) {
+              const url = await getDownloadURL(existingFile)
 
               return { nombre: file.nombre, tipo: file.tipo, url, tamaño: file.tamaño }
             } else {
-              // Si por alguna razón no encontramos el archivo, mantenemos la URL original
-              return file
+              return file // Mantener el archivo sin cambios
             }
           }
         })
@@ -241,9 +231,7 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
         body: JSON.stringify(documentoToUpdate)
       })
 
-      if (!response.ok) {
-        throw new Error('Error al actualizar el documento')
-      }
+      if (!response.ok) throw new Error('Error al actualizar el documento')
 
       toast.success('Editado', { description: 'El documento se ha editado correctamente', position: 'bottom-right' })
       onDocumentoEdit()
@@ -326,6 +314,18 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
     if (updatedFiles.length === 0 && fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  const handleClose = () => {
+    setNombre('')
+    setTipo('')
+    setCategoria('')
+    setUltimaActualizacion('')
+    setProximaActualizacion('')
+    setFiles([])
+    setErrors({})
+
+    onClose()
   }
 
   if (animationState === 'closed' && !isOpen) return null
@@ -495,7 +495,7 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
 
         {/* Footer */}
         <div className="flex justify-end gap-2 border-t bg-muted/50 px-6 py-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancelar
           </Button>
           <Button disabled={!nombre || !categoria || (tipo === 'periodico' && !proximaActualizacion) || !files.length} type="submit" onClick={handleFormSubmit}>
@@ -504,7 +504,7 @@ export function EditarDocumento({ onClose, isOpen, documento, onDocumentoEdit }:
         </div>
 
         {/* Close button */}
-        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={onClose}>
+        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={handleClose}>
           <X className="h-5 w-5" />
         </button>
       </div>

@@ -200,7 +200,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
       let archivosSubidos: Archivo[] = []
 
       // Obtener referencia al directorio de documentos en Firebase Storage
-      const storageDirRef = ref(storage, 'documentos')
+      const storageDirRef = ref(storage, 'Doc Regulares')
 
       // Si el documento original tiene archivos, buscarlos y eliminarlos antes de subir los nuevos
       if (documento?.archivo && documento.archivo.length > 0) {
@@ -211,7 +211,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
 
           if (fileRef) {
             try {
-              const fileToDelete = ref(storage, `documentos/${fileRef.name}`)
+              const fileToDelete = ref(storage, `Doc Regulares/${fileRef.name}`)
 
               await deleteObject(fileToDelete)
             } catch (deleteError) {}
@@ -228,7 +228,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
             const blob = await response.blob()
             const fileData = new File([blob], file.nombre, { type: file.tipo })
 
-            const storageRef = ref(storage, `documentos/${file.nombre}`)
+            const storageRef = ref(storage, `Doc Regulares/${file.nombre}`)
 
             await uploadBytes(storageRef, fileData)
 
@@ -295,6 +295,11 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
   const handleFormSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     void handleUpdateDocumento(e) // Usar void para ignorar el valor devuelto
+  }
+
+  const handleClose = () => {
+    setArchivoNuevo([])
+    onClose()
   }
 
   if (animationState === 'closed' && !isOpen) return null
@@ -422,7 +427,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
         {/* Footer */}
         {documentoActualizado ? (
           <div className="flex justify-end gap-2 border-t bg-muted/50 px-6 py-4">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button disabled={!proximaActualizacion || !archivoNuevo.length} onClick={handleFormSubmit}>
@@ -433,7 +438,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
         ) : null}
 
         {/* Close button */}
-        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={onClose}>
+        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={handleClose}>
           <X className="h-5 w-5" />
         </button>
       </div>

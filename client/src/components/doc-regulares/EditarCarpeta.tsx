@@ -172,6 +172,14 @@ export function EditarCarpeta({ isOpen, onClose, onFolderUpdated, folder }: Edit
     void handleSubmit(e) // Usar void para ignorar el valor devuelto
   }
 
+  const handleClose = () => {
+    setNombre('')
+    setDescripcion('')
+    setSelectedColor('')
+
+    onClose()
+  }
+
   if (animationState === 'closed' && !isOpen) return null
 
   return (
@@ -262,7 +270,7 @@ export function EditarCarpeta({ isOpen, onClose, onFolderUpdated, folder }: Edit
 
         {/* Footer */}
         <div className="flex justify-end gap-2 border-t bg-muted/50 px-6 py-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancelar
           </Button>
           <Button disabled={!nombre || isLoading} onClick={handleFormSubmit}>
@@ -272,7 +280,7 @@ export function EditarCarpeta({ isOpen, onClose, onFolderUpdated, folder }: Edit
         </div>
 
         {/* Close button */}
-        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={onClose}>
+        <button aria-label="Cerrar" className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-gray-800" type="button" onClick={handleClose}>
           <X className="h-5 w-5" />
         </button>
       </div>

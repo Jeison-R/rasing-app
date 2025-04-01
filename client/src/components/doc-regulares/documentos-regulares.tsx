@@ -266,7 +266,7 @@ export default function DocumentosRegulares() {
 
   const handleEliminarDocumento = (documentId: string, filePath: string, folderId: string) => {
     // Asegurar que filePath tenga la ruta completa
-    const fullPath = `documentos/${filePath}`
+    const fullPath = `Doc Regulares/${filePath}`
 
     setSelectedDocument({ documentId, fullPath, folderId })
     setIsModalOpenDeleteDocument(true)
