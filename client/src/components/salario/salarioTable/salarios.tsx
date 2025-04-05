@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddSalaryModal } from '../modalAddSalary/AddSalaryModal'
 import { obtenerSalarios } from '../../services/salario/salarioService'
 
-import { deleteSalario } from './deleteSalario'
+import { DeleteSalarioModal } from './deleteSalario'
 
 export interface Salario {
   id: string
@@ -76,7 +77,7 @@ export const columns: ColumnDef<Salario>[] = [
 ]
 
 export function CustomTable() {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([{ id: 'año', desc: true }])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
@@ -84,6 +85,11 @@ export function CustomTable() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Salario[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedSalario, setSelectedSalario] = useState<{ anio: string; salarioId: string }>({
+    anio: '',
+    salarioId: ''
+  })
 
   // Función para obtener las actividades desde la API
   const fetchSalario = async () => {
@@ -115,8 +121,21 @@ export function CustomTable() {
     setIsModalOpen(false)
   }
 
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
   const handleSalariodAdded = () => {
     void fetchSalario()
+  }
+
+  const handleDeleteSuccess = () => {
+    void fetchSalario()
+  }
+
+  const handleDeleteRow = (salarioId: string, anio: string) => {
+    setSelectedSalario({ salarioId, anio })
+    setIsDeleteModalOpen(true)
   }
 
   const table = useReactTable({
@@ -144,6 +163,7 @@ export function CustomTable() {
 
   return (
     <>
+      <SonnerProvider />
       <div className="flex items-center justify-between py-4">
         <Input
           className="max-w-sm"
@@ -193,7 +213,13 @@ export function CustomTable() {
                         <div className="flex justify-center space-x-2">
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
-                            <Button size="icon" variant="ghost" onClick={() => void deleteSalario(row.original.id, `${row.original.año}`, fetchSalario)}>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                handleDeleteRow(row.original.id, `${row.original.año}`)
+                              }}
+                            >
                               <Trash className="h-5 w-5 text-red-500" />
                             </Button>
                           </CustomTooltip>
@@ -261,6 +287,7 @@ export function CustomTable() {
       </div>
 
       <AddSalaryModal isOpen={isModalOpen} onClose={handleCloseModal} onSalaryAdded={handleSalariodAdded} />
+      <DeleteSalarioModal anio={selectedSalario.anio} isOpen={isDeleteModalOpen} salarioId={selectedSalario.salarioId} onClose={handleCloseDeleteModal} onDeleteSuccess={handleDeleteSuccess} />
     </>
   )
 }

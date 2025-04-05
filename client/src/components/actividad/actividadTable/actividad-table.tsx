@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddActividadModal } from '../modalAddActividad/AddActividadModal'
 import { obtenerActividades } from '../../services/actividad/actividadService'
 
-import { deleteActividad } from './deleteActividad'
+import { DeleteActividadModal } from './deleteActividad'
 
 export interface Actividad {
   id: string
@@ -73,6 +74,11 @@ export function CustomTableActividad() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Actividad[]>([]) // Cambiar el estado inicial a un array vacío
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedActividad, setSelectedActividad] = useState<{ nombre: string; actividadId: string }>({
+    nombre: '',
+    actividadId: ''
+  })
 
   // Función para obtener las actividades desde la API
   const fetchActividades = async () => {
@@ -106,6 +112,19 @@ export function CustomTableActividad() {
     await fetchActividades()
   }
 
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleDeleteSuccess = () => {
+    void fetchActividades()
+  }
+
+  const handleDeleteRow = (actividadId: string, nombre: string) => {
+    setSelectedActividad({ actividadId, nombre })
+    setIsDeleteModalOpen(true)
+  }
+
   const table = useReactTable({
     data,
     columns,
@@ -131,6 +150,7 @@ export function CustomTableActividad() {
 
   return (
     <>
+      <SonnerProvider />
       <div className="flex flex-col items-center justify-center py-4">
         <h1 className="mb-2">Actividad Principal</h1>
         <div className="flex items-center space-x-2">
@@ -186,7 +206,13 @@ export function CustomTableActividad() {
                         <div className="flex justify-center space-x-2">
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
-                            <Button size="icon" variant="ghost" onClick={() => void deleteActividad(row.original.id, row.original.nombre, fetchActividades)}>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                handleDeleteRow(row.original.id, row.original.nombre)
+                              }}
+                            >
                               <Trash className="h-5 w-5 text-red-500" />
                             </Button>
                           </CustomTooltip>
@@ -243,6 +269,13 @@ export function CustomTableActividad() {
       </div>
 
       <AddActividadModal isOpen={isModalOpen} onActividadAdded={handleActividadAdded} onClose={handleCloseModal} />
+      <DeleteActividadModal
+        actividadId={selectedActividad.actividadId}
+        isOpen={isDeleteModalOpen}
+        nombreActividad={selectedActividad.nombre}
+        onClose={handleCloseDeleteModal}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </>
   )
 }

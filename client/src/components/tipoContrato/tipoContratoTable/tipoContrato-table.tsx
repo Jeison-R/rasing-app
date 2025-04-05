@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddContratoModal } from '../modalAddTipoContrato/AddContratoModal'
 import { obtenerTiposContrato } from '../../services/tipoContrato/contratoService'
 
-import { deleteContrato } from './deleteTipoContrato'
+import { DeleteContratoModal } from './deleteTipoContrato'
 
 export interface Contrato {
   id: string
@@ -74,6 +75,11 @@ export function CustomTableTipoContrato() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Contrato[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedContrato, setSelectedContrato] = useState<{ nombre: string; contratoId: string }>({
+    nombre: '',
+    contratoId: ''
+  })
 
   const fetchContratos = async () => {
     try {
@@ -130,8 +136,22 @@ export function CustomTableTipoContrato() {
     await fetchContratos() // Llama a la función para obtener la lista actualizada
   }
 
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleDeleteSuccess = () => {
+    void fetchContratos()
+  }
+
+  const handleDeleteRow = (contratoId: string, nombre: string) => {
+    setSelectedContrato({ contratoId, nombre })
+    setIsDeleteModalOpen(true)
+  }
+
   return (
     <>
+      <SonnerProvider />
       <div className="flex flex-col items-center justify-center py-4">
         <h1 className="mb-2">Tipo de Contrato</h1>
         <div className="flex items-center space-x-2">
@@ -185,7 +205,13 @@ export function CustomTableTipoContrato() {
                         <div className="flex justify-center space-x-2">
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
-                            <Button size="icon" variant="ghost" onClick={() => void deleteContrato(row.original.id, row.original.nombre, fetchContratos)}>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                handleDeleteRow(row.original.id, row.original.nombre)
+                              }}
+                            >
                               <Trash className="h-5 w-5 text-red-500" />
                             </Button>
                           </CustomTooltip>
@@ -241,6 +267,13 @@ export function CustomTableTipoContrato() {
       </div>
 
       <AddContratoModal isOpen={isModalOpen} onClose={handleCloseModal} onContratoAdded={handleContratoAdded} />
+      <DeleteContratoModal
+        contratoId={selectedContrato.contratoId}
+        isOpen={isDeleteModalOpen}
+        nombreContrato={selectedContrato.nombre}
+        onClose={handleCloseDeleteModal}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </>
   )
 }

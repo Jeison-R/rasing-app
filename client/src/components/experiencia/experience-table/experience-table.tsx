@@ -22,6 +22,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddExperienciaModal } from '../modalAddExperiencia/AddExperienciaModal'
@@ -35,7 +36,7 @@ import { getCustomSelectStyles } from '../../custom-select/customSelectStyles'
 import { columns } from './columnas'
 import FloatingBox from './floatingBox'
 import { ActionsMenu } from './ActionsMenu'
-import { deleteExperience } from './deleteExperience'
+import { DeleteExperienceModal } from './deleteExperience'
 
 const getColumnVisibilityFromLocalStorage = () => {
   if (typeof window !== 'undefined') {
@@ -76,6 +77,11 @@ export function CustomTable() {
     tipoContrato: string
     longitudIntervenida: number
   } | null>(null)
+  const [isModalOpenDeleteExperience, setIsModalOpenDeleteExperience] = useState(false)
+  const [selectedExperience, setSelectedExperience] = useState<{ experienceId: string; fullPaths: string[] }>({
+    experienceId: '',
+    fullPaths: []
+  })
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -170,6 +176,16 @@ export function CustomTable() {
   }
 
   const handleExperienciaEdit = () => {
+    const currentPage = table.getState().pagination.pageIndex
+
+    void fetchExperiences().then(() => {
+      setTimeout(() => {
+        table.setPageIndex(currentPage)
+      }, 0)
+    })
+  }
+
+  const handleExperienciaDelete = () => {
     const currentPage = table.getState().pagination.pageIndex
 
     void fetchExperiences().then(() => {
@@ -302,12 +318,11 @@ export function CustomTable() {
     }
   }, [rowSelection, table])
 
-  const handleDeleteRow = async (id: string) => {
-    const deleted = await deleteExperience(id)
+  const handleDeleteRow = (experienceId: string, filePaths: string[]) => {
+    const fullPaths = filePaths.map((filePath) => `documentos/${filePath.trim()}`)
 
-    if (deleted) {
-      setData((prevData) => prevData.filter((row) => row.id !== id)) // Actualiza el estado
-    }
+    setSelectedExperience({ experienceId, fullPaths })
+    setIsModalOpenDeleteExperience(true)
   }
 
   const handleOpenModal = () => {
@@ -342,6 +357,10 @@ export function CustomTable() {
 
   const handleCloseViewModal = () => {
     setIsViewModalOpen(false)
+  }
+
+  const handleCloseExperienceModalDelete = () => {
+    setIsModalOpenDeleteExperience(false)
   }
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -398,6 +417,7 @@ export function CustomTable() {
 
   return (
     <>
+      <SonnerProvider />
       <div className="flex flex-wrap items-center justify-between py-4">
         {selectedInfo ? (
           <FloatingBox
@@ -416,7 +436,7 @@ export function CustomTable() {
             value={globalFilter || ''}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setGlobalFilter(e.target.value)
-            }} // Setea el filtro global
+            }}
           />
         </div>
         <div className="flex w-full flex-col sm:w-auto">
@@ -596,7 +616,10 @@ export function CustomTable() {
                     <ActionsMenu
                       row={row}
                       onDelete={() => {
-                        void handleDeleteRow(row.original.id ?? '')
+                        handleDeleteRow(
+                          row.original.id ?? '',
+                          row.original.documentoCargado.map((doc) => doc.name)
+                        )
                       }}
                       onEdit={() => {
                         handleOpenEditModal(row.original)
@@ -701,6 +724,14 @@ export function CustomTable() {
       ) : null}
 
       {isViewModalOpen && selectedPayment ? <ViewExperienceModal isOpen={isViewModalOpen} payment={selectedPayment} onClose={handleCloseViewModal} /> : null}
+
+      <DeleteExperienceModal
+        experienceId={selectedExperience.experienceId}
+        filePaths={selectedExperience.fullPaths}
+        isOpen={isModalOpenDeleteExperience}
+        onClose={handleCloseExperienceModalDelete}
+        onDeleteSuccess={handleExperienciaDelete}
+      />
     </>
   )
 }

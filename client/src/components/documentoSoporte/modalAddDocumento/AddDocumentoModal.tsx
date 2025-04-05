@@ -2,7 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 
 import { X } from 'lucide-react'
 import { useState } from 'react'
-import Swal from 'sweetalert2'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,27 +33,11 @@ export function AddDocumentoModal({ isOpen, onClose, onDocumentoAdded }: Readonl
             id: ''
           })
 
-          // Mostrar SweetAlert de éxito usando el nombre directamente
-          await Swal.fire({
-            title: 'Éxito',
-            text: `Documento guardado con éxito. Nombre: ${name}`, // Usamos el nombre directamente del estado
-            icon: 'success',
-            timer: 4000,
-            timerProgressBar: true,
-            showConfirmButton: false
-          })
-
+          toast.success('Tipo Documento Guardado con Exito', { description: `Nombre: ${name}` })
           onDocumentoAdded() // Llama a la función para actualizar la lista
         } catch (error) {
           // Manejar errores de red o cualquier otro error
-          await Swal.fire({
-            title: 'Error',
-            text: `Error de red: ${(error as Error).message}`,
-            icon: 'error',
-            timer: 4000,
-            timerProgressBar: true,
-            showConfirmButton: false
-          })
+          toast.error('Error', { description: `No se puedo guardar el tipo de documento` })
         } finally {
           setIsLoading(false) // Terminar la carga
           setName('') // Limpiar el campo después de guardar

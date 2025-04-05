@@ -11,8 +11,8 @@ import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
 import { useState, useEffect, type ChangeEvent } from 'react'
 import { Edit2, Plus, X } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
-import Swal from 'sweetalert2'
 import SelectR from 'react-select'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -158,54 +158,54 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
 
     // Verificar campos vacíos
     if (!rup.trim()) {
-      void Swal.fire('Error', 'El campo Nº RUP no puede estar vacío', 'error')
+      toast.error('El campo Nº RUP no puede estar vacío')
       isValid = false
     } else if (!entidadContratante.trim()) {
-      void Swal.fire('Error', 'El campo Entidad no puede estar vacío', 'error')
+      toast.error('El campo Entidad no puede estar vacío')
       isValid = false
     } else if (!empresa.trim()) {
-      void Swal.fire('Error', 'El campo Empresa no puede estar vacío', 'error')
+      toast.error('El campo Empresa no puede estar vacío')
       isValid = false
     } else if (!contratoNo.trim()) {
-      void Swal.fire('Error', 'El campo Contrato No no puede estar vacío', 'error')
+      toast.error('El campo Contrato No no puede estar vacío')
       isValid = false
     } else if (!socio.trim()) {
-      void Swal.fire('Error', 'El campo Socio no puede estar vacío', 'error')
+      toast.error('El campo Socio no puede estar vacío')
       isValid = false
     } else if (!contratista.trim()) {
-      void Swal.fire('Error', 'El campo Contratista no puede estar vacío', 'error')
+      toast.error('El campo Contratista no puede estar vacío')
       isValid = false
     } else if (!modalidad.trim()) {
-      void Swal.fire('Error', 'El campo Modalidad no puede estar vacío', 'error')
+      toast.error('El campo Modalidad no puede estar vacío')
       isValid = false
     } else if (!objeto.trim()) {
-      void Swal.fire('Error', 'El campo Objeto no puede estar vacío', 'error')
+      toast.error('El campo Objeto no puede estar vacío')
       isValid = false
     } else if (!documentoSoporte.length) {
-      void Swal.fire('Error', 'Debe seleccionar al menos un Documento Soporte', 'error')
+      toast.error('Debe seleccionar al menos un Documento Soporte')
       isValid = false
     } else if (!tipoContrato.length) {
-      void Swal.fire('Error', 'Debe seleccionar al menos un Tipo Contrato', 'error')
+      toast.error('Debe seleccionar al menos un Tipo Contrato')
       isValid = false
     } else if (!actividadPrincipal.length) {
-      void Swal.fire('Error', 'Debe seleccionar al menos una Actividad Principal', 'error')
+      toast.error('Debe seleccionar al menos una Actividad Principal')
       isValid = false
     } else if (!fechaInicio.trim()) {
-      void Swal.fire('Error', 'El campo Fecha de Inicio no puede estar vacío', 'error')
+      toast.error('El campo Fecha de Inicio no puede estar vacío')
       isValid = false
     } else if (!fechaTerminacion.trim()) {
-      void Swal.fire('Error', 'El campo Fecha de Terminación no puede estar vacío', 'error')
+      toast.error('El campo Fecha de Terminación no puede estar vacío')
       isValid = false
     } else if (!valorInicial) {
-      void Swal.fire('Error', 'El campo Valor Inicial no puede estar vacío', 'error')
+      toast.error('El campo Valor Inicial no puede estar vacío')
       isValid = false
     } else if (!partPorcentaje) {
-      void Swal.fire('Error', 'El campo Part. % no puede estar vacío', 'error')
+      toast.error('El campo Part. % no puede estar vacío')
       isValid = false
     }
 
     if (documentoSoporteUrls.length === 0 && files.length === 0) {
-      void Swal.fire('Error', 'Debe tener al menos un documento cargado', 'error')
+      toast.error('Debe tener al menos un documento cargado')
       isValid = false
     }
 
@@ -298,28 +298,14 @@ export function EditExperienceModal({ isOpen, onClose, payment, onSave, onExperi
       }
 
       // Mostrar mensaje de éxito
-      void Swal.fire({
-        title: 'Actualizado',
-        text: 'Los cambios se han guardado exitosamente',
-        icon: 'success',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.success('Experiencia Editada', { description: 'Los cambio se han guardado correctamente', position: 'bottom-right' })
       onSave(updatedPayment)
       onExperienciaEdit()
       resetForm()
       onClose()
     } catch (error) {
       global.console.error('Error:', error)
-      void Swal.fire({
-        title: 'Error',
-        text: 'Hubo un problema al actualizar la experiencia',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.error('Error al actualizar', { description: 'No se ha podido actualizar la experiencia. Inténtalo de nuevo.', position: 'bottom-right' })
     } finally {
       setIsLoading(false)
     }

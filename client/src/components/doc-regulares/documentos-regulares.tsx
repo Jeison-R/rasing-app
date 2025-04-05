@@ -25,6 +25,7 @@ import {
   LayoutGrid
 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -565,6 +566,13 @@ export default function DocumentosRegulares() {
     }
   }
 
+  const showToast = () => {
+    toast.success('Eliminado', {
+      description: 'La experiencia ha sido eliminada junto con sus archivos asociados.',
+      position: 'top-center'
+    })
+  }
+
   return (
     <>
       <SonnerProvider />
@@ -610,6 +618,10 @@ export default function DocumentosRegulares() {
               <Button className="flex items-center gap-2 px-4" onClick={handleOpenFolderModal}>
                 <FolderPlus className="h-4 w-4" />
                 <span>Nueva carpeta</span>
+              </Button>
+              <Button className="flex items-center gap-2 px-4" onClick={showToast}>
+                <FolderPlus className="h-4 w-4" />
+                <span>prueba</span>
               </Button>
             </div>
           </div>

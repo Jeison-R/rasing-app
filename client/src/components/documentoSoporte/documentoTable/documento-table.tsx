@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
 
 import { CustomTooltip } from '../../commons/tooltip'
 import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
 import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
 
-import { deleteDocumento } from './deleteDocumento'
+import { DeleteDocumentoModal } from './deleteDocumento'
 
 export interface Documento {
   id: string
@@ -74,6 +75,11 @@ export function CustomTableDocumento() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [data, setData] = useState<Documento[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedDocumento, setSelectedDocumento] = useState<{ nombre: string; documentoId: string }>({
+    nombre: '',
+    documentoId: ''
+  })
 
   const fetchDocumentos = async () => {
     try {
@@ -130,8 +136,22 @@ export function CustomTableDocumento() {
     void fetchDocumentos() // Llama a la función para obtener la lista actualizada
   }
 
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleDeleteSuccess = () => {
+    void fetchDocumentos()
+  }
+
+  const handleDeleteRow = (documentoId: string, nombre: string) => {
+    setSelectedDocumento({ documentoId, nombre })
+    setIsDeleteModalOpen(true)
+  }
+
   return (
     <>
+      <SonnerProvider />
       <div className="flex flex-col items-center justify-center py-4">
         <h2 className="mb-2">Tipos de documentos</h2>
         <div className="flex items-center space-x-2">
@@ -186,7 +206,13 @@ export function CustomTableDocumento() {
                         <div className="flex justify-center space-x-2">
                           {/* Botón Eliminar */}
                           <CustomTooltip content="Eliminar">
-                            <Button size="icon" variant="ghost" onClick={() => void deleteDocumento(row.original.id, row.original.nombre, fetchDocumentos)}>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                handleDeleteRow(row.original.id, row.original.nombre)
+                              }}
+                            >
                               <Trash className="h-5 w-5 text-red-500" />
                             </Button>
                           </CustomTooltip>
@@ -241,6 +267,13 @@ export function CustomTableDocumento() {
       </div>
 
       <AddDocumentoModal isOpen={isModalOpen} onClose={handleCloseModal} onDocumentoAdded={handleDocumentoAdded} />
+      <DeleteDocumentoModal
+        documentoId={selectedDocumento.documentoId}
+        isOpen={isDeleteModalOpen}
+        nombreDocumento={selectedDocumento.nombre}
+        onClose={handleCloseDeleteModal}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </>
   )
 }

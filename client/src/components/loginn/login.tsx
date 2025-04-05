@@ -7,8 +7,8 @@ import { setCookie } from 'cookies-next'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation' // Importar useRouter
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import Swal from 'sweetalert2' // Importar SweetAlert2
 import { Eye, EyeOff } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,7 @@ import { auth } from '@/firebase/firebase'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 import { Logo } from '../../assets/icons/logo'
+import { SonnerProvider } from '../doc-regulares/sonner-provider'
 
 export function Login() {
   const [email, setEmail] = useState<string>('')
@@ -51,7 +52,7 @@ export function Login() {
 
       if (response.ok) {
         await setCookie('auth_token', data.token, {
-          maxAge: 60 * 60,
+          maxAge: 120 * 120,
           path: '/',
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict'
@@ -60,19 +61,11 @@ export function Login() {
           router.push('/')
         }, 50) // Redirigir a /experiencias
       } else {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: data.message || 'Los datos son incorrectos.'
-        })
+        toast.error('Error', { description: data.message || 'Los datos son incorrectos' })
       }
     } catch (loginError) {
       if (loginError instanceof Error) {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Los datos son incorrectos'
-        })
+        toast.error('Error', { description: 'Los datos son incorrectos' })
       }
     } finally {
       setIsLoading(false)
@@ -88,53 +81,56 @@ export function Login() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center overflow-hidden">
-      {isLoading ? <LoadingSpinner /> : null}
-      <Card className="w-[800px]">
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="flex items-center justify-center bg-gray-100 p-6">
-            <Logo className="h-56 w-56" />
-          </div>
-          <div className="p-6">
-            <CardHeader>
-              <CardTitle>Iniciar sesión</CardTitle>
-              <CardDescription>Accede a tu cuenta</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  void handleLogin(e)
-                }}
-              >
-                <div>
-                  <Label htmlFor="email">Correo electrónico</Label>
-                  <Input required className="mt-2" id="email" placeholder="correo@ejemplo.com" type="email" value={email} onChange={handleEmailChange} />
-                </div>
-                <div className="relative">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <div className="relative mt-2">
-                    <Input required className="pr-10" id="password" placeholder="••••••••" type={showPassword ? 'text' : 'password'} value={password} onChange={handlePasswordChange} />
-                    <Button
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                      onClick={togglePasswordVisibility}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
-                    </Button>
+    <>
+      <SonnerProvider />
+      <div className="flex h-screen items-center justify-center overflow-hidden">
+        {isLoading ? <LoadingSpinner /> : null}
+        <Card className="w-[800px]">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="flex items-center justify-center bg-gray-100 p-6">
+              <Logo className="h-56 w-56" />
+            </div>
+            <div className="p-6">
+              <CardHeader>
+                <CardTitle>Iniciar sesión</CardTitle>
+                <CardDescription>Accede a tu cuenta</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    void handleLogin(e)
+                  }}
+                >
+                  <div>
+                    <Label htmlFor="email">Correo electrónico</Label>
+                    <Input required className="mt-2" id="email" placeholder="correo@ejemplo.com" type="email" value={email} onChange={handleEmailChange} />
                   </div>
-                </div>
-                <Button className="w-full" disabled={isLoading} type="submit">
-                  Iniciar sesión
-                </Button>
-              </form>
-            </CardContent>
+                  <div className="relative">
+                    <Label htmlFor="password">Contraseña</Label>
+                    <div className="relative mt-2">
+                      <Input required className="pr-10" id="password" placeholder="••••••••" type={showPassword ? 'text' : 'password'} value={password} onChange={handlePasswordChange} />
+                      <Button
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                        onClick={togglePasswordVisibility}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
+                      </Button>
+                    </div>
+                  </div>
+                  <Button className="w-full" disabled={isLoading} type="submit">
+                    Iniciar sesión
+                  </Button>
+                </form>
+              </CardContent>
+            </div>
           </div>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </>
   )
 }

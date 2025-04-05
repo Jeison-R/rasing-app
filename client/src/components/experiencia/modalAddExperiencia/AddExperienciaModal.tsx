@@ -9,8 +9,8 @@ import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage'
 import { Plus, X, Edit2 } from 'lucide-react'
 import { useState, useEffect, useMemo } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import Swal from 'sweetalert2'
 import SelectR from 'react-select'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -299,15 +299,8 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
       const endDate = new Date(fechaTerminacion)
 
       if (startDate > endDate) {
-        // Mostrar alerta de error con SweetAlert2
-        void Swal.fire({
-          title: 'Error de Fechas',
-          text: 'La fecha de inicio no puede ser mayor que la fecha de terminación',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        })
+        toast.error('Error de Fechas', { description: 'La fecha de inicio no puede ser mayor que la fecha de terminación', position: 'bottom-right' })
 
-        // Retornar false para indicar que el formulario no es válido
         setErrors(newErrors)
 
         return false
@@ -407,26 +400,12 @@ export function AddExperienciaModal({ isOpen, onClose, onExperienciaAdded }: Rea
       }
 
       // Mostrar alerta de éxito
-      void Swal.fire({
-        title: 'Guardado',
-        text: 'La experiencia se ha guardado exitosamente',
-        icon: 'success',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.success('Experiencia guardada', { description: 'La experiencia se ha guardado correctamente' })
       onExperienciaAdded()
       handleClose()
     } catch (error) {
       global.console.error('Error:', error)
-      void Swal.fire({
-        title: 'Error',
-        text: 'Hubo un problema al guardar la experiencia',
-        icon: 'error',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false
-      })
+      toast.error('Error al guardar', { description: 'La experiencia no se ha podido guardar' })
     } finally {
       setIsLoading(false)
     }

@@ -2,7 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 
 import { X } from 'lucide-react'
 import { useState } from 'react'
-import Swal from 'sweetalert2'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,27 +35,11 @@ export function AddSalaryModal({ isOpen, onClose, onSalaryAdded }: Readonly<AddS
             valor: value
           }) // Enviar el año y el valor
 
-          // Mostrar SweetAlert de éxito
-          await Swal.fire({
-            title: 'Éxito',
-            text: `Salario guardado con éxito. Año: ${year}, Valor: ${value}`,
-            icon: 'success',
-            timer: 4000,
-            timerProgressBar: true,
-            showConfirmButton: false
-          })
+          toast.success('Salario guardado con éxito', { description: `Año: ${year}, Valor: ${value}` })
 
           onSalaryAdded() // Actualizar la lista de salarios
         } catch (error) {
-          // Manejar errores de red o cualquier otro error
-          await Swal.fire({
-            title: 'Error',
-            text: `Error de red: ${(error as Error).message}`,
-            icon: 'error',
-            timer: 4000,
-            timerProgressBar: true,
-            showConfirmButton: false
-          })
+          toast.error('Error', { description: `No se pudo guardar el salario` })
         } finally {
           setIsLoading(false) // Terminar la carga
           setYear('') // Limpiar el campo de año
@@ -63,14 +47,7 @@ export function AddSalaryModal({ isOpen, onClose, onSalaryAdded }: Readonly<AddS
           onClose() // Cerrar el modal
         }
       } else {
-        await Swal.fire({
-          title: 'Error',
-          text: 'Por favor, completa todos los campos.',
-          icon: 'error',
-          timer: 4000,
-          timerProgressBar: true,
-          showConfirmButton: false
-        })
+        toast.error('Error', { description: 'Por favor completa todos los campos' })
       }
     }
 
