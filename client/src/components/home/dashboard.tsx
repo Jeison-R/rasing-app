@@ -193,13 +193,13 @@ export function Dashboard() {
                         data={getTopContractsWithOthers(chartData)}
                         dataKey="Total"
                         innerRadius={60}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={(entry: { name: string; percent: number }) => `${entry.name} ${(entry.percent * 100).toFixed(0)}%`}
                         labelLine={false}
                         outerRadius={90}
                         paddingAngle={2}
                       >
-                        {getTopContractsWithOthers(chartData).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                        {getTopContractsWithOthers(chartData).map((entry) => (
+                          <Cell key={entry.name} fill={pieColors[pieColors.indexOf(entry.name)]} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(value: number) => [`${value} contratos`, 'Cantidad']} />
