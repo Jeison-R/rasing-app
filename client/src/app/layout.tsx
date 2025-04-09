@@ -3,34 +3,24 @@ import type { Documento, Folder } from '@/components/doc-regulares/interface'
 
 import './globals.css'
 import React from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import { LogOut } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { Inter } from 'next/font/google'
-import { deleteCookie } from 'cookies-next'
 import { Suspense, useState, useEffect } from 'react'
 
 import { MainNav } from '@/components/commons/main-nav'
 import { NavMobile } from '@/components/commons/nav-mobile'
-import { Button } from '@/components/ui/button'
-import { CustomTooltip } from '@/components/commons/tooltip'
-import ThemeToggle from '@/components/commons/theme-toggle'
-import { ROUTES } from '@/consts/routes'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { NotificationsPanel } from '@/components/panel-notificaciones/notifications-panel'
+
+import { UserNav } from './UserNav'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname()
-  const router = useRouter()
   const [documentos, setDocumentos] = useState<Documento[]>([])
 
   const [carpetas, setCarpetas] = useState<Folder[]>([])
-
-  const handleLogout = () => {
-    void deleteCookie('auth_token')
-    router.push(ROUTES.LOGIN)
-  }
 
   // Fetch documents and folders for notifications
   useEffect(() => {
@@ -90,12 +80,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <NavMobile />
             <div className="flex w-fit items-center gap-4">
               {pathname !== '/login' && <NotificationsPanel carpetas={carpetas} documentos={documentos} />}
-              <ThemeToggle />
-              <CustomTooltip content="Cerrar sesión">
-                <Button className="group rounded-full border-input/10 bg-border/10 hover:bg-transparent" size="icon" type="button" variant="outline" onClick={handleLogout}>
-                  <LogOut className="h-5 w-5 text-muted-foreground group-hover:text-secondary" strokeWidth={1.5} />
-                </Button>
-              </CustomTooltip>
+              <UserNav />
             </div>
           </div>
         </header>

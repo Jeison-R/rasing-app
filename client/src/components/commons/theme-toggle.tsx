@@ -39,12 +39,8 @@ function ThemeToggle() {
   return (
     <div className="relative">
       <CustomTooltip content={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}>
-        <Button className="group rounded-full border-input/10 bg-border/10 hover:bg-transparent" size="icon" type="button" variant="outline" onClick={toggleTheme}>
-          {theme === 'light' ? (
-            <Sun className="h-5 w-5 text-muted-foreground group-hover:text-secondary" strokeWidth={1.5} />
-          ) : (
-            <Moon className="h-5 w-5 text-muted-foreground group-hover:text-secondary" strokeWidth={1.5} />
-          )}
+        <Button className="h-8 w-8 rounded-full" size="icon" variant="ghost" onClick={toggleTheme}>
+          {theme === 'light' ? <Sun className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} /> : <Moon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />}
         </Button>
       </CustomTooltip>
     </div>

@@ -57,6 +57,7 @@ export function Login() {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict'
         })
+        localStorage.setItem('user_email', email)
         setTimeout(() => {
           router.push('/')
         }, 50) // Redirigir a /experiencias

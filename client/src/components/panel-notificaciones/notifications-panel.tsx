@@ -168,7 +168,7 @@ export function NotificationsPanel({ documentos, carpetas }: NotificationsPanelP
                   }}
                 >
                   <div className="flex gap-3">
-                    <div className={`mt-1 rounded-full p-1 ${notification.type === 'update' ? 'bg-red-100' : 'bg-amber-100'}`}>
+                    <div className={`mt-1 h-6 rounded-full p-1 ${notification.type === 'update' ? 'bg-red-100' : 'bg-amber-100'}`}>
                       {notification.type === 'update' ? <AlertCircle className="h-4 w-4 text-red-600" /> : <Clock className="h-4 w-4 text-amber-600" />}
                     </div>
                     <div className="flex-1">
