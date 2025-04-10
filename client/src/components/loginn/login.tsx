@@ -3,8 +3,8 @@
 import { useState, useEffect, type ChangeEvent, type FormEvent } from 'react'
 import { setCookie } from 'cookies-next'
 import { useRouter } from 'next/navigation'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
+import { Eye, EyeOff, ArrowRight, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -23,6 +23,9 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formState, setFormState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState<string>('')
+  const [resetPasswordState, setResetPasswordState] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
   const router = useRouter()
   const [particles, setParticles] = useState<{ x: number; y: number; size: number; vx: number; vy: number; color: string }[]>([])
 
@@ -120,12 +123,48 @@ export function Login() {
     }
   }
 
+  const handleResetPassword = async (e: FormEvent) => {
+    e.preventDefault()
+    setResetPasswordState('submitting')
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail)
+      setResetPasswordState('success')
+      toast.success('Correo enviado', {
+        description: 'Se ha enviado un correo para restablecer tu contraseña'
+      })
+
+      // Close the reset password modal after a delay
+      setTimeout(() => {
+        setShowResetPassword(false)
+        setResetPasswordState('idle')
+      }, 3000)
+    } catch (error) {
+      setResetPasswordState('error')
+
+      if (error instanceof Error) {
+        toast.error('Error', {
+          description: 'No se pudo enviar el correo. Verifica que la dirección sea correcta.'
+        })
+      }
+    }
+  }
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    void handleResetPassword(e) // Usar void para ignorar el valor devuelto
+  }
+
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
   }
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value)
+  }
+
+  const handleResetEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setResetEmail(e.target.value)
   }
 
   return (
@@ -148,6 +187,105 @@ export function Login() {
             <LoadingSpinner />
           </motion.div>
         ) : null}
+
+        {/* Reset Password Modal */}
+        <AnimatePresence>
+          {showResetPassword ? (
+            <motion.div animate={{ opacity: 1 }} className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" exit={{ opacity: 0 }} initial={{ opacity: 0 }}>
+              <motion.div
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative mx-4 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+                exit={{ scale: 0.9, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
+              >
+                <div className="relative p-6">
+                  <div className="absolute right-4 top-4">
+                    <Button
+                      className="h-8 w-8 rounded-full text-slate-500 hover:bg-slate-100"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        setShowResetPassword(false)
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Cerrar</span>
+                    </Button>
+                  </div>
+
+                  <div className="mb-6 text-center">
+                    <h2 className="text-xl font-bold text-slate-900">Restablecer contraseña</h2>
+                    <p className="mt-1 text-sm text-slate-600">Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña</p>
+                  </div>
+
+                  <AnimatePresence mode="wait">
+                    {resetPasswordState === 'success' ? (
+                      <motion.div
+                        key="success"
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center py-4 text-center"
+                        exit={{ opacity: 0, y: -10 }}
+                        initial={{ opacity: 0, y: 10 }}
+                      >
+                        <div className="mb-4 rounded-full bg-green-100 p-3">
+                          <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-slate-900">Correo enviado</h3>
+                        <p className="mt-1 text-sm text-slate-600">Revisa tu bandeja de entrada y sigue las instrucciones</p>
+                      </motion.div>
+                    ) : (
+                      <motion.form key="form" animate={{ opacity: 1, y: 0 }} className="space-y-4" exit={{ opacity: 0, y: -10 }} initial={{ opacity: 0, y: 10 }} onSubmit={handleFormSubmit}>
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-slate-900" htmlFor="reset-email">
+                            Correo electrónico
+                          </Label>
+                          <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                            <Input
+                              required
+                              className="border-none bg-transparent text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500/30"
+                              id="reset-email"
+                              placeholder="correo@ejemplo.com"
+                              type="email"
+                              value={resetEmail}
+                              onChange={handleResetEmailChange}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="relative pt-2">
+                          <div className="absolute -inset-1 animate-pulse rounded-lg bg-gradient-to-r from-orange-400 via-orange-500 to-amber-600 opacity-70 blur-md" />
+                          <Button
+                            className="relative h-11 w-full overflow-hidden rounded-lg bg-gradient-to-r from-orange-500 to-amber-600 font-medium text-white shadow-lg transition-all hover:shadow-xl"
+                            disabled={resetPasswordState === 'submitting'}
+                            type="submit"
+                          >
+                            {resetPasswordState === 'submitting' ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path
+                                    className="opacity-75"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                                Enviando...
+                              </span>
+                            ) : (
+                              'Enviar correo de restablecimiento'
+                            )}
+                          </Button>
+                        </div>
+                      </motion.form>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         <motion.div animate={{ opacity: 1, y: 0 }} className="w-full max-w-5xl" initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
           {/* Two-column card with enhanced contrast */}
@@ -179,7 +317,7 @@ export function Login() {
                       Bienvenido de nuevo
                     </motion.h2>
                     <motion.p animate={{ opacity: 1, y: 0 }} className="mt-2 text-center text-white/70" initial={{ opacity: 0, y: 20 }} transition={{ delay: 0.5 }}>
-                      Me alegra verte otra vez
+                      Nos alegra verte otra vez
                     </motion.p>
                   </motion.div>
                 </div>
@@ -249,9 +387,16 @@ export function Login() {
                                 <Label className="text-sm font-medium text-slate-900" htmlFor="password">
                                   Contraseña
                                 </Label>
-                                <a className="text-xs font-medium text-orange-600 transition-colors hover:text-orange-700" href="/">
+                                <button
+                                  className="text-xs font-medium text-orange-600 transition-colors hover:text-orange-700"
+                                  type="button"
+                                  onClick={() => {
+                                    setResetEmail(email)
+                                    setShowResetPassword(true)
+                                  }}
+                                >
                                   ¿Olvidaste tu contraseña?
-                                </a>
+                                </button>
                               </div>
                               <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                                 <Input
