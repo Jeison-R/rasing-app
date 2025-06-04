@@ -26,7 +26,7 @@ export function DeleteFolderModal({ isOpen, onClose, folderId, onDeleteSuccess }
     try {
       const storage = getStorage()
 
-      const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${folderId}`, {
+      const folderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/obtenerCarpetaPorId/${folderId}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -39,7 +39,7 @@ export function DeleteFolderModal({ isOpen, onClose, folderId, onDeleteSuccess }
       const folderData = (await folderResponse.json()) as Folder
 
       for (const documento of folderData.documentos) {
-        const docResponse = await fetch(`https://servidor-rasing.onrender.com/documentos/obtenerDocumentoPorId/${documento}`, {
+        const docResponse = await fetch(`https://servidor-vercel-bice.vercel.app/documentos/obtenerDocumentoPorId/${documento}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -58,13 +58,13 @@ export function DeleteFolderModal({ isOpen, onClose, folderId, onDeleteSuccess }
           await deleteObject(fileRef)
         }
 
-        await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${documento}`, {
+        await fetch(`https://servidor-vercel-bice.vercel.app/documentos/EliminarDocumento/${documento}`, {
           method: 'DELETE',
           credentials: 'include'
         })
       }
 
-      const deleteFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/EliminarCarpeta/${folderId}`, {
+      const deleteFolderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/EliminarCarpeta/${folderId}`, {
         method: 'DELETE',
         credentials: 'include'
       })

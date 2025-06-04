@@ -29,33 +29,33 @@ export function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv', {
+        const response1 = await fetch('https://servidor-vercel-bice.vercel.app/dashboard/sum-valor-smmlv', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
         })
-        const response2 = await fetch('https://servidor-rasing.onrender.com/dashboard/sum-valor-smmlv-part2', {
+        const response2 = await fetch('https://servidor-vercel-bice.vercel.app/dashboard/sum-valor-smmlv-part2', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
         })
-        const response3 = await fetch('https://servidor-rasing.onrender.com/dashboard/count-experiencias', {
+        const response3 = await fetch('https://servidor-vercel-bice.vercel.app/dashboard/count-experiencias', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
         })
-        const response4 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumValorFinalAfectado', {
+        const response4 = await fetch('https://servidor-vercel-bice.vercel.app/dashboard/sumValorFinalAfectado', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
         })
-        const response5 = await fetch('https://servidor-rasing.onrender.com/dashboard/sumTiposContratos', {
+        const response5 = await fetch('https://servidor-vercel-bice.vercel.app/dashboard/sumTiposContratos', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'
         })
 
-        const response7 = await fetch('https://servidor-rasing.onrender.com/experiencias/obtenerExperiencia', {
+        const response7 = await fetch('https://servidor-vercel-bice.vercel.app/experiencias/obtenerExperiencia', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include'

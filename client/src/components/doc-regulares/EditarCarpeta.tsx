@@ -145,7 +145,7 @@ export function EditarCarpeta({ isOpen, onClose, onFolderUpdated, folder }: Edit
     try {
       const updatedFolder = { ...folder, nombre, descripcion, color: selectedColor }
 
-      const response = await fetch(`https://servidor-rasing.onrender.com/carpetas/editarCarpeta/${folderId}`, {
+      const response = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/editarCarpeta/${folderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

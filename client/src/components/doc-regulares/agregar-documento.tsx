@@ -91,7 +91,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
       }
 
       // 4️⃣ Enviar los datos a la API
-      const response = await fetch('https://servidor-rasing.onrender.com/documentos/agregarDocumento', {
+      const response = await fetch('https://servidor-vercel-bice.vercel.app/documentos/agregarDocumento', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +105,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
       if (selectedFolderId) {
         try {
           // Obtener la carpeta actual para extraer los documentos existentes
-          const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${selectedFolderId}`, {
+          const folderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/obtenerCarpetaPorId/${selectedFolderId}`, {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
@@ -124,7 +124,7 @@ export function AgregarDocumento({ onClose, isOpen, onDocumentoAdded, selectedFo
           const documentosActualizados = [...documentosActuales, documentoId]
 
           // Enviar la actualización con el array completo
-          const updateFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/editarCarpeta/${selectedFolderId}`, {
+          const updateFolderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/editarCarpeta/${selectedFolderId}`, {
             method: 'PUT',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },

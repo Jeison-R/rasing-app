@@ -271,7 +271,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
       }
 
       // Enviar los datos a la API
-      const response = await fetch(`https://servidor-rasing.onrender.com/documentos/EditarDocumento/${documentoId}`, {
+      const response = await fetch(`https://servidor-vercel-bice.vercel.app/documentos/EditarDocumento/${documentoId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

@@ -173,7 +173,7 @@ export default function DocumentosRegulares() {
 
   const obtenerDocumentos = async () => {
     try {
-      const response = await fetch('https://servidor-rasing.onrender.com/documentos/ConsultarDocumentos', {
+      const response = await fetch('https://servidor-vercel-bice.vercel.app/documentos/ConsultarDocumentos', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -199,7 +199,7 @@ export default function DocumentosRegulares() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('https://servidor-rasing.onrender.com/carpetas/obtenerCarpetas', {
+      const response = await fetch('https://servidor-vercel-bice.vercel.app/carpetas/obtenerCarpetas', {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }

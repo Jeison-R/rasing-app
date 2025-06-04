@@ -83,7 +83,7 @@ export function Login() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const idToken = await userCredential.user.getIdToken()
 
-      const response = await fetch('https://servidor-rasing.onrender.com/auth/login', {
+      const response = await fetch('https://servidor-vercel-bice.vercel.app/auth/login', {
         method: 'POST',
         credentials: 'include',
         headers: {

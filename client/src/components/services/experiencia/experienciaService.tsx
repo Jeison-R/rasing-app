@@ -1,7 +1,7 @@
 import type { Experiencia } from '../../experiencia/experience-table/interface'
 
 export const obtenerExperiences = async (): Promise<Experiencia[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/experiencias/obtenerExperiencia', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/experiencias/obtenerExperiencia', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -17,7 +17,7 @@ export const obtenerExperiences = async (): Promise<Experiencia[]> => {
 }
 
 export const eliminarExperiences = async (id: string): Promise<void> => {
-  const response = await fetch(`https://servidor-rasing.onrender.com/experiencias/eliminarExperiencia/${id}`, {
+  const response = await fetch(`https://servidor-vercel-bice.vercel.app/experiencias/eliminarExperiencia/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
@@ -31,7 +31,7 @@ export const eliminarExperiences = async (id: string): Promise<void> => {
 }
 
 export const actualizarExperiences = async (id: string, experiencia: Experiencia): Promise<void> => {
-  const response = await fetch(`https://servidor-rasing.onrender.com/experiencias/actualizarExperiencia/${id}`, {
+  const response = await fetch(`https://servidor-vercel-bice.vercel.app/experiencias/actualizarExperiencia/${id}`, {
     method: 'PUT', // O 'PATCH', según tu API
     headers: {
       'Content-Type': 'application/json' // Asegúrate de que tu backend acepte JSON

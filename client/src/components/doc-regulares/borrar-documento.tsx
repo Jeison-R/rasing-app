@@ -27,7 +27,7 @@ export function DeleteDocumentModal({ isOpen, onClose, documentId, filePath, fol
 
     try {
       // Eliminar el documento de la base de datos
-      const response = await fetch(`https://servidor-rasing.onrender.com/documentos/EliminarDocumento/${documentId}`, {
+      const response = await fetch(`https://servidor-vercel-bice.vercel.app/documentos/EliminarDocumento/${documentId}`, {
         method: 'DELETE',
         credentials: 'include'
       })
@@ -46,7 +46,7 @@ export function DeleteDocumentModal({ isOpen, onClose, documentId, filePath, fol
 
       // Obtener la carpeta actualizada y eliminar el ID del documento
       if (folderId) {
-        const folderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/obtenerCarpetaPorId/${folderId}`, {
+        const folderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/obtenerCarpetaPorId/${folderId}`, {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' }
@@ -60,7 +60,7 @@ export function DeleteDocumentModal({ isOpen, onClose, documentId, filePath, fol
         const documentosActualizados = folderData.documentos.filter((docId: string) => docId !== documentId)
 
         // Actualizar la carpeta con la nueva lista de documentos
-        const updateFolderResponse = await fetch(`https://servidor-rasing.onrender.com/carpetas/editarCarpeta/${folderId}`, {
+        const updateFolderResponse = await fetch(`https://servidor-vercel-bice.vercel.app/carpetas/editarCarpeta/${folderId}`, {
           method: 'PUT',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

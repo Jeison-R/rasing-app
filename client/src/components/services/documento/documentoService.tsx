@@ -6,7 +6,7 @@ export interface DocumentoSoporte {
 
 // Obtener todos los documentos de soporte
 export const obtenerDocumentosSoporte = async (): Promise<DocumentoSoporte[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/obtenerTiposDocumentos', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/tiposDocumentos/obtenerTiposDocumentos', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ export const obtenerDocumentosSoporte = async (): Promise<DocumentoSoporte[]> =>
 
 // Agregar un nuevo documento de soporte
 export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte): Promise<void> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/tiposDocumentos/crearTipoDocumento', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/tiposDocumentos/crearTipoDocumento', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -39,7 +39,7 @@ export const agregarDocumentoSoporte = async (documentoSoporte: DocumentoSoporte
 
 // Eliminar un documento de soporte por ID
 export const eliminarDocumentoSoporte = async (id: string): Promise<void> => {
-  const response = await fetch(`https://servidor-rasing.onrender.com/tiposDocumentos/eliminarTipoDocumento/${id}`, {
+  const response = await fetch(`https://servidor-vercel-bice.vercel.app/tiposDocumentos/eliminarTipoDocumento/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'

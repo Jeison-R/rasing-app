@@ -6,7 +6,7 @@ export interface TipoContrato {
 
 // Obtener todos los tipos de contrato
 export const obtenerTiposContrato = async (): Promise<TipoContrato[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/tiposContratos/obtenerTiposContratos', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/tiposContratos/obtenerTiposContratos', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ export const obtenerTiposContrato = async (): Promise<TipoContrato[]> => {
 
 // Agregar un nuevo tipo de contrato
 export const agregarTipoContrato = async (tipoContrato: TipoContrato): Promise<void> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/tiposContratos/crearTipoContrato', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/tiposContratos/crearTipoContrato', {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -39,7 +39,7 @@ export const agregarTipoContrato = async (tipoContrato: TipoContrato): Promise<v
 
 // Eliminar un tipo de contrato por ID
 export const eliminarTipoContrato = async (id: string): Promise<void> => {
-  const response = await fetch(`https://servidor-rasing.onrender.com/tiposContratos/eliminarTipoContrato/${id}`, {
+  const response = await fetch(`https://servidor-vercel-bice.vercel.app/tiposContratos/eliminarTipoContrato/${id}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {

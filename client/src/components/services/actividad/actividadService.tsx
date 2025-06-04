@@ -6,7 +6,7 @@ export interface Payment {
 
 // Obtener todas las actividades
 export const obtenerActividades = async (): Promise<Payment[]> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/actividades/obtenerActividades', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/actividades/obtenerActividades', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ export const obtenerActividades = async (): Promise<Payment[]> => {
 
 // Agregar una nueva actividad
 export const agregarActividad = async (actividad: Payment): Promise<void> => {
-  const response = await fetch('https://servidor-rasing.onrender.com/actividades/crearActividad', {
+  const response = await fetch('https://servidor-vercel-bice.vercel.app/actividades/crearActividad', {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -39,7 +39,7 @@ export const agregarActividad = async (actividad: Payment): Promise<void> => {
 
 // Eliminar una actividad por ID
 export const eliminarActividad = async (id: string): Promise<void> => {
-  const response = await fetch(`https://servidor-rasing.onrender.com/actividades/eliminarActividad/${id}`, {
+  const response = await fetch(`https://servidor-vercel-bice.vercel.app/actividades/eliminarActividad/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
