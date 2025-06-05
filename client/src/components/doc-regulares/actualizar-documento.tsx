@@ -1,8 +1,9 @@
 'use client'
 
 import type { Documento, Archivo } from './interface'
+import type { ChangeEvent } from 'react'
 
-import React, { type ChangeEvent } from 'react'
+import React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { Upload, X, RefreshCw } from 'lucide-react'
 import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from 'firebase/storage'
@@ -36,6 +37,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
   const [archivoNuevo, setArchivoNuevo] = useState<Archivo[]>([])
   const [files, setFiles] = useState<Archivo[]>([])
   const [proximaActualizacion, setProximaActualizacion] = useState<string>('')
+  const [fechaActualizacion, setFechaActualizacion] = useState<string>('')
   const [documentoId, setDocumentoId] = useState<string>('')
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
       setCategoria(documento.categoria)
       setTipo(documento.tipo)
       setProximaActualizacion(documento.proximaActualizacion)
+      setFechaActualizacion(documento.fechaActualizacion !== '-' ? documento.fechaActualizacion : '')
       setFiles(documento.archivo)
     }
   }, [documento])
@@ -124,8 +127,17 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
   // Cargar los datos del documento cuando se abre el modal
   useEffect(() => {
     if (documento && isOpen) {
+      // Limpiar archivos nuevos al abrir el modal
+      setArchivoNuevo([])
+
+      // Limpiar también el input de archivos
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+
       setDocumentoActualizado(documento)
       setProximaActualizacion(documento.proximaActualizacion !== '-' ? documento.proximaActualizacion : '')
+      setFechaActualizacion(documento.fechaActualizacion !== '-' ? documento.fechaActualizacion : '')
 
       // Guardar el ID del documento si existe
       if ('id' in documento) {
@@ -140,6 +152,7 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
       const timer = setTimeout(() => {
         setDocumentoActualizado(null)
         setProximaActualizacion('')
+        setFechaActualizacion('')
         setDocumentoId('')
       }, 300)
 
@@ -282,7 +295,10 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
         throw new Error('Error al actualizar el documento')
       }
 
-      toast.success('Documento actualizado', { description: 'El documento se ha actualizado correctamente', position: 'bottom-right' })
+      toast.success('Documento actualizado', {
+        description: 'El documento se ha actualizado correctamente',
+        position: 'bottom-right'
+      })
       onDocumentoAct()
       onClose()
     } catch (error) {
@@ -299,6 +315,12 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
 
   const handleClose = () => {
     setArchivoNuevo([])
+
+    // Limpiar el input de archivos
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+
     onClose()
   }
 
@@ -359,9 +381,17 @@ export function ActualizarDocumento({ onClose, isOpen, documento, onDocumentoAct
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right" htmlFor="fechaActualizacion">
-                Fecha de actualización
+                Fecha de actualización *
               </Label>
-              <Input readOnly className="col-span-3" id="fechaActualizacion" type="date" value={new Date().toISOString().split('T')[0]} />
+              <Input
+                className="col-span-3"
+                id="fechaActualizacion"
+                type="date"
+                value={fechaActualizacion}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setFechaActualizacion(e.target.value)
+                }}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right" htmlFor="proximaActualizacion">
