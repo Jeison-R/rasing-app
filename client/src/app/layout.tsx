@@ -29,12 +29,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
       try {
         const [documentosResponse, carpetasResponse] = await Promise.all([
-          fetch('https://servidor-rasing.onrender.com/documentos/ConsultarDocumentos', {
+          fetch('https://servidor-vercel-bice.vercel.app/documentos/ConsultarDocumentos', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
           }),
-          fetch('https://servidor-rasing.onrender.com/carpetas/obtenerCarpetas', {
+          fetch('https://servidor-vercel-bice.vercel.app/carpetas/obtenerCarpetas', {
             method: 'GET',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
