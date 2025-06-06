@@ -22,16 +22,23 @@
   "license": "ISC",
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.5.4",
-    "@vercel/style-guide": "^5.0.1",
+    "@vercel/style-guide": "^5.2.0",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "13.5.4",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-next": "^0.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^9.0.11",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.4",
     "typescript-coverage-report": "^0.8.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-toast": "^1.2.6",
+    "@types/uuid": "^10.0.0",
+    "cookies-next": "^5.0.2",
+    "firebase": "^10.14.1"
   }
 }

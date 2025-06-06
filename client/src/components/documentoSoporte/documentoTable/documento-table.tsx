@@ -1,0 +1,279 @@
+'use client'
+
+import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from '@tanstack/react-table'
+
+import { CaretSortIcon } from '@radix-ui/react-icons'
+import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { ChevronLeft, ChevronRight, CirclePlus, Trash } from 'lucide-react'
+import { v4 as uuidv4 } from 'uuid'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { SonnerProvider } from '@/components/doc-regulares/sonner-provider'
+
+import { CustomTooltip } from '../../commons/tooltip'
+import { AddDocumentoModal } from '../modalAddDocumento/AddDocumentoModal'
+import { obtenerDocumentosSoporte } from '../../services/documento/documentoService'
+
+import { DeleteDocumentoModal } from './deleteDocumento'
+
+export interface Documento {
+  id: string
+  nombre: string
+}
+
+export const columns: ColumnDef<Documento>[] = [
+  {
+    accessorKey: 'id',
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              column.toggleSorting(column.getIsSorted() === 'asc')
+            }}
+          >
+            ID
+            <CaretSortIcon className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div className="text-center">{row.getValue('id')}</div>
+  },
+  {
+    accessorKey: 'nombre',
+    header: ({ column }) => {
+      return (
+        <div className="flex justify-center">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              column.toggleSorting(column.getIsSorted() === 'asc')
+            }}
+          >
+            Documentos
+            <CaretSortIcon className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div className="text-center">{row.getValue('nombre')}</div>
+  }
+]
+
+export function CustomTableDocumento() {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const [currentPage, setCurrentPage] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [data, setData] = useState<Documento[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedDocumento, setSelectedDocumento] = useState<{ nombre: string; documentoId: string }>({
+    nombre: '',
+    documentoId: ''
+  })
+
+  const fetchDocumentos = async () => {
+    try {
+      const documentosData = await obtenerDocumentosSoporte()
+
+      setData(documentosData)
+      setIsLoading(false)
+    } catch (error) {
+      if (error instanceof Error) {
+        global.console.error('Error al obtener documentos:', error.message) // Mensaje de error más específico
+      } else {
+        global.console.error('Error desconocido al obtener documentos') // Manejo de errores no específico
+      }
+    }
+  }
+
+  // Usar useEffect para cargar los datos al montar el componente
+  useEffect(() => {
+    void fetchDocumentos() // Llama a la función sin .catch aquí, el manejo de errores está dentro de la función
+  }, [])
+
+  const table = useReactTable({
+    data,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+      pagination: {
+        pageIndex: currentPage,
+        pageSize: 9
+      }
+    }
+  })
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleDocumentoAdded = () => {
+    void fetchDocumentos() // Llama a la función para obtener la lista actualizada
+  }
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false)
+  }
+
+  const handleDeleteSuccess = () => {
+    void fetchDocumentos()
+  }
+
+  const handleDeleteRow = (documentoId: string, nombre: string) => {
+    setSelectedDocumento({ documentoId, nombre })
+    setIsDeleteModalOpen(true)
+  }
+
+  return (
+    <>
+      <SonnerProvider />
+      <div className="flex flex-col items-center justify-center py-4">
+        <h2 className="mb-2">Tipos de documentos</h2>
+        <div className="flex items-center space-x-2">
+          <Input
+            className="max-w-sm"
+            placeholder="Filtrar..."
+            value={table.getColumn('nombre')?.getFilterValue() as string}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => table.getColumn('nombre')?.setFilterValue(event.target.value)}
+          />
+          <CustomTooltip content="Añadir salario">
+            <Button size="icon" type="button" variant="default" onClick={handleOpenModal}>
+              <CirclePlus className="h-5 w-5" />
+            </Button>
+          </CustomTooltip>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center justify-center space-y-6 lg:flex-row lg:space-x-6 lg:space-y-0">
+        <div className="w-full lg:w-96">
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                    })}
+                    <TableHead className="justify-center text-center">Acciones</TableHead>
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  // Skeleton loader
+                  Array.from({ length: 10 }).map(() => (
+                    <TableRow key={uuidv4()}>
+                      {Array.from({ length: columns.length + 1 }).map(() => (
+                        <TableCell key={uuidv4()}>
+                          <Skeleton className="h-8 w-full dark:bg-gray-800" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                      {/* Renderizar los botones de editar y eliminar aquí */}
+                      <TableCell>
+                        <div className="flex justify-center space-x-2">
+                          {/* Botón Eliminar */}
+                          <CustomTooltip content="Eliminar">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => {
+                                handleDeleteRow(row.original.id, row.original.nombre)
+                              }}
+                            >
+                              <Trash className="h-5 w-5 text-red-500" />
+                            </Button>
+                          </CustomTooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell className="h-24 text-center" colSpan={columns.length + 1}>
+                      Sin resultados
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground">
+              {currentPage + 1} de {table.getPageCount()} páginas
+            </div>
+            <div className="space-x-2">
+              <CustomTooltip content="Anterior">
+                <Button
+                  disabled={!table.getCanPreviousPage()}
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    table.previousPage()
+                    setCurrentPage(table.getState().pagination.pageIndex - 1)
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+              </CustomTooltip>
+              <CustomTooltip content="Siguiente">
+                <Button
+                  disabled={!table.getCanNextPage()}
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    table.nextPage()
+                    setCurrentPage(table.getState().pagination.pageIndex + 1)
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CustomTooltip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <AddDocumentoModal isOpen={isModalOpen} onClose={handleCloseModal} onDocumentoAdded={handleDocumentoAdded} />
+      <DeleteDocumentoModal
+        documentoId={selectedDocumento.documentoId}
+        isOpen={isDeleteModalOpen}
+        nombreDocumento={selectedDocumento.nombre}
+        onClose={handleCloseDeleteModal}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
+    </>
+  )
+}

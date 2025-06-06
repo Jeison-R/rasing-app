@@ -1,5 +1,8 @@
 export const ROUTES = {
-  HOME: '/',
+  HOME: '/home',
   EXPERIENCES: '/experiencias',
-  MINIMUIM_WAGE: '/salarios-minimos'
+  MINIMUIM_WAGE: '/salarios-minimos',
+  LOGIN: '/login',
+  ACTIVIDAD: '/actividad-documentos',
+  DOCREGULADRES: '/documentos-regulares'
 }

@@ -38,6 +38,7 @@ export function NavMobile() {
                 <span className="text-2xl font-bold">Rasing S.A.S</span>
               </Link>
               <Link
+                className="text-black dark:text-white"
                 href={ROUTES.EXPERIENCES}
                 onClick={() => {
                   setIsOpen(false)
@@ -46,12 +47,31 @@ export function NavMobile() {
                 Experiencias
               </Link>
               <Link
+                className="text-black dark:text-white"
+                href={ROUTES.DOCREGULADRES}
+                onClick={() => {
+                  setIsOpen(false)
+                }}
+              >
+                Documento Regulares
+              </Link>
+              <Link
+                className="text-black dark:text-white"
                 href={ROUTES.MINIMUIM_WAGE}
                 onClick={() => {
                   setIsOpen(false)
                 }}
               >
                 Salarios mínimos
+              </Link>{' '}
+              <Link
+                className="text-black dark:text-white"
+                href={ROUTES.ACTIVIDAD}
+                onClick={() => {
+                  setIsOpen(false)
+                }}
+              >
+                Act, doc, Con
               </Link>
             </section>
           </nav>

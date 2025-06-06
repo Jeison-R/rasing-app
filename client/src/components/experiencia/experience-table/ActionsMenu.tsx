@@ -1,0 +1,83 @@
+import type { Experiencia } from './interface'
+
+import { MoreHorizontal, Eye, Edit, Trash } from 'lucide-react' // Agregado los iconos de Lucide
+// import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+
+// import { ViewExperienceModal } from '../modalViewExperience/modalViewExperience'
+
+// import { deleteExperience } from './deleteExperience'
+
+interface ActionsMenuProps {
+  row: {
+    original: Experiencia
+  }
+  onDelete: () => void
+  onEdit: (data: Experiencia) => void
+  onView: (data: Experiencia) => void
+}
+
+export function ActionsMenu({ row, onDelete, onEdit, onView }: ActionsMenuProps) {
+  const payment = row.original
+  //   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  //   const [selectedPayment, setSelectedPayment] = useState<Experiencia | null>(null)
+  //
+  //   const handleView = (data: Experiencia) => {
+  //     setSelectedPayment(data)
+  //     setIsModalOpen(true)
+  //   }
+  //
+  //   const closeModal = () => {
+  //     setIsModalOpen(false)
+  //   }
+
+  // const handleDelete = async () => {
+  //   await deleteExperience(payment).then((result) => {
+  //     if (result.isConfirmed) {
+  //       onDelete()
+  //     }
+  //   })
+  // }
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="h-8 w-8 p-0" variant="ghost">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              onView(payment)
+            }}
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Visualizar
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => {
+              onEdit(payment)
+            }}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Editar
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onDelete}>
+            <Trash className="mr-2 h-4 w-4" />
+            Eliminar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Modal para ver los detalles del pago */}
+      {/* <ViewExperienceModal isOpen={isModalOpen} payment={selectedPayment} onClose={closeModal} /> */}
+    </>
+  )
+}
